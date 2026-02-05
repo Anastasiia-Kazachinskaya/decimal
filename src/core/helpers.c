@@ -26,3 +26,16 @@ int s21_set_bit(s21_decimal* value, int bit_index, int bit_value) {
     }
     return 0;
 }
+
+// получаю значение масштаба значения
+int s21_get_scale(s21_decimal *value) {
+    int scale = 0;
+    if (value) {
+        scale = value->bits[3] >> 16 & 0xFF;
+    }
+    if (scale > 28) {
+        return 0;  
+    }
+    return scale;
+}
+
