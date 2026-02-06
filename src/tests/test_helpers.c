@@ -61,11 +61,3 @@ Suite* s21_helpers_suite(void) {
     return s;
 }
 
-int main(void) {
-    Suite *s = s21_helpers_suite();
-    SRunner *sr = srunner_create(s);
-    srunner_run_all(sr, CK_NORMAL);
-    int failed = srunner_ntests_failed(sr);
-    srunner_free(sr);
-    return (failed == 0) ? 0 : 1;
-}
