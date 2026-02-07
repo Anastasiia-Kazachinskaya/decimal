@@ -29,7 +29,7 @@ int s21_set_bit(s21_decimal* value, int bit_index, int bit_value) {
 }
 
 
-// возвращает 1, если первые три бита zero, иначе 0
+// Возвращает 1, если первые три бита zero, иначе 0
 int s21_is_zero(s21_decimal value) {
     int result = 1;
     int i;
@@ -43,4 +43,9 @@ int s21_is_zero(s21_decimal value) {
     }
     
     return result;
+}
+
+// Обнуляет все биты.
+void s21_null_decimal(s21_decimal* value) {
+    *value = (s21_decimal){0}; 
 }
