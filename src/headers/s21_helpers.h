@@ -1,7 +1,7 @@
 #ifndef S21_HELPERS_H
 #define S21_HELPERS_H
 
-#include "s21_decimal.h"
+#include "../s21_decimal.h"
 
 #define CONVERTATION_ERROR 1
 #define OK 0
@@ -16,7 +16,7 @@ typedef struct {
   int scale;
 } s21_big_decimal;
 
-s21_big_decimal s21_decimal_to_big(s21_decimal value);               // DO
+s21_big_decimal s21_decimal_to_big(s21_decimal* value);               // DO
 s21_decimal s21_big_to_decimal(s21_big_decimal value);               // TODO
 int s21_get_sign(s21_decimal *value);                                 // DO
 int s21_set_sign(s21_big_decimal* val, s21_decimal *value);           //DO

@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -std=c11 -Wall -Werror -Wextra
 CHECK_FLAGS = $(shell pkg-config --cflags --libs check)
 SOURCES = $(wildcard core/*.c)
-HEADERS = headers/s21_decimal.h headers/s21_helpers.h
+HEADERS = s21_decimal.h headers/s21_helpers.h
 OBJECTS = $(SOURCES:.c=.o)
 LIB = s21_decimal.a
 
