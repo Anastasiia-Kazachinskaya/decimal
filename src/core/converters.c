@@ -55,4 +55,12 @@ int s21_from_int_to_decimal(int src, s21_decimal* dst) {
   return res;
 }
 
-s21_big_decimal s21_decimal_to_big(s21_decimal value) {}
+s21_big_decimal s21_decimal_to_big(s21_decimal* value) {
+    s21_big_decimal res = {0};
+    if (value) {
+    for (int i = 0; i < 3; ++i) res.bits[i] = value->bits[i];
+    if (s21_get_sign(value)) res.sign = 1;
+    res.scale = s21_get_scale(value);
+    }
+    return res;
+}
