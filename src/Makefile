@@ -49,4 +49,11 @@ clean:
 
 rebuild: clean all
 
+clang_check:
+	clang-format -n core/*.c *.h 
+
+style:
+	clang-format -i core/*.c *.h 
+
+
 .PHONY: clean all rebuild test gcov_report
