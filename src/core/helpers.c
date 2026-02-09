@@ -1,4 +1,4 @@
-#include <../headers/s21_helpers.h>
+#include "../headers/s21_helpers.h"
 #define S21_BIG_DECIMAL_DATA_BITS 3
 
 // получить значение (0 или 1) конкретного бита по его индексу (0-95)
@@ -27,7 +27,6 @@ int s21_set_bit(s21_decimal* value, int bit_index, int bit_value) {
   return 0;
 }
 
-void s21_null_decimal(s21_decimal* value) { *value = (s21_decimal){0}; }
 
 int s21_get_scale(s21_decimal* value) {
   int scale = 0;
@@ -38,6 +37,25 @@ int s21_get_scale(s21_decimal* value) {
     return 0;
   }
   return scale;
+}
+
+void s21_null_decimal(s21_decimal* value) {
+    *value = (s21_decimal){0}; 
+}
+
+int s21_is_zero(s21_decimal value) {
+    int result = 1;
+    int i;
+    int has_nonzero_bit = 0;
+
+    for (i = 0; i < S21_BIG_DECIMAL_DATA_BITS && !(has_nonzero_bit); i++) {
+        if (value.bits[i] != 0) {
+            has_nonzero_bit = 1;
+            result = 0;
+        }  
+    }
+    
+    return result;
 }
 
 int s21_get_sign(s21_decimal* value) {
