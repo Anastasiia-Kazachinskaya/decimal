@@ -1,4 +1,5 @@
-#include "../headers/s21_helpers.h"
+#include <stdio.h>
+#include "../s21_helpers.h"
 
 #define S21_BIG_DECIMAL_DATA_BITS 3
 
@@ -41,7 +42,7 @@ int s21_get_scale(s21_decimal* value) {
 }
 
 void s21_null_decimal(s21_decimal* value) {
-    *value = (s21_decimal){0}; 
+  memset(value, 0, sizeof(*value));
 }
 
 int s21_is_zero(s21_decimal value) {
