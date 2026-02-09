@@ -35,7 +35,7 @@ int s21_from_float_to_decimal(float src, s21_decimal* dst) {
 int s21_from_int_to_decimal(int src, s21_decimal* dst) {
   int res = CONVERTATION_ERROR;
   if (!dst) return res;
-  s21_null_decimal(*dst);
+  s21_null_decimal(dst);
   if (src == 0) res = OK;
   if (res == CONVERTATION_ERROR) {
     if (src < 0) {
