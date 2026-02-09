@@ -1,4 +1,5 @@
 #include <../headers/s21_helpers.h>
+#define S21_BIG_DECIMAL_DATA_BITS 3
 
 // получить значение (0 или 1) конкретного бита по его индексу (0-95)
 int s21_get_bit(s21_decimal value, int bit_index) {
@@ -52,4 +53,3 @@ int s21_set_sign(s21_big_decimal* val, s21_decimal* value) {
   if (val->sign == 1) value->bits[3] |= 1u << 31;
 }
 
-s21_big_decimal s21_decimal_to_big(s21_decimal value) {}
