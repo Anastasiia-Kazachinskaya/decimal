@@ -1,4 +1,4 @@
-#include <../headers/s21_helpers.h>
+#include "../headers/s21_helpers.h"
 
 int s21_from_decimal_to_float(s21_decimal src, float* dst) {
   if (s21_is_zero(src)) *dst = 0.0f;
