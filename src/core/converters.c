@@ -18,8 +18,8 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
     unsigned int value_low = src.bits[0];
     unsigned long long mantissa = (unsigned long long)value_low;
     if (src.bits[1] != 0) {
-        unsigned int value_high = src.bits[1];
-        mantissa |= (unsigned long long)value_high << 32;
+      unsigned int value_high = src.bits[1];
+      mantissa |= (unsigned long long)value_high << 32;
     }
     for (int i = 0; i < scale && mantissa > 0; i++) mantissa /= 10;
     if (mantissa <= max_allowed) {
@@ -30,14 +30,14 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
         *dst = !sign ? (int)mantissa : -(int)mantissa;
         res = OK;
       }
+    }
   }
-}
   return res;
 }
 
 int s21_from_float_to_decimal(float src, s21_decimal* dst) {
   if (src < 0) dst->bits[3] |= 1u << 31;
-  
+
   return 0;
 }
 
@@ -65,11 +65,11 @@ int s21_from_int_to_decimal(int src, s21_decimal* dst) {
 }
 
 s21_big_decimal s21_decimal_to_big(s21_decimal* value) {
-    s21_big_decimal res = {0};
-    if (value) {
+  s21_big_decimal res = {0};
+  if (value) {
     for (int i = 0; i < 3; ++i) res.bits[i] = value->bits[i];
     if (s21_get_sign(value)) res.sign = 1;
     res.scale = s21_get_scale(value);
-    }
-    return res;
+  }
+  return res;
 }
