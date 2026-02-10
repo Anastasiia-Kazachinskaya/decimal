@@ -4,4 +4,4 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../headers/s21_decimal.h"
+#include "../s21_decimal.h"

@@ -1,5 +1,7 @@
 #include <stdio.h>
-#include "../s21_helpers.h"
+#include <string.h>
+
+#include "../headers/s21_helpers.h"
 
 #define S21_BIG_DECIMAL_DATA_BITS 3
 
@@ -29,7 +31,6 @@ int s21_set_bit(s21_decimal* value, int bit_index, int bit_value) {
   return 0;
 }
 
-
 int s21_get_scale(s21_decimal* value) {
   int scale = 0;
   if (value) {
@@ -41,23 +42,21 @@ int s21_get_scale(s21_decimal* value) {
   return scale;
 }
 
-void s21_null_decimal(s21_decimal* value) {
-  memset(value, 0, sizeof(*value));
-}
+void s21_null_decimal(s21_decimal* value) { memset(value, 0, sizeof(*value)); }
 
 int s21_is_zero(s21_decimal value) {
-    int result = 1;
-    int i;
-    int has_nonzero_bit = 0;
+  int result = 1;
+  int i;
+  int has_nonzero_bit = 0;
 
-    for (i = 0; i < S21_BIG_DECIMAL_DATA_BITS && !(has_nonzero_bit); i++) {
-        if (value.bits[i] != 0) {
-            has_nonzero_bit = 1;
-            result = 0;
-        }  
+  for (i = 0; i < S21_BIG_DECIMAL_DATA_BITS && !(has_nonzero_bit); i++) {
+    if (value.bits[i] != 0) {
+      has_nonzero_bit = 1;
+      result = 0;
     }
-    
-    return result;
+  }
+
+  return result;
 }
 
 int s21_get_sign(s21_decimal* value) {
@@ -71,5 +70,5 @@ int s21_get_sign(s21_decimal* value) {
 // при конвертации big_decimal в decimal
 int s21_set_sign(s21_big_decimal* val, s21_decimal* value) {
   if (val->sign == 1) value->bits[3] |= 1u << 31;
+  return 0;
 }
-

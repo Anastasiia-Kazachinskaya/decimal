@@ -2,6 +2,7 @@
 
 int s21_from_decimal_to_float(s21_decimal src, float* dst) {
   if (s21_is_zero(src)) *dst = 0.0f;
+  return 0;
 }
 
 int s21_from_decimal_to_int(s21_decimal src, int* dst) {
@@ -30,6 +31,8 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
 
 int s21_from_float_to_decimal(float src, s21_decimal* dst) {
   if (src < 0) dst->bits[3] |= 1u << 31;
+  
+  return 0;
 }
 
 int s21_from_int_to_decimal(int src, s21_decimal* dst) {

@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -std=c11 -Wall -Werror -Wextra
 CHECK_FLAGS = $(shell pkg-config --cflags --libs check)
 SOURCES = $(wildcard core/*.c)
-HEADERS = headers/s21_decimal.h headers/s21_helpers.h
+HEADERS = s21_decimal.h headers/s21_helpers.h
 OBJECTS = $(SOURCES:.c=.o)
 LIB = s21_decimal.a
 
@@ -33,7 +33,7 @@ $(LIB): $(OBJECTS) $(HEADERS)
 	ar rcs $(LIB) $(OBJECTS)
 
 test: $(TEST_OBJ)	$(LIB) 
-	$(CC) $(CFLAGS) $(CHECK_FLAGS) -o $(TEST_EXE) $(TEST_OBJ) $(LIB)
+	$(CC) $(CFLAGS) -o $(TEST_EXE) $(TEST_OBJ) $(LIB) $(CHECK_FLAGS)
 	@./$(TEST_EXE)
 
 gcov_report: $(SOURCES) $(TEST_SRC)
