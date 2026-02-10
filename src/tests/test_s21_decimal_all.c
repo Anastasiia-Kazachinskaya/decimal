@@ -3,12 +3,14 @@
 #include "../headers/s21_helpers.h"
 
 Suite* s21_helpers_suite(void);
+Suite* int_conversion_suite(void);
 
 int main(void) {
     int failed = 0;
     
     Suite* suites[] = {
         s21_helpers_suite(),
+        int_conversion_suite(),
         NULL
     };
     

@@ -37,7 +37,7 @@ test: $(TEST_OBJ)	$(LIB)
 	@./$(TEST_EXE)
 
 gcov_report: $(SOURCES) $(TEST_SRC)
-	$(CC) $(CFLAGS) $(CHECK_FLAGS) --coverage -o $(TEST_EXE) $(SOURCES) $(TEST_SRC)
+	$(CC) $(CFLAGS) --coverage -o $(TEST_EXE) $(SOURCES) $(TEST_SRC) $(CHECK_FLAGS)
 	./$(TEST_EXE)
 	@mkdir $(REPORT_DIR)
 	@gcovr --html-details $(REPORT_DIR)/$(REPORT)

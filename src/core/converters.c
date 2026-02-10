@@ -14,18 +14,24 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   } else if (src.bits[2] == 0) {
     int sign = s21_get_sign(&src);
     int scale = s21_get_scale(&src);
-    unsigned int max_allowed = sign ? 2147483648U : 2147483647U;
-    unsigned long long mantissa = src.bits[0];
-    mantissa |= (unsigned long long)src.bits[1] << 32;
+    unsigned long long max_allowed = sign ? 2147483648ULL : 2147483647ULL;
+    unsigned int value_low = src.bits[0];
+    unsigned long long mantissa = (unsigned long long)value_low;
+    if (src.bits[1] != 0) {
+        unsigned int value_high = src.bits[1];
+        mantissa |= (unsigned long long)value_high << 32;
+    }
     for (int i = 0; i < scale && mantissa > 0; i++) mantissa /= 10;
     if (mantissa <= max_allowed) {
-      if (sign && mantissa == 2147483648U)
+      if (sign && mantissa == 2147483648ULL) {
         *dst = MIN_INT;
-      else
+        res = OK;
+      } else {
         *dst = !sign ? (int)mantissa : -(int)mantissa;
-      res = OK;
-    }
+        res = OK;
+      }
   }
+}
   return res;
 }
 
