@@ -1,7 +1,7 @@
 #ifndef S21_HELPERS_H
 #define S21_HELPERS_H
 
-#include "s21_decimal.h"
+#include "../s21_decimal.h"
 
 #define CONVERTATION_ERROR 1
 #define OK 0
