@@ -7,6 +7,387 @@
 #include "../headers/s21_helpers.h"
 
 // int_to_decimal
+// Тест 1: Конвертация положительных чисел
+START_TEST(int_to_decimal_test_positive_int) {
+    s21_decimal result;
+    int num = 12345;
+    
+    int status = s21_from_int_to_decimal(num, &result);
+    ck_assert_int_eq(status, OK);
+    ck_assert_uint_eq(result.bits[0], 12345);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_int_eq((result.bits[3] >> 31) & 1, 0);
+}
+END_TEST
+
+// Тест 2: Конвертация отрицательных чисел
+START_TEST(int_to_decimal_test_negative_int) {
+    s21_decimal result;
+    int num = -12345;
+    
+    int status = s21_from_int_to_decimal(num, &result);
+    ck_assert_int_eq(status, OK);
+    ck_assert_uint_eq(result.bits[0], 12345);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_int_eq((result.bits[3] >> 31) & 1, 1);
+}
+END_TEST
+
+// Тест 3: Конвертация нуля
+START_TEST(int_to_decimal_test_zero) {
+    s21_decimal result;
+    int num = 0;
+    int status = s21_from_int_to_decimal(num, &result);
+    ck_assert_int_eq(status, OK);
+    ck_assert_uint_eq(result.bits[0], 0);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_uint_eq(result.bits[3], 0);
+}
+END_TEST
+
+// Тест 4: Конвертация минимального int
+START_TEST(int_to_decimal_test_min_int) {
+    s21_decimal result;
+    memset(&result, 0, sizeof(result));
+    
+    int num = INT_MIN;
+    int status = s21_from_int_to_decimal(num, &result);
+    
+    ck_assert_int_eq(status, OK);
+
+    unsigned int actual = result.bits[0];
+    unsigned int expected = 0x80000000U;
+    
+    ck_assert_msg(actual == expected,
+                  "Expected bits[0] = 0x%08x (%u), got 0x%08x (%llu)",
+                  expected, expected, actual, (unsigned long long)actual);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_int_eq((result.bits[3] >> 31) & 1, 1);
+}
+END_TEST
+
+// Тест 5: Конвертация максимального int
+START_TEST(int_to_decimal_test_max_int) {
+    s21_decimal result;
+    int num = INT_MAX;
+    
+    int status = s21_from_int_to_decimal(num, &result);
+    ck_assert_int_eq(status, OK);
+    ck_assert_uint_eq(result.bits[0], 2147483647);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_int_eq((result.bits[3] >> 31) & 1, 0);
+}
+END_TEST
+
+// Тест 6: Конвертация числа 1
+START_TEST(int_to_decimal_test_one) {
+    s21_decimal result;
+    int num = 1;
+    
+    int status = s21_from_int_to_decimal(num, &result);
+    ck_assert_int_eq(status, OK);
+    ck_assert_uint_eq(result.bits[0], 1);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_int_eq((result.bits[3] >> 31) & 1, 0);
+}
+END_TEST
+
+// Тест 7: Конвертация числа -1
+START_TEST(int_to_decimal_test_minus_one) {
+    s21_decimal result;
+    int num = -1;
+    
+    int status = s21_from_int_to_decimal(num, &result);
+    ck_assert_int_eq(status, OK);
+    ck_assert_uint_eq(result.bits[0], 1);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_int_eq((result.bits[3] >> 31) & 1, 1);
+}
+END_TEST
+
+// Тест 8: Конвертация с нулевым указателем
+START_TEST(int_to_decimal_test_null_pointer) {
+    int num = 42;
+    int status = s21_from_int_to_decimal(num, NULL);
+    ck_assert_int_eq(status, CONVERTATION_ERROR);
+}
+END_TEST
+
+// Тест 9: Конвертация граничных значений
+START_TEST(int_to_decimal_test_boundary_values) {
+    s21_decimal result;
+
+    int status = s21_from_int_to_decimal(-2, &result);
+    ck_assert_int_eq(status, OK);
+    ck_assert_uint_eq(result.bits[0], 2);
+    ck_assert_int_eq((result.bits[3] >> 31) & 1, 1);
+
+    status = s21_from_int_to_decimal(2, &result);
+    ck_assert_int_eq(status, OK);
+    ck_assert_uint_eq(result.bits[0], 2);
+    ck_assert_int_eq((result.bits[3] >> 31) & 1, 0);
+}
+END_TEST
+
+// Тест 10: Конвертация произвольных чисел
+START_TEST(int_to_decimal_test_random_numbers) {
+    s21_decimal result;
+    
+    int tests[] = {100, -100, 999, -999, 1234567, -1234567};
+    
+    for (size_t i = 0; i < sizeof(tests) / sizeof(tests[0]); i++) {
+        int num = tests[i];
+        int expected_value = (num < 0) ? -num : num;
+        
+        int status = s21_from_int_to_decimal(num, &result);
+        ck_assert_int_eq(status, OK);
+        ck_assert_uint_eq(result.bits[0], expected_value);
+        ck_assert_uint_eq(result.bits[1], 0);
+        ck_assert_uint_eq(result.bits[2], 0);
+        
+        int expected_sign = (num < 0) ? 1 : 0;
+        ck_assert_int_eq((result.bits[3] >> 31) & 1, expected_sign);
+    }
+}
+END_TEST
+
+// Тест 11: Проверка, что функция обнуляет decimal перед записью
+START_TEST(int_to_decimal_test_clean_before_write) {
+    s21_decimal result;
+
+    result.bits[0] = 0xFFFFFFFF;
+    result.bits[1] = 0xFFFFFFFF;
+    result.bits[2] = 0xFFFFFFFF;
+    result.bits[3] = 0xFFFFFFFF;
+    
+    int status = s21_from_int_to_decimal(42, &result);
+    ck_assert_int_eq(status, OK);
+
+    ck_assert_uint_eq(result.bits[0], 42);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_uint_eq(result.bits[3] & 0x7FFFFFFF, 0);
+}
+END_TEST
+
+// Тест 12: Конвертация максимального положительного до INT_MAX
+START_TEST(int_to_decimal_test_large_positive) {
+    s21_decimal result;
+    
+    for (int num = 1000000; num <= 1000005; num++) {
+        int status = s21_from_int_to_decimal(num, &result);
+        ck_assert_int_eq(status, OK);
+        ck_assert_uint_eq(result.bits[0], num);
+        ck_assert_int_eq((result.bits[3] >> 31) & 1, 0);
+    }
+}
+END_TEST
+
+// Тест 13: Конвертация максимального отрицательного до INT_MIN+1
+START_TEST(int_to_decimal_test_large_negative) {
+    s21_decimal result;
+    
+    for (int num = -1000005; num >= -1000000; num++) {
+        int status = s21_from_int_to_decimal(num, &result);
+        ck_assert_int_eq(status, OK);
+        ck_assert_uint_eq(result.bits[0], -num);
+        ck_assert_int_eq((result.bits[3] >> 31) & 1, 1);
+    }
+}
+END_TEST
+
+//decimal_to_big_decimal
+// Тест 1: Конвертация положительного decimal в big_decimal
+START_TEST(test_positive_decimal_to_big) {
+    s21_decimal src = {0};
+    src.bits[0] = 123456789U;
+    src.bits[1] = 0;
+    src.bits[2] = 0;
+    src.bits[3] = 0;
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    ck_assert_uint_eq(result.bits[0], 123456789U);
+    ck_assert_uint_eq(result.bits[1], 0U);
+    ck_assert_uint_eq(result.bits[2], 0U);
+    ck_assert_uint_eq(result.bits[3], 0U);
+    ck_assert_uint_eq(result.bits[4], 0U);
+    ck_assert_uint_eq(result.bits[5], 0U);
+    ck_assert_int_eq(result.sign, 0);
+    ck_assert_int_eq(result.scale, 0);
+}
+END_TEST
+
+// Тест 2: Конвертация отрицательного decimal в big_decimal
+START_TEST(test_negative_decimal_to_big) {
+    s21_decimal src = {0};
+    src.bits[0] = 123456789U;
+    src.bits[3] = 1u << 31;
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    ck_assert_uint_eq(result.bits[0], 123456789U);
+    ck_assert_int_eq(result.sign, 1);
+    ck_assert_int_eq(result.scale, 0);
+}
+END_TEST
+
+// Тест 3: Конвертация decimal с масштабом (scale)
+START_TEST(test_decimal_with_scale_to_big) {
+    s21_decimal src = {0};
+    src.bits[0] = 123456789U;
+    src.bits[3] = 3 << 16;
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    ck_assert_uint_eq(result.bits[0], 123456789U);
+    ck_assert_int_eq(result.sign, 0);
+    ck_assert_int_eq(result.scale, 3);
+}
+END_TEST
+
+// Тест 4: Конвертация decimal с отрицательным знаком и масштабом
+START_TEST(test_negative_with_scale_to_big) {
+    s21_decimal src = {0};
+    src.bits[0] = 987654321U;
+    src.bits[3] = (5 << 16) | (1u << 31);
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    ck_assert_uint_eq(result.bits[0], 987654321U);
+    ck_assert_int_eq(result.sign, 1);
+    ck_assert_int_eq(result.scale, 5);
+}
+END_TEST
+
+// Тест 5: Конвертация decimal с заполненными bits[0], bits[1], bits[2]
+START_TEST(test_full_decimal_to_big) {
+    s21_decimal src = {0};
+    src.bits[0] = 0xFFFFFFFFU;
+    src.bits[1] = 0xAAAAAAAAU;
+    src.bits[2] = 0x55555555U;
+    src.bits[3] = (2 << 16) | (1u << 31);
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    ck_assert_uint_eq(result.bits[0], 0xFFFFFFFFU);
+    ck_assert_uint_eq(result.bits[1], 0xAAAAAAAAU);
+    ck_assert_uint_eq(result.bits[2], 0x55555555U);
+    ck_assert_uint_eq(result.bits[3], 0U);
+    ck_assert_uint_eq(result.bits[4], 0U);
+    ck_assert_uint_eq(result.bits[5], 0U);
+    ck_assert_int_eq(result.sign, 1);
+    ck_assert_int_eq(result.scale, 2);
+}
+END_TEST
+
+// Тест 6: Конвертация нулевого decimal
+START_TEST(test_zero_decimal_to_big) {
+    s21_decimal src = {0};
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    for (int i = 0; i < 6; i++) {
+        ck_assert_uint_eq(result.bits[i], 0U);
+    }
+    ck_assert_int_eq(result.sign, 0);
+    ck_assert_int_eq(result.scale, 0);
+}
+END_TEST
+
+// Тест 7: Конвертация с нулевым указателем (должна вернуть нулевой big_decimal)
+START_TEST(test_null_pointer_to_big) {
+    s21_big_decimal result = s21_decimal_to_big(NULL);
+    for (int i = 0; i < 6; i++) {
+        ck_assert_uint_eq(result.bits[i], 0U);
+    }
+    ck_assert_int_eq(result.sign, 0);
+    ck_assert_int_eq(result.scale, 0);
+}
+END_TEST
+
+// Тест 8: Конвертация максимального положительного decimal
+START_TEST(test_max_positive_decimal_to_big) {
+    s21_decimal src = {0};
+    src.bits[0] = 0xFFFFFFFFU;
+    src.bits[1] = 0xFFFFFFFFU;
+    src.bits[2] = 0xFFFFFFFFU;
+    src.bits[3] = 0;
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    ck_assert_uint_eq(result.bits[0], 0xFFFFFFFFU);
+    ck_assert_uint_eq(result.bits[1], 0xFFFFFFFFU);
+    ck_assert_uint_eq(result.bits[2], 0xFFFFFFFFU);
+    ck_assert_uint_eq(result.bits[3], 0U);
+    ck_assert_uint_eq(result.bits[4], 0U);
+    ck_assert_uint_eq(result.bits[5], 0U);
+    ck_assert_int_eq(result.sign, 0);
+    ck_assert_int_eq(result.scale, 0);
+}
+END_TEST
+
+// Тест 9: Проверка, что остальные биты big_decimal обнуляются
+START_TEST(test_clean_high_bits_in_big) {
+    s21_decimal src = {0};
+    src.bits[0] = 12345U;
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    ck_assert_uint_eq(result.bits[0], 12345U);
+    ck_assert_uint_eq(result.bits[1], 0U);
+    ck_assert_uint_eq(result.bits[2], 0U);
+    ck_assert_uint_eq(result.bits[3], 0U);
+    ck_assert_uint_eq(result.bits[4], 0U);
+    ck_assert_uint_eq(result.bits[5], 0U);
+}
+END_TEST
+
+// Тест 10: Конвертация с разными значениями scale
+START_TEST(test_various_scales_to_big) {
+    for (int scale = 0; scale <= 28; scale++) {
+        s21_decimal src = {0};
+        src.bits[0] = 1000U;
+        src.bits[3] = scale << 16;
+        s21_big_decimal result = s21_decimal_to_big(&src);
+        ck_assert_uint_eq(result.bits[0], 1000U);
+        ck_assert_int_eq(result.scale, scale);
+        ck_assert_int_eq(result.sign, 0);
+    }
+}
+END_TEST
+
+// Тест 11: Конвертация пограничных значений
+START_TEST(test_boundary_values_to_big) {
+    {
+        s21_decimal src = {0};
+        src.bits[0] = 1U;
+        s21_big_decimal result = s21_decimal_to_big(&src);
+        ck_assert_uint_eq(result.bits[0], 1U);
+        ck_assert_int_eq(result.sign, 0);
+    }
+
+    {
+        s21_decimal src = {0};
+        src.bits[2] = 0x80000000U;
+        s21_big_decimal result = s21_decimal_to_big(&src);
+        ck_assert_uint_eq(result.bits[2], 0x80000000U);
+        ck_assert_uint_eq(result.bits[0], 0U);
+        ck_assert_uint_eq(result.bits[1], 0U);
+    }
+}
+END_TEST
+
+// Тест 12: Проверка структуры big_decimal после конвертации
+START_TEST(test_big_decimal_structure) {
+    s21_decimal src = {0};
+    src.bits[0] = 0x12345678U;
+    src.bits[1] = 0x9ABCDEF0U;
+    src.bits[2] = 0x0FEDCBA9U;
+    src.bits[3] = (7 << 16) | (1u << 31);
+    s21_big_decimal result = s21_decimal_to_big(&src);
+    ck_assert_uint_eq(result.bits[0], 0x12345678U);
+    ck_assert_uint_eq(result.bits[1], 0x9ABCDEF0U);
+    ck_assert_uint_eq(result.bits[2], 0x0FEDCBA9U);
+    ck_assert_uint_eq(result.bits[3], 0U);
+    ck_assert_uint_eq(result.bits[4], 0U);
+    ck_assert_uint_eq(result.bits[5], 0U);
+    
+    ck_assert_int_eq(result.sign, 1);
+    ck_assert_int_eq(result.scale, 7);
+}
+END_TEST
 
 Suite *int_conversion_suite(void) {
     Suite *s = suite_create("Converters");
@@ -26,6 +407,19 @@ Suite *int_conversion_suite(void) {
     tcase_add_test(tc_core, int_to_decimal_test_clean_before_write);
     tcase_add_test(tc_core, int_to_decimal_test_large_positive);
     tcase_add_test(tc_core, int_to_decimal_test_large_negative);
+
+    tcase_add_test(tc_core, test_positive_decimal_to_big);
+    tcase_add_test(tc_core, test_negative_decimal_to_big);
+    tcase_add_test(tc_core, test_decimal_with_scale_to_big);
+    tcase_add_test(tc_core, test_negative_with_scale_to_big);
+    tcase_add_test(tc_core, test_full_decimal_to_big);
+    tcase_add_test(tc_core, test_zero_decimal_to_big);
+    tcase_add_test(tc_core, test_null_pointer_to_big);
+    tcase_add_test(tc_core, test_max_positive_decimal_to_big);
+    tcase_add_test(tc_core, test_clean_high_bits_in_big);
+    tcase_add_test(tc_core, test_various_scales_to_big);
+    tcase_add_test(tc_core, test_boundary_values_to_big);
+    tcase_add_test(tc_core, test_big_decimal_structure);
     
     suite_add_tcase(s, tc_core);
     
