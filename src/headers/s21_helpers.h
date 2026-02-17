@@ -38,4 +38,5 @@ int s21_from_int_to_decimal(int src, s21_decimal* dst); //done
 
 void s21_round_big_decimal(s21_big_decimal* value, int target_scale);  // TODO
 
+void copy_decimal(s21_decimal* value_1, s21_decimal* value_2);
 #endif

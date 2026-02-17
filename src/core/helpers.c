@@ -72,3 +72,9 @@ int s21_set_sign(s21_big_decimal* val, s21_decimal* value) {
   if (val->sign == 1) value->bits[3] |= 1u << 31;
   return 0;
 }
+
+void copy_decimal(s21_decimal* value_1, s21_decimal* value_2) {
+  if (value_1 && value_2) {
+    for (int i = 0; i < 4; ++i) value_2->bits[i] = value_1->bits[i];
+  }
+}
