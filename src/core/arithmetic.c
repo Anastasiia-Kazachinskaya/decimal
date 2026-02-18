@@ -1,6 +1,9 @@
 #include "../s21_decimal.h"
 #include "../headers/s21_helpers.h"
 
+#define ERROR 1
+#define OK 0
+
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 // int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
@@ -8,47 +11,38 @@
 
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
-    int status = 0;
-    s21_null_decimal(result);
-
-    int sign1 = s21_get_sign(&value_1);
-    int sign2 = s21_get_sign(&value_2);
-
-   
-    if (s21_is_zero(value_2)) {
-        *result = value_1;
-    }
-
-    else if (sign1 == 1 && sign2 == 1) {
-
-        s21_decimal a = value_1;
-        s21_decimal b = value_2;
-
-        a.bits[3] &= ~(1u << 31);
-        b.bits[3] &= ~(1u << 31);
-
-        if(b.bits[0] >= a.bits[0]) {
-            result->bits[0] = b.bits[0] - a.bits[0];
-        } else {
-            result->bits[0] = a.bits[0] - b.bits[0];
-            result->bits[3] |= 1u << 31;
-        }
-    } else if (sign1 == 1 && sign2 == 0) {
-        result->bits[0] = value_1.bits[0] + value_2.bits[0];
-        result->bits[3] |= 1u << 31;
-    } else if (sign1 == 0 && sign2 == 1) {
-        result->bits[0] = value_1.bits[0] + value_2.bits[0];
+    if (!result) {
+        return ERROR;
     }
     
-    else {
-        if (value_1.bits[0] >= value_2.bits[0]){
-            result->bits[0] = value_1.bits[0] - value_2.bits[0];
+    s21_null_decimal(result);
+    
+    s21_big_decimal big1 = s21_decimal_to_big(&value_1);
+    s21_big_decimal big2 = s21_decimal_to_big(&value_2);
+    
+    s21_normalize_big(&big1, &big2);
+    s21_big_decimal res_big;
+    s21_null_big_decimal(&res_big);
+
+    
+    if (big1.sign != big2.sign) {
+        s21_big_add(big1, big2, &res_big);
+        res_big.sign = big1.sign;
+    } else {
+        int cmp = s21_big_compare_abs(big1, big2);
+        if (cmp > 0) {
+            s21_big_sub(big1, big2, &res_big);
+            res_big.sign = big1.sign;
+        } else if (cmp < 0) {
+            s21_big_sub(big2, big1, &res_big);
+            res_big.sign = big1.sign;
         } else {
-            result->bits[0] = value_2.bits[0] - value_1.bits[0];
-            result->bits[3] = 0;
-            result->bits[3] |= (1u << 31);
+            s21_null_big_decimal(&res_big);
+            res_big.sign = 0;
         }
     }
-    return status;
+    
+    return s21_big_to_decimal(res_big, &result);
 }
 
+// #todo: в big_sub учесть функцию переполнения
