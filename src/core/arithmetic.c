@@ -8,14 +8,17 @@
 
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
+    s21_null_decimal(result);
    
     if (s21_is_zero(value_2)) {
         *result = value_1;
-    } else {
+    } else if (value_1.bits[0] >= value_2.bits[0]){
         result->bits[0] = value_1.bits[0] - value_2.bits[0];
-        result->bits[1] = 0;
-        result->bits[2] = 0;
         result->bits[3] = 0;
+    } else {
+        result->bits[0] = value_2.bits[0] - value_1.bits[0];
+        result->bits[3] = 0;
+        result->bits[3] |= (1u << 31);
     }
     return 0;
 }
