@@ -33,6 +33,9 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
             result->bits[0] = a.bits[0] - b.bits[0];
             result->bits[3] |= 1u << 31;
         }
+    } else if (sign1 == 1 && sign2 == 0) {
+        result->bits[0] = value_1.bits[0] + value_2.bits[0];
+        result->bits[3] |= 1u << 31;
     }
     
     else {
