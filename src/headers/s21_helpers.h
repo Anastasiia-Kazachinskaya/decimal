@@ -26,6 +26,7 @@ int s21_get_bit(s21_decimal value, int bit_index);                   // TODO
 int s21_set_bit(s21_decimal* value, int bit_index, int bit_value);   // TODO
 int s21_is_zero(s21_decimal value);                                  // DONE
 void s21_null_decimal(s21_decimal* value);                             // TODO
+void s21_null_big_decimal(s21_big_decimal* value);
 int s21_normalize_pair(s21_decimal* value_1, s21_decimal* value_2);  // TODO
 int s21_shift_left(s21_big_decimal* value, int shift);               // TODO
 int s21_shift_right(s21_big_decimal* value, int shift);              // TODO

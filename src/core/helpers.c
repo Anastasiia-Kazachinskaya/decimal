@@ -43,6 +43,7 @@ int s21_get_scale(s21_decimal* value) {
 }
 
 void s21_null_decimal(s21_decimal* value) { memset(value, 0, sizeof(*value)); }
+void s21_null_big_decimal(s21_big_decimal* value) { memset(value, 0, sizeof(*value)); }
 
 int s21_is_zero(s21_decimal value) {
   int result = 1;
