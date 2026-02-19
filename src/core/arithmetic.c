@@ -9,7 +9,6 @@
 // int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 // int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
-/*
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     if (!result) {
@@ -30,11 +29,10 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
         s21_big_add(big1, big2, &res_big);
         res_big.sign = big1.sign;
     } else {
-        int cmp = s21_big_compare_abs(big1, big2);
-        if (cmp > 0) {
+        if (s21_is_big_greater(big1, big2)) {
             s21_big_sub(big1, big2, &res_big);
             res_big.sign = big1.sign;
-        } else if (cmp < 0) {
+        } else if (s21_is_big_less(big1, big2)) {
             s21_big_sub(big2, big1, &res_big);
             res_big.sign = big1.sign;
         } else {
@@ -43,7 +41,8 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
         }
     }
     
+
     return s21_big_to_decimal(res_big, &result);
 }
-*/
+
 // #todo: в big_sub учесть функцию переполнения
