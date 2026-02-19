@@ -18,6 +18,8 @@ typedef struct {
 
 s21_big_decimal s21_decimal_to_big(s21_decimal *value);               // DO
 s21_decimal s21_big_to_decimal(s21_big_decimal value);               // TODO
+int s21_is_big_less(s21_big_decimal value1, s21_big_decimal value2);
+int s21_is_big_greater(s21_big_decimal value1, s21_big_decimal value2);
 int s21_get_sign(s21_decimal *value);                                 // DO
 int s21_set_sign(s21_big_decimal* val, s21_decimal *value);           //DO
 int s21_get_scale(s21_decimal *value);                                // TODO
@@ -28,6 +30,7 @@ int s21_is_zero(s21_decimal value);                                  // DONE
 void s21_null_decimal(s21_decimal* value);                             // TODO
 void s21_null_big_decimal(s21_big_decimal* value);
 int s21_normalize_pair(s21_decimal* value_1, s21_decimal* value_2);  // TODO
+int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2);
 int s21_shift_left(s21_big_decimal* value, int shift);               // TODO
 int s21_shift_right(s21_big_decimal* value, int shift);              // TODO
 
