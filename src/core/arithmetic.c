@@ -42,7 +42,9 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     }
     
 
-    return s21_big_to_decimal(res_big, &result);
+    s21_big_to_decimal(&res_big, result);
+    
+    return OK;
 }
 
 // #todo: в big_sub учесть функцию переполнения
