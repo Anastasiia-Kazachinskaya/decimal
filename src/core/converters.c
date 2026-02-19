@@ -67,3 +67,16 @@ s21_big_decimal s21_decimal_to_big(s21_decimal* value) {
     }
     return res;
 }
+
+
+s21_decimal s21_big_to_decimal(s21_big_decimal* big_result, s21_decimal* result) {
+  s21_null_decimal(result);
+  result->bits[0] = big_result->bits[0];
+  if(big_result->sign) {
+    result->bits[3] |= 1u << 31;
+  }
+
+  result->bits[3] |= big_result->scale << 16;
+  
+  return *result;
+}
