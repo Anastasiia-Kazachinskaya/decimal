@@ -4,13 +4,15 @@
 
 Suite* s21_helpers_suite(void);
 Suite *s21_arithmetic_suite(void);
+Suite *s21_comparison_suite(void);
 
 int main(void) {
     int failed = 0;
     
     Suite* suites[] = {
         s21_helpers_suite(),
-        // s21_arithmetic_suite(),
+        s21_arithmetic_suite(),
+        s21_comparison_suite(),
         NULL
     };
     
