@@ -17,7 +17,7 @@ typedef struct {
 } s21_big_decimal;
 
 s21_big_decimal s21_decimal_to_big(s21_decimal *value);               // DO
-s21_decimal s21_big_to_decimal(s21_big_decimal value);               // TODO
+s21_decimal s21_big_to_decimal(s21_big_decimal* big_result, s21_decimal* result);               // TODO
 int s21_is_big_less(s21_big_decimal value1, s21_big_decimal value2);
 int s21_is_big_greater(s21_big_decimal value1, s21_big_decimal value2);
 int s21_get_sign(s21_decimal *value);                                 // DO
