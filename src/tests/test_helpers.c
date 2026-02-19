@@ -70,6 +70,8 @@ START_TEST(s21_null_decimal_already_zero){
 }
 END_TEST
 
+
+// s21_get_bit tests section
 START_TEST(s21_get_bit_basic){
     s21_decimal val = {{0, 0, 1 << 6, 0}};
     int index_of_bit = 70;
@@ -79,19 +81,22 @@ START_TEST(s21_get_bit_basic){
 }
 END_TEST
 
+
+// s21_set_bit tests section
 START_TEST(s21_set_bit_basic){
     s21_decimal val = {{0, 0, 1 << 6, 0}};
     int index_of_bit = 70;
     int bit_value = 0;
-    printf("%u\n", val.bits[2]);
+
     s21_set_bit(&val, index_of_bit, bit_value);
-    printf("%u\n", val.bits[2]);
+    
     int result;
     result = s21_get_bit(val, index_of_bit);
     ck_assert_int_eq(result, 0);
 }
 END_TEST
 
+// s21_get_scale tests section
 START_TEST(s21_get_scale_basic){
     s21_decimal val = {{0, 0, 0, 0}};
     val.bits[3] = 5 << 16;
@@ -101,7 +106,7 @@ START_TEST(s21_get_scale_basic){
 }
 END_TEST
 
-
+// s21_get_sign tests section
 START_TEST(s21_get_sign_basic){
     s21_decimal val = {{0, 0, 0, 0}};
     val.bits[3] = 1 << 31;
