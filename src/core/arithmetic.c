@@ -20,7 +20,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     s21_big_decimal big1 = s21_decimal_to_big(&value_1);
     s21_big_decimal big2 = s21_decimal_to_big(&value_2);
     
-    s21_normalize_big(&big1, &big2);
+    s21_normalize_big_pair(&big1, &big2);
     s21_big_decimal res_big;
     s21_null_big_decimal(&res_big);
 
