@@ -48,3 +48,17 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 }
 
 // #todo: в big_sub учесть функцию переполнения
+
+int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
+    (void) value_1;
+    (void) value_2;
+    (void) result;
+    return 0;
+}
+
+int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
+    (void) value_1;
+    (void) value_2;
+    (void) result;
+    return 0;
+}
