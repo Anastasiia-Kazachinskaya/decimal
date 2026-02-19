@@ -6,7 +6,7 @@
 
 #include "../s21_decimal.h"
 #include "../headers/s21_helpers.h"
-/*
+
 // s21_sub tests section
 START_TEST(s21_sub_positive_minus_zero){
     int status;
@@ -21,6 +21,10 @@ START_TEST(s21_sub_positive_minus_zero){
     ck_assert_int_eq(status, 0);
 }
 END_TEST
+
+/*
+
+TODO: s21_big_to_decimal TEST
 
 
 START_TEST(s21_sub_positive_minus_lower_positive){
@@ -104,19 +108,18 @@ START_TEST(s21_sub_positive_minus_negative){
     ck_assert_int_eq(status, 0);
 }
 END_TEST
-
+*/
 Suite *s21_arithmetic_suite(void) {
     Suite *s = suite_create("arithmetic");
     TCase *tc_core = tcase_create("Core");
     tcase_add_test(tc_core, s21_sub_positive_minus_zero);
-    tcase_add_test(tc_core, s21_sub_positive_minus_lower_positive);
-    tcase_add_test(tc_core, s21_sub_positive_minus_larger_positive);
-    tcase_add_test(tc_core, s21_sub_negative_minus_negative);
-    tcase_add_test(tc_core, s21_sub_negative_minus_positive);
-    tcase_add_test(tc_core, s21_sub_positive_minus_negative);
+    // tcase_add_test(tc_core, s21_sub_positive_minus_lower_positive);
+    // tcase_add_test(tc_core, s21_sub_positive_minus_larger_positive);
+    // tcase_add_test(tc_core, s21_sub_negative_minus_negative);
+    // tcase_add_test(tc_core, s21_sub_negative_minus_positive);
+    // tcase_add_test(tc_core, s21_sub_positive_minus_negative);
 
     suite_add_tcase(s, tc_core);
     return s;
 }
 
-*/
