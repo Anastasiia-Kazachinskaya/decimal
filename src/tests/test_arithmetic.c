@@ -122,41 +122,80 @@ START_TEST(s21_sub_modules_five_minus_two){
 }
 END_TEST
 
-/*
-START_TEST(s21_sub_negative_minus_positive){
+START_TEST(s21_sub_modules_five_minus_five){
     int status;
-    s21_decimal result = {{0, 0, 0, 0}};
-    s21_decimal value_1 = {{2, 0, 0, 0}};
-    s21_decimal value_2 = {{5, 0, 0, 0}};
 
-    value_1.bits[3] |= 1u << 31;
-    
-    status = s21_sub(value_1, value_2, &result);
-    ck_assert_int_eq(result.bits[0], 7);
-    ck_assert_int_eq(result.bits[1], 0);
-    ck_assert_int_eq(result.bits[2], 0);
-    ck_assert_int_eq(s21_get_sign(&result), 1);
-    ck_assert_int_eq(status, 0);
+    s21_decimal value_1 = {{5, 0, 0, 0}};
+    s21_decimal value_2 = {{5, 0, 0, 0}};
+    s21_big_decimal five = s21_decimal_to_big(&value_1);
+    s21_big_decimal five2 = s21_decimal_to_big(&value_2);
+    five.sign = 1;
+    five2.sign = 1;
+    s21_big_decimal big_result;
+    s21_null_big_decimal(&big_result);
+
+    status = s21_big_sub(five, five2, &big_result);
+
+    ck_assert_int_eq(big_result.bits[0], 0);
+    ck_assert_int_eq(big_result.bits[1], 0);
+    ck_assert_int_eq(big_result.bits[2], 0);
+    ck_assert_int_eq(big_result.bits[6], 0);
+    // знак меняется в основной функции s21_sub
+    ck_assert_int_eq(big_result.sign, 0);
+    ck_assert_int_eq(status, OK);
 }
 END_TEST
+
+
+START_TEST(s21_sub_negative_minus_positive){
+    int status;
+
+    s21_decimal value_1 = {{2, 0, 0, 0}};
+    s21_decimal value_2 = {{5, 0, 0, 0}};
+    s21_big_decimal two = s21_decimal_to_big(&value_1);
+    s21_big_decimal five = s21_decimal_to_big(&value_2);
+    two.sign = 1;
+    s21_big_decimal big_result;
+    s21_null_big_decimal(&big_result);
+
+    status = s21_big_add(two, five, &big_result);
+
+    ck_assert_int_eq(big_result.bits[0], 7);
+    ck_assert_int_eq(big_result.bits[1], 0);
+    ck_assert_int_eq(big_result.bits[2], 0);
+    ck_assert_int_eq(big_result.bits[6], 0);
+    // знак меняется в основной функции s21_sub
+    ck_assert_int_eq(big_result.sign, 0);
+    ck_assert_int_eq(status, OK);
+}
+END_TEST
+
 
 START_TEST(s21_sub_positive_minus_negative){
     int status;
-    s21_decimal result = {{0, 0, 0, 0}};
+
     s21_decimal value_1 = {{2, 0, 0, 0}};
     s21_decimal value_2 = {{5, 0, 0, 0}};
+    s21_big_decimal two = s21_decimal_to_big(&value_1);
+    s21_big_decimal five = s21_decimal_to_big(&value_2);
+    five.sign = 1;
+    s21_big_decimal big_result;
+    s21_null_big_decimal(&big_result);
 
-    value_2.bits[3] |= 1u << 31;
-    
-    status = s21_sub(value_1, value_2, &result);
-    ck_assert_int_eq(result.bits[0], 7);
-    ck_assert_int_eq(result.bits[1], 0);
-    ck_assert_int_eq(result.bits[2], 0);
-    ck_assert_int_eq(s21_get_sign(&result), 0);
-    ck_assert_int_eq(status, 0);
+    status = s21_big_add(two, five, &big_result);
+
+    ck_assert_int_eq(big_result.bits[0], 7);
+    ck_assert_int_eq(big_result.bits[1], 0);
+    ck_assert_int_eq(big_result.bits[2], 0);
+    ck_assert_int_eq(big_result.bits[6], 0);
+    // знак меняется в основной функции s21_sub
+    ck_assert_int_eq(big_result.sign, 0);
+    ck_assert_int_eq(status, OK);
 }
 END_TEST
-*/
+
+
+
 Suite *s21_arithmetic_suite(void) {
     Suite *s = suite_create("arithmetic");
     TCase *tc_core = tcase_create("Core");
@@ -165,8 +204,10 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_positive_minus_larger_positive);
     tcase_add_test(tc_core, s21_sub_modules_two_minus_five);
     tcase_add_test(tc_core, s21_sub_modules_five_minus_two);
-    // tcase_add_test(tc_core, s21_sub_negative_minus_positive);
-    // tcase_add_test(tc_core, s21_sub_positive_minus_negative);
+    tcase_add_test(tc_core, s21_sub_modules_five_minus_five);
+    tcase_add_test(tc_core, s21_sub_negative_minus_positive);
+    tcase_add_test(tc_core, s21_sub_positive_minus_negative);
+
 
     suite_add_tcase(s, tc_core);
     return s;
