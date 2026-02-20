@@ -32,7 +32,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
             res_big.sign = big1.sign;
         } else if (s21_is_big_less(big1, big2)) {
             s21_big_sub(big2, big1, &res_big);
-            res_big.sign = big1.sign;
+            res_big.sign = big2.sign;
         } else {
             s21_null_big_decimal(&res_big);
             res_big.sign = 0;
