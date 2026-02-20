@@ -5,6 +5,7 @@
 
 #define CONVERTATION_ERROR 1
 #define OK 0
+#define ERROR 1;
 
 #define MIN_INT -2147483648
 #define MAX_INT 2147483647
