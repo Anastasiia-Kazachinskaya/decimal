@@ -1,8 +1,6 @@
 #include "../s21_decimal.h"
 #include "../headers/s21_helpers.h"
 
-#define ERROR 1
-#define OK 0
 
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
@@ -50,10 +48,12 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 // #todo: в big_sub учесть функцию переполнения
 
 int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
-    (void) value_1;
-    (void) value_2;
-    (void) result;
-    return 0;
+    
+    for (int i = 0; i < 7; i++) {
+        result->bits[i] = value_1.bits[i] - value_2.bits[i];
+    }
+
+    return OK;
 }
 
 int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
