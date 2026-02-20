@@ -52,23 +52,29 @@ START_TEST(s21_sub_positive_minus_lower_positive){
     ck_assert_int_eq(status, OK);
 }
 END_TEST
-/*
+
 
 START_TEST(s21_sub_positive_minus_larger_positive){
     int status;
-    s21_decimal result = {{0, 0, 0, 0}};
-    s21_decimal value_1 = {{2, 0, 0, 0}};
+
+    s21_decimal value_1 = {{3, 0, 0, 0}};
     s21_decimal value_2 = {{5, 0, 0, 0}};
-    status = s21_sub(value_1, value_2, &result);
-    ck_assert_int_eq(result.bits[0], 3);
-    ck_assert_int_eq(result.bits[1], 0);
-    ck_assert_int_eq(result.bits[2], 0);
-    ck_assert_int_eq(s21_get_sign(&result), 1);
-    ck_assert_int_eq(status, 0);
+    s21_big_decimal five = s21_decimal_to_big(&value_1);
+    s21_big_decimal three = s21_decimal_to_big(&value_2);
+    s21_big_decimal big_result;
+    s21_null_big_decimal(&big_result);
+
+    status = s21_big_sub(three, five, &big_result);
+
+    ck_assert_int_eq(big_result.bits[0], 2);
+    ck_assert_int_eq(big_result.bits[1], 0);
+    ck_assert_int_eq(big_result.bits[2], 0);
+    ck_assert_int_eq(big_result.bits[6], 0);
+    ck_assert_int_eq(status, OK);
 }
 END_TEST
 
-
+/*
 START_TEST(s21_sub_negative_minus_negative){
     int status;
     s21_decimal result = {{0, 0, 0, 0}};
@@ -126,7 +132,7 @@ Suite *s21_arithmetic_suite(void) {
     TCase *tc_core = tcase_create("Core");
     tcase_add_test(tc_core, s21_sub_positive_minus_zero);
     tcase_add_test(tc_core, s21_sub_positive_minus_lower_positive);
-    // tcase_add_test(tc_core, s21_sub_positive_minus_larger_positive);
+    tcase_add_test(tc_core, s21_sub_positive_minus_larger_positive);
     // tcase_add_test(tc_core, s21_sub_negative_minus_negative);
     // tcase_add_test(tc_core, s21_sub_negative_minus_positive);
     // tcase_add_test(tc_core, s21_sub_positive_minus_negative);
