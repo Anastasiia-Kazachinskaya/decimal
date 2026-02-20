@@ -1,6 +1,8 @@
+#include "../s21_decimal.h"
+
 #include <check.h>
 #include <stdlib.h> 
-#include "../headers/s21_helpers.h"
+
 
 Suite* s21_helpers_suite(void);
 

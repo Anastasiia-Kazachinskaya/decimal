@@ -1,9 +1,9 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Werror -Wextra
 CHECK_FLAGS = $(shell pkg-config --cflags --libs check)
-SOURCES = $(wildcard core/*.c)
-HEADERS = headers/s21_decimal.h headers/s21_helpers.h
-OBJECTS = $(SOURCES:.c=.o)
+DECIMAL_SOURCES = $(wildcard core/decimal/*.c)
+HEADERS = s21_decimal.h headers/s21_big_decimal.h headers/s21_utils.h
+OBJECTS = $(DECIMAL_SOURCES:.c=.o)
 LIB = s21_decimal.a
 
 TEST_SRC = tests/test_s21_decimal_all.c tests/test_arithmetic.c tests/test_comparison.c tests/test_converters.c tests/test_other.c tests/test_helpers.c
@@ -36,8 +36,8 @@ test: $(TEST_OBJ)	$(LIB)
 	$(CC) $(CFLAGS) $(CHECK_FLAGS) -o $(TEST_EXE) $(TEST_OBJ) $(LIB)
 	@./$(TEST_EXE)
 
-gcov_report: $(SOURCES) $(TEST_SRC)
-	$(CC) $(CFLAGS) $(CHECK_FLAGS) --coverage -o $(TEST_EXE) $(SOURCES) $(TEST_SRC)
+gcov_report: $(DECIMAL_SOURCES) $(TEST_SRC)
+	$(CC) $(CFLAGS) --coverage -o $(TEST_EXE) $(DECIMAL_SOURCES) $(TEST_SRC) $(CHECK_FLAGS)
 	./$(TEST_EXE)
 	@mkdir $(REPORT_DIR)
 	@gcovr --html-details $(REPORT_DIR)/$(REPORT)
