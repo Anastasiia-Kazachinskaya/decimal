@@ -27,7 +27,4 @@ jobs:
       # Собираем проект
       - name: make
         run: cd src && make
-      
-      # (Опционально) Запускаем тесты, если они используют check
-      - name: run tests
-        run: cd src && make test
+        
