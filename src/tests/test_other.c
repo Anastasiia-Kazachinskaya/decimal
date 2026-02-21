@@ -5,3 +5,52 @@
 #include <stdlib.h>
 
 #include "../s21_decimal.h"
+#include "../headers/s21_helpers.h"
+
+
+START_TEST(s21_get_overflow_no_overflow) {
+    
+    s21_big_decimal value;
+    s21_null_big_decimal(&value);
+    value.bits[0] = 12345;
+    // bits[1..6] = 0
+    
+    
+    int result = s21_get_overflow(&value);
+    ck_assert_int_eq(result, 0);
+}
+END_TEST
+
+START_TEST(s21_big_add_overflow_integration) {
+    s21_big_decimal a, b, res;
+    s21_null_big_decimal(&a);
+    s21_null_big_decimal(&b);
+    s21_null_big_decimal(&res);
+    
+    for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+        a.bits[i] = 0xFFFFFFFF;
+        b.bits[i] = 0xFFFFFFFF;
+    }
+    
+    int add_result = s21_big_add(a, b, &res);
+    
+    // === ОТЛАДОЧНЫЙ ВЫВОД ===
+    printf("\n[DEBUG] s21_big_add overflow test:\n");
+    printf("  add_result = %d (0=OK, 1=ERROR)\n", add_result);
+    printf("  res.bits[4] = 0x%X (старшее слово)\n", res.bits[4]);
+    printf("  res.bits[0] = 0x%X (младшее слово)\n", res.bits[0]);
+    // =======================
+    
+    ck_assert_int_eq(add_result, 1);
+}
+END_TEST
+
+Suite *s21_other_suite(void) {
+    Suite *s = suite_create("other");
+    TCase *tc_core = tcase_create("Core");
+    tcase_add_test(tc_core, s21_get_overflow_no_overflow);
+    tcase_add_test(tc_core, s21_big_add_overflow_integration);
+
+    suite_add_tcase(s, tc_core);
+    return s;
+}
