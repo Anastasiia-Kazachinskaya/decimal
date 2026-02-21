@@ -1,7 +1,7 @@
-#include <stdio.h>
-#include "../s21_helpers.h"
+#include "../../s21_decimal.h"
 
-#define S21_BIG_DECIMAL_DATA_BITS 3
+#include <stdio.h>
+#include <string.h>
 
 // получить значение (0 или 1) конкретного бита по его индексу (0-95)
 int s21_get_bit(s21_decimal value, int bit_index) {
@@ -28,7 +28,6 @@ int s21_set_bit(s21_decimal* value, int bit_index, int bit_value) {
   }
   return 0;
 }
-
 
 int s21_get_scale(s21_decimal* value) {
   int scale = 0;
@@ -67,9 +66,3 @@ int s21_get_sign(s21_decimal* value) {
   }
   return sign;
 }
-
-// при конвертации big_decimal в decimal
-int s21_set_sign(s21_big_decimal* val, s21_decimal* value) {
-  if (val->sign == 1) value->bits[3] |= 1u << 31;
-}
-

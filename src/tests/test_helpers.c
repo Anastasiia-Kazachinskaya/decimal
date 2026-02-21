@@ -1,5 +1,7 @@
+#include "../s21_decimal.h"
+#include "../headers/s21_utils.h"
+
 #include <check.h>
-#include "../headers/s21_helpers.h"
 
 
 // s21_is_zero tests section

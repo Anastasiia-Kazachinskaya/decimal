@@ -1,8 +1,7 @@
-#include "../headers/s21_helpers.h"
+#include "../../s21_decimal.h"
+#include "../../headers/s21_utils.h"
 
-int s21_from_decimal_to_float(s21_decimal src, float* dst) {
-  if (s21_is_zero(src)) *dst = 0.0f;
-}
+int s21_from_decimal_to_float(s21_decimal src, float* dst);
 
 int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   int res = CONVERTATION_ERROR;
@@ -28,9 +27,7 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   return res;
 }
 
-int s21_from_float_to_decimal(float src, s21_decimal* dst) {
-  if (src < 0) dst->bits[3] |= 1u << 31;
-}
+int s21_from_float_to_decimal(float src, s21_decimal* dst);
 
 int s21_from_int_to_decimal(int src, s21_decimal* dst) {
   int res = CONVERTATION_ERROR;
@@ -53,14 +50,4 @@ int s21_from_int_to_decimal(int src, s21_decimal* dst) {
     }
   }
   return res;
-}
-
-s21_big_decimal s21_decimal_to_big(s21_decimal* value) {
-    s21_big_decimal res = {0};
-    if (value) {
-    for (int i = 0; i < 3; ++i) res.bits[i] = value->bits[i];
-    if (s21_get_sign(value)) res.sign = 1;
-    res.scale = s21_get_scale(value);
-    }
-    return res;
 }
