@@ -1,11 +1,14 @@
+#include <stdint.h> 
 #include "../s21_decimal.h"
 #include "../headers/s21_helpers.h"
 
+#define S21_BIG_DECIMAL_SIZE 7 
 
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 // int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 // int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
+
 
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
@@ -39,28 +42,54 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
         }
     }
     
-
+    if (s21_get_overflow(&res_big) == 1) {
+        return ERROR;
+    }
     s21_big_to_decimal(&res_big, result);
     
     return OK;
 }
 
-// #todo: в big_sub учесть функцию переполнения
 
-int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
+
+int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
+    uint32_t carry = 0;
     
-    for (int i = 0; i < 7; i++) {
-        result->bits[i] = value_1.bits[i] - value_2.bits[i];
+    // Складываем по словам с учётом переноса
+    for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+        uint64_t sum = (uint64_t)value_1.bits[i] + value_2.bits[i] + carry;
+        result->bits[i] = (uint32_t)(sum & 0xFFFFFFFF);  // младшие 32 бита
+        carry = (uint32_t)(sum >> 32);                    // старшие биты = перенос
     }
-
+    
+    // Если после обработки последнего слова остался carry — это переполнение
+    if (carry) {
+        return ERROR;
+    }
+    
     return OK;
 }
 
-int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
+int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
+    int32_t borrow = 0;
     
-    for (int i = 0; i < 7; i++) {
-        result->bits[i] = value_1.bits[i] + value_2.bits[i];
+    for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+        // Приводим к int64_t, чтобы корректно обработать отрицательный результат
+        int64_t diff = (int64_t)value_1.bits[i] - value_2.bits[i] - borrow;
+        
+        if (diff < 0) {
+            result->bits[i] = (uint32_t)(diff + 0x100000000LL);  // "занимаем" единицу из старшего разряда
+            borrow = 1;
+        } else {
+            result->bits[i] = (uint32_t)diff;
+            borrow = 0;
+        }
     }
-
+    
+    // Если после последнего разряда остался borrow — переполнение (underflow)
+    if (borrow) {
+        return ERROR;
+    }
+    
     return OK;
 }
