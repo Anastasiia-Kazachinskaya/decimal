@@ -8,10 +8,26 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+      
+      # Устанавливаем необходимые пакеты
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            check \
+            gcovr \
+            lcov \
+            clang-format
+      
+      # Собираем проект
       - name: make
         run: cd src && make
+      
+      # (Опционально) Запускаем тесты, если они используют check
+      - name: run tests
+        run: cd src && make test
