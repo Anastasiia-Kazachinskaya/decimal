@@ -55,9 +55,9 @@ clean:
 rebuild: clean all
 
 clang_check:
-	clang-format -n core/*.c *.h headers/*.h
+	clang-format -n $(DECIMAL_SOURCES) $(HEADERS)
 
 style:
-	clang-format -i core/*.c *.h headers/*.h
+	clang-format -i $(DECIMAL_SOURCES) $(HEADERS)
 
 .PHONY: clean all rebuild test gcov_report clang_check style
