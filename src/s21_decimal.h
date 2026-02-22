@@ -7,7 +7,7 @@
 #define NUMNER_TO_SMALL 2
 #define DIVISION_BY_ZERO 3
 
-#define TRUE 0
+#define TRUE 1
 #define FALSE 0
 
 #define MIN_INT -2147483648
@@ -15,6 +15,7 @@
 
 #define S21_BIG_DECIMAL_DATA_BITS 3
 
+///[][][][0-15/scale(16-23)/24-30/sign]
 typedef struct {
   int bits[4];
 } s21_decimal;
