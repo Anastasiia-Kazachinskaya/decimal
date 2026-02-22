@@ -28,3 +28,8 @@ jobs:
       - name: make
         run: cd src && make
         
+      - name: style
+        run: cd src && make clang_check
+        
+      - name: test
+        run: cd src && make test
