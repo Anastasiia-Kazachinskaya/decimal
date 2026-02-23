@@ -7,7 +7,19 @@ int s21_negate(s21_decimal value, s21_decimal* result);
 int s21_round(s21_decimal value, s21_decimal* result);
 int s21_truncate(s21_decimal value, s21_decimal* result);
 
-
+int s21_truncate(s21_decimal value, s21_decimal* result) {
+    if (!result) {
+        return CALCULATION_ERROR;
+    }
+    int val_scale;
+    val_scale = s21_get_scale(&value);
+    if (val_scale == 0) {
+        for (int i = 0; i < 4; i++) {
+            result->bits[i] = value.bits[i];
+        }
+    }
+    return OK;
+}
 
 int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2) {
     (void) value_1;
