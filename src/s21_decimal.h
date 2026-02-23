@@ -1,6 +1,10 @@
 #ifndef S21_DECIMAL_H
 #define S21_DECIMAL_H
 
+#define OK 0
+#define CALCULATION_ERROR 1
+
+
 typedef struct {
   int bits[4];
 } s21_decimal;
