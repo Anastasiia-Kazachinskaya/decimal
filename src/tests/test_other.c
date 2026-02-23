@@ -45,11 +45,28 @@ START_TEST(s21_big_add_overflow_integration) {
 }
 END_TEST
 
+
+START_TEST(s21_truncate_scale_zero) {
+    s21_decimal result;
+    s21_decimal value;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    value.bits[0] = 12345;
+    s21_truncate(value, &result);
+    ck_assert_int_eq(result.bits[0], value.bits[0]);
+    ck_assert_int_eq(result.bits[1], value.bits[1]);
+    ck_assert_int_eq(result.bits[2], value.bits[2]);
+    ck_assert_int_eq(result.bits[3], value.bits[3]);
+}
+END_TEST
+
+int s21_truncate(s21_decimal value, s21_decimal* result);
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
     TCase *tc_core = tcase_create("Core");
     tcase_add_test(tc_core, s21_get_overflow_no_overflow);
     tcase_add_test(tc_core, s21_big_add_overflow_integration);
+    tcase_add_test(tc_core, s21_truncate_scale_zero);
 
     suite_add_tcase(s, tc_core);
     return s;
