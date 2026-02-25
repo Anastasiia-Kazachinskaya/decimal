@@ -109,7 +109,7 @@ END_TEST
 // s21_get_sign tests section
 START_TEST(s21_get_sign_basic){
     s21_decimal val = {{0, 0, 0, 0}};
-    val.bits[3] = 1 << 31;
+    val.bits[3] = 1u << 31;
     int result = s21_get_sign(&val);
     ck_assert_int_eq(result, 1);
 
