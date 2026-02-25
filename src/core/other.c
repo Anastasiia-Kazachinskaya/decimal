@@ -44,8 +44,15 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
 
 
 int s21_divide_mantissa_by_10(s21_decimal* value) {
-    value -> bits[0] /= 10;
-    return OK;
+    uint32_t remainder = 0;
+
+    for (int i = 2; i >= 0; i--) {
+        uint64_t temp = ((uint64_t) remainder << 32) | value->bits[i];
+        value->bits[i] = (uint32_t)(temp / 10);
+        
+        remainder = temp % 10; 
+    }
+    return remainder == 0 ? OK : 1;
 }
 
 
