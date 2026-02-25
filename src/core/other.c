@@ -6,20 +6,48 @@ int s21_floor(s21_decimal value, s21_decimal* result);
 int s21_negate(s21_decimal value, s21_decimal* result);
 int s21_round(s21_decimal value, s21_decimal* result);
 int s21_truncate(s21_decimal value, s21_decimal* result);
+int s21_divide_mantissa_by_10(s21_decimal *dec);
 
 int s21_truncate(s21_decimal value, s21_decimal* result) {
     if (!result) {
         return CALCULATION_ERROR;
     }
-    int val_scale;
-    val_scale = s21_get_scale(&value);
-    if (val_scale == 0) {
-        for (int i = 0; i < 4; i++) {
-            result->bits[i] = value.bits[i];
-        }
+
+    s21_null_decimal(result);
+
+    int scale = s21_get_scale(&value);
+    int sign = s21_get_sign(&value);
+
+    // Копируем мантиссу
+    result->bits[0] = value.bits[0];
+    result->bits[1] = value.bits[1];
+    result->bits[2] = value.bits[2];
+
+    int divisions = scale > 28 ? 28 : scale;
+    for (int i = 0; i < divisions && !s21_is_zero(*result); i++) {
+        s21_divide_mantissa_by_10(result);
     }
+
+    if (s21_is_zero(*result)) {
+        sign = 0;
+    }
+
+    // Собираем bits[3]: знак + scale
+    result->bits[3] = 0;
+    if (sign) {
+        result->bits[3] |= 1u << 31;
+    }
+
     return OK;
 }
+
+
+
+int s21_divide_mantissa_by_10(s21_decimal* value) {
+    value -> bits[0] /= 10;
+    return OK;
+}
+
 
 int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2) {
     (void) value_1;
