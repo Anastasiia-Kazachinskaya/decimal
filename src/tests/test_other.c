@@ -60,13 +60,109 @@ START_TEST(s21_truncate_scale_zero) {
 }
 END_TEST
 
+START_TEST(s21_truncate_scale_positive) {
+    s21_decimal result;
+    s21_decimal value;
+    s21_null_decimal(&value);
+    result.bits[0] = 123;
+    result.bits[1] = 456;
+    result.bits[2] = 789;
+    result.bits[3] = MAX4BITE;
+
+
+    value.bits[0] = 1;
+    value.bits[3] = 1 << 16;
+    s21_truncate(value, &result);
+    ck_assert_int_eq(result.bits[0], 0);
+    ck_assert_int_eq(result.bits[1], 0);
+    ck_assert_int_eq(result.bits[2], 0);
+    ck_assert_int_eq(result.bits[3], 0);
+}
+END_TEST
+
+
+START_TEST(s21_truncate_negative_small) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+
+    value.bits[0] = 9;
+    value.bits[3] = 2 << 16;
+    value.bits[3] |= 1u << 31;
+
+    s21_truncate(value, &result);
+    ck_assert_int_eq(result.bits[0], 0);
+    ck_assert_int_eq(result.bits[3], 0);
+
+}
+END_TEST
+
+
+START_TEST(s21_truncate_normal_positive) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 1234;
+    value.bits[3] = 3 << 16;
+
+    s21_truncate(value, &result);
+    ck_assert_int_eq(result.bits[0], 1);
+    int result_scale = s21_get_scale(&result); 
+    ck_assert_int_eq(result_scale, 0);
+}
+END_TEST
+
+
+START_TEST(s21_truncate_normal_negative) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 1234;
+    value.bits[3] = 3 << 16 | 1u << 31;
+
+    s21_truncate(value, &result);
+    ck_assert_int_eq(result.bits[0], 1);
+    int result_scale = s21_get_scale(&result);
+    int result_sign = s21_get_sign(&result);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 1);
+
+
+}
+END_TEST
+
+
+START_TEST(s21_truncate_scale_28_max) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 1;
+    value.bits[3] = 28 << 16;
+    
+    s21_truncate(value, &result);
+    ck_assert_int_eq(result.bits[0], 0);
+}
+END_TEST
+
+
 int s21_truncate(s21_decimal value, s21_decimal* result);
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
     TCase *tc_core = tcase_create("Core");
     tcase_add_test(tc_core, s21_get_overflow_no_overflow);
+    
     tcase_add_test(tc_core, s21_big_add_overflow_integration);
+
     tcase_add_test(tc_core, s21_truncate_scale_zero);
+    tcase_add_test(tc_core, s21_truncate_scale_positive);
+    tcase_add_test(tc_core, s21_truncate_negative_small);
+    tcase_add_test(tc_core, s21_truncate_normal_positive);
+    tcase_add_test(tc_core, s21_truncate_normal_negative);
+    tcase_add_test(tc_core, s21_truncate_scale_28_max);
+
 
     suite_add_tcase(s, tc_core);
     return s;
