@@ -34,7 +34,7 @@ int s21_set_bit(s21_decimal* value, int bit_index, int bit_value) {
 int s21_get_scale(s21_decimal* value) {
   int scale = 0;
   if (value) {
-    scale = value->bits[3] >> 16 & 0xFF;
+    scale = value->bits[3] >> 16 & 0xFF;  // 0xFF = 11111111 
   }
   if (scale > 28) {
     return 0;
