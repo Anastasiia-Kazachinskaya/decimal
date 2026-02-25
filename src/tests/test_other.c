@@ -156,6 +156,34 @@ START_TEST(s21_divide_mantissa_by_10_zero_bit) {
 END_TEST
 
 
+START_TEST(s21_divide_mantissa_remainder) {
+    s21_decimal value;
+    s21_null_decimal(&value);
+    value.bits[0] = 123;
+    
+    int result = s21_divide_mantissa_by_10(&value);
+    
+    ck_assert_int_eq(value.bits[0], 12);    // 123 / 10 = 12
+    ck_assert_int_eq(result, 1);          // функция возвращает 1 при наличиии остатка
+}
+END_TEST
+
+
+START_TEST(s21_divide_mantissa_drop_high_remainder) {
+    s21_decimal value;
+    s21_null_decimal(&value);
+    value.bits[0] = 95;
+    value.bits[1] = 123;
+    
+    int result = s21_divide_mantissa_by_10(&value);
+    
+    ck_assert_int_eq(value.bits[0], 1288490198);
+    ck_assert_int_eq(value.bits[1], 12);
+    ck_assert_int_eq(value.bits[2], 0);
+    ck_assert_int_eq(result, 1);
+}
+END_TEST
+
 int s21_truncate(s21_decimal value, s21_decimal* result);
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
@@ -172,6 +200,8 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_truncate_scale_28_max);
 
     tcase_add_test(tc_core, s21_divide_mantissa_by_10_zero_bit);
+    tcase_add_test(tc_core, s21_divide_mantissa_remainder);
+    tcase_add_test(tc_core, s21_divide_mantissa_drop_high_remainder);
 
 
     suite_add_tcase(s, tc_core);
