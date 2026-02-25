@@ -7,7 +7,7 @@
 #include "../s21_decimal.h"
 #include "../headers/s21_helpers.h"
 
-
+// s21_get_overflow tests section
 START_TEST(s21_get_overflow_no_overflow) {
     
     s21_big_decimal value;
@@ -21,6 +21,8 @@ START_TEST(s21_get_overflow_no_overflow) {
 }
 END_TEST
 
+
+// s21_big_add tests section
 START_TEST(s21_big_add_overflow_integration) {
     s21_big_decimal a, b, res;
     s21_null_big_decimal(&a);
@@ -34,12 +36,12 @@ START_TEST(s21_big_add_overflow_integration) {
     
     int add_result = s21_big_add(a, b, &res);
 
-    
+
     ck_assert_int_eq(add_result, 1);
 }
 END_TEST
 
-
+// s21_truncate tests section
 START_TEST(s21_truncate_scale_zero) {
     s21_decimal result;
     s21_decimal value;
@@ -141,6 +143,18 @@ START_TEST(s21_truncate_scale_28_max) {
 }
 END_TEST
 
+// s21_divide_mantissa_by_10 tests section
+START_TEST(s21_divide_mantissa_by_10_zero_bit) {
+    s21_decimal value;
+    s21_null_decimal(&value);
+
+    value.bits[0] = 123;
+
+    s21_divide_mantissa_by_10(&value);
+    ck_assert_int_eq(value.bits[0], 12);
+}
+END_TEST
+
 
 int s21_truncate(s21_decimal value, s21_decimal* result);
 Suite *s21_other_suite(void) {
@@ -156,6 +170,8 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_truncate_normal_positive);
     tcase_add_test(tc_core, s21_truncate_normal_negative);
     tcase_add_test(tc_core, s21_truncate_scale_28_max);
+
+    tcase_add_test(tc_core, s21_divide_mantissa_by_10_zero_bit);
 
 
     suite_add_tcase(s, tc_core);
