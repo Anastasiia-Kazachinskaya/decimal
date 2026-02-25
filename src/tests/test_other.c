@@ -33,13 +33,7 @@ START_TEST(s21_big_add_overflow_integration) {
     }
     
     int add_result = s21_big_add(a, b, &res);
-    
-    // === ОТЛАДОЧНЫЙ ВЫВОД ===
-    printf("\n[DEBUG] s21_big_add overflow test:\n");
-    printf("  add_result = %d (0=OK, 1=ERROR)\n", add_result);
-    printf("  res.bits[4] = 0x%X (старшее слово)\n", res.bits[4]);
-    printf("  res.bits[0] = 0x%X (младшее слово)\n", res.bits[0]);
-    // =======================
+
     
     ck_assert_int_eq(add_result, 1);
 }
