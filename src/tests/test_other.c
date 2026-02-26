@@ -267,8 +267,21 @@ START_TEST(s21_floor_zero_negative) {
 }
 END_TEST
 
+// -0.0001 -> +0
+START_TEST(s21_floor_negative_near_zero) {
+    s21_decimal value = {0}, result = {0};
+    
+    value.bits[0] = 1;
+    value.bits[3] = (4 << 16) | (1u << 31);
+    
+    s21_floor(value, &result);
+    
+    ck_assert_int_eq(s21_is_zero(result), 1);
+    ck_assert_int_eq(s21_get_sign(&result), 0);
+    ck_assert_int_eq(s21_get_scale(&result), 0);
+}
+END_TEST
 
-int s21_truncate(s21_decimal value, s21_decimal* result);
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
     TCase *tc_core = tcase_create("Core");
@@ -291,6 +304,7 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_floor_negative_fractional);
     tcase_add_test(tc_core, s21_floor_negative_integer);
     tcase_add_test(tc_core, s21_floor_zero_negative);
+    tcase_add_test(tc_core, s21_floor_negative_near_zero);
 
     suite_add_tcase(s, tc_core);
     return s;
