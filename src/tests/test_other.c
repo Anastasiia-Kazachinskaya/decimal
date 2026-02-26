@@ -184,6 +184,47 @@ START_TEST(s21_divide_mantissa_drop_high_remainder) {
 }
 END_TEST
 
+
+// int s21_floor tests section
+START_TEST(s21_floor_basic_positive_fractional) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 1234;
+    value.bits[3] = 3 << 16;
+    
+    s21_floor(value, &result);
+    
+    int result_scale = s21_get_scale(&result); 
+    int result_sign = s21_get_sign(&result);
+    
+    ck_assert_int_eq(result.bits[0], 1);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 0);
+}
+END_TEST
+
+
+START_TEST(s21_floor_basic_negative_fractional) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 1234;
+    value.bits[3] = 3 << 16 | 1u << 31;
+    
+    s21_floor(value, &result);
+    
+    int result_scale = s21_get_scale(&result); 
+    int result_sign = s21_get_sign(&result);
+    
+    ck_assert_int_eq(result.bits[0], 2);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 1);
+}
+END_TEST
+
 int s21_truncate(s21_decimal value, s21_decimal* result);
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
@@ -203,6 +244,8 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_divide_mantissa_remainder);
     tcase_add_test(tc_core, s21_divide_mantissa_drop_high_remainder);
 
+    tcase_add_test(tc_core, s21_floor_basic_positive_fractional);
+    tcase_add_test(tc_core, s21_floor_basic_negative_fractional);
 
     suite_add_tcase(s, tc_core);
     return s;
