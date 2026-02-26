@@ -186,7 +186,8 @@ END_TEST
 
 
 // int s21_floor tests section
-START_TEST(s21_floor_basic_positive_fractional) {
+// 1.234 → 1
+START_TEST(s21_floor_positive_fractional) {
     s21_decimal value, result;
     s21_null_decimal(&value);
     s21_null_decimal(&result);
@@ -205,8 +206,8 @@ START_TEST(s21_floor_basic_positive_fractional) {
 }
 END_TEST
 
-
-START_TEST(s21_floor_basic_negative_fractional) {
+// -1.234 → -2
+START_TEST(s21_floor_negative_fractional) {
     s21_decimal value, result;
     s21_null_decimal(&value);
     s21_null_decimal(&result);
@@ -224,6 +225,48 @@ START_TEST(s21_floor_basic_negative_fractional) {
     ck_assert_int_eq(result_sign, 1);
 }
 END_TEST
+
+
+// -12 → -12
+START_TEST(s21_floor_negative_integer) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 12;
+    value.bits[3] = 0 << 16 | 1u << 31;
+    
+    s21_floor(value, &result);
+    
+    int result_scale = s21_get_scale(&result); 
+    int result_sign = s21_get_sign(&result);
+    
+    ck_assert_int_eq(result.bits[0], 12);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 1);
+}
+END_TEST
+
+// -0/0 → 0
+START_TEST(s21_floor_zero_negative) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 0;
+    value.bits[3] = 0 << 16 | 1u << 31;
+    
+    s21_floor(value, &result);
+    
+    int result_scale = s21_get_scale(&result); 
+    int result_sign = s21_get_sign(&result);
+    
+    ck_assert_int_eq(result.bits[0], 0);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 0);
+}
+END_TEST
+
 
 int s21_truncate(s21_decimal value, s21_decimal* result);
 Suite *s21_other_suite(void) {
@@ -244,8 +287,10 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_divide_mantissa_remainder);
     tcase_add_test(tc_core, s21_divide_mantissa_drop_high_remainder);
 
-    tcase_add_test(tc_core, s21_floor_basic_positive_fractional);
-    tcase_add_test(tc_core, s21_floor_basic_negative_fractional);
+    tcase_add_test(tc_core, s21_floor_positive_fractional);
+    tcase_add_test(tc_core, s21_floor_negative_fractional);
+    tcase_add_test(tc_core, s21_floor_negative_integer);
+    tcase_add_test(tc_core, s21_floor_zero_negative);
 
     suite_add_tcase(s, tc_core);
     return s;
