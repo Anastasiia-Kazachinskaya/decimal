@@ -42,6 +42,26 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
 }
 
 
+int s21_floor(s21_decimal value, s21_decimal* result) {
+    if (!result) {
+        return CALCULATION_ERROR;
+    }
+
+    s21_null_decimal(result);
+    int sign = s21_get_sign(&value);
+
+    s21_truncate(value, result);
+    int overflow = s21_get_overflow_decimal(result);
+
+    if (sign && !s21_is_zero(*result) && !overflow) {
+        result->bits[0] = result->bits[0] + 1;
+    }
+
+    return OK;
+}
+
+
+
 
 int s21_divide_mantissa_by_10(s21_decimal* value) {
     uint32_t remainder = 0;
@@ -70,6 +90,20 @@ int s21_normalize_pair(s21_decimal* value_1, s21_decimal* value_2) {
 }
 
 int s21_get_overflow(s21_big_decimal* value) {
+    int overflow = 0;
+    for (int i = 0; i < S21_DECIMAL_LIMIT; i++) {
+        value->bits[i] += overflow;
+        overflow = (uint64_t)value->bits[i] >> 32;
+        value->bits[i] &= MAX4BITE;
+    }
+    if(overflow) {
+            return ERROR; // 1
+        }
+    return OK; // 0
+}
+
+
+int s21_get_overflow_decimal(s21_decimal* value) {
     int overflow = 0;
     for (int i = 0; i < S21_DECIMAL_LIMIT; i++) {
         value->bits[i] += overflow;
