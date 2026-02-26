@@ -43,6 +43,8 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
 
 
 int s21_floor(s21_decimal value, s21_decimal* result) {
+    int status = OK;
+    
     if (!result) {
         return CALCULATION_ERROR;
     }
@@ -50,20 +52,19 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
     s21_null_decimal(result);
 
     if (s21_is_zero(value)) {
-        return OK;
+        return 0;
     }
 
     int sign = s21_get_sign(&value);
     int scale = s21_get_scale(&value);
 
     s21_truncate(value, result);
-    int overflow = s21_get_overflow_decimal(result);
-
-    if (sign && scale && !s21_is_zero(*result) && !overflow) {
+    
+    if (sign && scale && !s21_is_zero(*result)) {
         result->bits[0] = result->bits[0] + 1;
-    } 
+    }
 
-    return OK;
+    return status;
 }
 
 
@@ -109,15 +110,3 @@ int s21_get_overflow(s21_big_decimal* value) {
 }
 
 
-int s21_get_overflow_decimal(s21_decimal* value) {
-    int overflow = 0;
-    for (int i = 0; i < S21_DECIMAL_LIMIT; i++) {
-        value->bits[i] += overflow;
-        overflow = (uint64_t)value->bits[i] >> 32;
-        value->bits[i] &= MAX4BITE;
-    }
-    if(overflow) {
-            return ERROR; // 1
-        }
-    return OK; // 0
-}
