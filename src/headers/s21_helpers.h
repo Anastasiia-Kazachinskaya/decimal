@@ -24,6 +24,7 @@ s21_big_decimal s21_decimal_to_big(s21_decimal *value);               // DO
 s21_decimal s21_big_to_decimal(s21_big_decimal* big_result, s21_decimal* result);               // TODO
 int s21_divide_mantissa_by_10(s21_decimal* value);
 int s21_get_overflow(s21_big_decimal* value);
+int s21_get_overflow_decimal(s21_decimal* value);
 int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
             s21_big_decimal* result);  // TODO
 int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
