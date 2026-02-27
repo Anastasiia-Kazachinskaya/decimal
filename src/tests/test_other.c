@@ -282,6 +282,90 @@ START_TEST(s21_floor_negative_near_zero) {
 }
 END_TEST
 
+
+// int s21_round tests section
+
+// 1,5 → 2
+START_TEST(s21_round_1_5_up) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 15;
+    value.bits[3] = 1 << 16;
+    
+    s21_round(value, &result);
+    
+    int result_scale = s21_get_scale(&result); 
+    int result_sign = s21_get_sign(&result);
+    
+    ck_assert_int_eq(result.bits[0], 2);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 0);
+}
+END_TEST
+
+
+// 2,5 → 2
+START_TEST(s21_round_2_5_stay) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 25;
+    value.bits[3] = 1 << 16;
+    
+    s21_round(value, &result);
+    
+    int result_scale = s21_get_scale(&result); 
+    int result_sign = s21_get_sign(&result);
+    
+    ck_assert_int_eq(result.bits[0], 2);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 0);
+}
+END_TEST
+
+// 1,3 → 1
+START_TEST(s21_round_1_3_stay) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 13;
+    value.bits[3] = 1 << 16;
+    
+    s21_round(value, &result);
+    
+    int result_scale = s21_get_scale(&result); 
+    int result_sign = s21_get_sign(&result);
+    
+    ck_assert_int_eq(result.bits[0], 1);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 0);
+}
+END_TEST
+
+// 1,6 → 2
+START_TEST(s21_round_1_6_up) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    value.bits[0] = 16;
+    value.bits[3] = 1 << 16;
+    
+    s21_round(value, &result);
+    
+    int result_scale = s21_get_scale(&result); 
+    int result_sign = s21_get_sign(&result);
+    
+    ck_assert_int_eq(result.bits[0], 2);
+    ck_assert_int_eq(result_scale, 0);
+    ck_assert_int_eq(result_sign, 0);
+}
+END_TEST
+
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
     TCase *tc_core = tcase_create("Core");
@@ -306,6 +390,13 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_floor_zero_negative);
     tcase_add_test(tc_core, s21_floor_negative_near_zero);
 
+    tcase_add_test(tc_core, s21_round_1_5_up);
+    tcase_add_test(tc_core, s21_round_2_5_stay);
+    tcase_add_test(tc_core, s21_round_1_3_stay);
+    tcase_add_test(tc_core, s21_round_1_6_up);
+    
+
+    
     suite_add_tcase(s, tc_core);
     return s;
 }
