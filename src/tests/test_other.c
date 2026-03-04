@@ -366,6 +366,64 @@ START_TEST(s21_round_1_6_up) {
 }
 END_TEST
 
+// 1.4449 → 1 (0.4449 < 0.5)
+START_TEST(s21_round_1_4449) {
+    s21_decimal value = {{14449, 0, 0, 4 << 16}}, result;  // scale=4
+    s21_round(value, &result);
+    ck_assert_int_eq(result.bits[0], 1);
+    ck_assert_int_eq(s21_get_scale(&result), 0);
+}
+END_TEST
+
+// 1.445 → 1 (0.445 < 0.5, НЕ 1.45 → 1.5 → 2!)
+START_TEST(s21_round_1_445) {
+    s21_decimal value = {{1445, 0, 0, 3 << 16}}, result;
+    s21_round(value, &result);
+    ck_assert_int_eq(result.bits[0], 1);
+}
+END_TEST
+
+// 1.45 → 1 (0.45 < 0.5)
+START_TEST(s21_round_1_45) {
+    s21_decimal value = {{145, 0, 0, 2 << 16}}, result;
+    s21_round(value, &result);
+    ck_assert_int_eq(result.bits[0], 1);
+}
+END_TEST
+
+// 1.5000 → 2
+START_TEST(s21_round_1_5000) {
+    s21_decimal value = {{15000, 0, 0, 4 << 16}}, result;
+    s21_round(value, &result);
+    ck_assert_int_eq(result.bits[0], 2);
+}
+END_TEST
+
+// 1.4999 → 1
+START_TEST(s21_round_1_4999) {
+    s21_decimal value = {{14999, 0, 0, 4 << 16}}, result;
+    s21_round(value, &result);
+    ck_assert_int_eq(result.bits[0], 1);
+}
+END_TEST
+
+// 1.5001 → 2
+START_TEST(s21_round_1_5001) {
+    s21_decimal value = {{15001, 0, 0, 4 << 16}}, result;
+    s21_round(value, &result);
+    ck_assert_int_eq(result.bits[0], 2);
+}
+END_TEST
+
+// -1.5 → -2
+START_TEST(s21_round_neg_1_5) {
+    s21_decimal value = {{15, 0, 0, (1 << 16) | (1 << 31)}}, result;
+    s21_round(value, &result);
+    ck_assert_int_eq(result.bits[0], 2);
+    ck_assert_int_eq(s21_get_sign(&result), 1);
+}
+END_TEST
+
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
     TCase *tc_core = tcase_create("Core");
@@ -394,6 +452,13 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_round_2_5_stay);
     tcase_add_test(tc_core, s21_round_1_3_stay);
     tcase_add_test(tc_core, s21_round_1_6_up);
+    tcase_add_test(tc_core, s21_round_1_4449);
+    tcase_add_test(tc_core, s21_round_1_445);
+    tcase_add_test(tc_core, s21_round_1_45);
+    tcase_add_test(tc_core, s21_round_1_5000);
+    tcase_add_test(tc_core, s21_round_1_4999);
+    tcase_add_test(tc_core, s21_round_1_5001);
+    tcase_add_test(tc_core, s21_round_neg_1_5);
     
 
     
