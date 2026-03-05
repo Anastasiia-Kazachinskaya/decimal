@@ -110,7 +110,7 @@ int s21_get_overflow(s21_big_decimal* value) {
     return OK; // 0
 }
 
-
+/*
 static uint32_t s21_pow10_unint32(int scale) {
     uint32_t result = 1;
     for (int i = 0; i < scale; i++) {
@@ -118,7 +118,7 @@ static uint32_t s21_pow10_unint32(int scale) {
     }
     return result;
 }
-
+*/
 static void s21_set_scale_internal(s21_decimal *value, int scale) {
     if (!value) return;
     if (scale < 0) {
@@ -129,7 +129,7 @@ static void s21_set_scale_internal(s21_decimal *value, int scale) {
     }
     value->bits[3] = (value->bits[3] & ~(0xFF << 16)) | (scale << 16);
 }
-
+/*
 int s21_round(s21_decimal value, s21_decimal* result) {
     int status = OK;
     
@@ -176,3 +176,143 @@ int s21_round(s21_decimal value, s21_decimal* result) {
 
     return status;
 }
+
+*/
+
+// вычисляем divisor (10^scale) , где scale 0-28
+static void s21_pow10_big(int scale, s21_big_decimal* result) {
+    s21_null_big_decimal(result);
+    result->bits[0] = 1;
+    result->scale = 0;
+    result->sign = 0;
+
+    for (int i = 0; i < scale; i++) {
+        uint64_t carry = 0;
+        for (int j = 0; j < 7; j++) {
+            uint64_t prod = (uint64_t) result->bits[j] * 10 + carry;
+            result->bits[j] = (uint32_t) (prod & 0xFFFFFFFF);
+            carry = prod >> 32;
+        }
+    }
+}
+
+// Вспомогательная: деление big_decimal на 2
+static void s21_big_div2(s21_big_decimal* value) {
+    unsigned int remainder = 0;
+    for (int i = 6; i >= 0; i--) {
+        unsigned int current = value->bits[i];
+        value->bits[i] = (current >> 1) | (remainder ? 0x80000000 : 0);
+        remainder = (current & 1);
+    }
+}
+
+// Безопасный инкремент decimal (96 бит с переносом)
+static int s21_inc_decimal(s21_decimal* value) {
+    if (!value) return 1;
+    for (int i = 0; i < 3; i++) {
+        if (++value->bits[i] != 0) return 0;  // нет переполнения разряда
+    }
+    return 1;  // переполнение 96 бит
+}
+
+
+int s21_is_big_equal(s21_big_decimal a, s21_big_decimal b) {
+    if (a.sign != b.sign || a.scale != b.scale) return 0;
+    for (int i = 0; i < 7; i++) {
+        if (a.bits[i] != b.bits[i]) return 0;
+    }
+    return 1;
+}
+
+int s21_round(s21_decimal value, s21_decimal* result) {
+    int status = OK;
+    
+    if (!result) return CALCULATION_ERROR;
+
+    s21_null_decimal(result);
+
+    if (s21_is_zero(value)) return status;
+    
+    int scale = s21_get_scale(&value);
+
+    printf(">>> ROUND START: value={%u,%u,%u}, scale=%d\n",
+           value.bits[0], value.bits[1], value.bits[2], scale);
+           
+    if(scale == 0) {
+        *result = value;
+        return OK;
+    }
+
+    int sign = s21_get_sign(&value);
+
+    // 1 получаем целую часть
+    s21_truncate(value, result);
+
+    printf(">>> AFTER TRUNCATE: result={%u,%u,%u}, scale=%d\n",
+           result->bits[0], result->bits[1], result->bits[2], s21_get_scale(result));
+
+    // 2 Вычисляем divisor = 10^scale и half = divisor / 2
+    s21_big_decimal divisor, half;
+    s21_pow10_big(scale, &divisor);
+    half = divisor; 
+    s21_big_div2(&half);
+
+    half.scale = scale; 
+    half.sign = 0;
+    
+    // 3 Конвертируем в big_decimal для вычисления дробной части
+    // Извлекаем дробную часть fractional = value % divisor
+    // Для этого: fractional = value - (truncated * divisor)
+    s21_big_decimal big_val = s21_decimal_to_big(&value);
+    s21_big_decimal big_truncated = s21_decimal_to_big(result);
+
+    // масштабируем big_truncated до масштаба big_val
+    int diff_scale = big_val.scale - big_truncated.scale;
+    for (int i = 0; i < diff_scale; i++) {
+        uint64_t carry = 0;
+        for (int j = 0; j < 7; j++) {
+            uint64_t prod = (uint64_t)big_truncated.bits[j] * 10 + carry;
+            big_truncated.bits[j] = (uint32_t)(prod & 0xFFFFFFFF);
+            carry = prod >> 32;
+        }
+        big_truncated.scale++;
+    }
+
+    // 4 Вычисляем дробную часть: fractional = value - truncated_scaled
+    s21_big_decimal fractional;
+
+     printf(">>> FRACTIONAL: {%u,%u,%u}, scale=%d | HALF: {%u,%u,%u}, scale=%d\n",
+           fractional.bits[0], fractional.bits[1], fractional.bits[2], fractional.scale,
+           half.bits[0], half.bits[1], half.bits[2], half.scale);
+    s21_big_sub(big_val, big_truncated, &fractional);  // fractional = value - truncated
+
+    fractional.scale = big_val.scale;
+    fractional.sign = 0;   
+
+    // банковское округление
+    if (s21_is_big_greater(fractional, half)) {
+        // > 0.5 → округляем "от нуля"
+        if (s21_inc_decimal(result) != 0) return CALCULATION_ERROR;
+    } else if (s21_is_big_equal(fractional, half)) {
+        // == 0.5 → округляем к ближайшему чётному
+        // Проверяем чётность всей 96-битной мантиссы (достаточно bits[0])
+        if (result->bits[0] % 2 != 0) {
+            if (s21_inc_decimal(result) != 0) return CALCULATION_ERROR;
+        }
+    }
+    
+    // fractional < half → округление вниз (ничего не делаем)
+
+    s21_set_scale_internal(result, 0);
+    if (sign){
+        result->bits[3] |= (1u << 31);
+    } else {
+        result->bits[3] &= ~(1u << 31);
+    }
+
+    printf(">>> FINAL RESULT: {%u,%u,%u}, scale=%d\n\n",
+           result->bits[0], result->bits[1], result->bits[2], s21_get_scale(result));
+    return status;
+}
+
+
