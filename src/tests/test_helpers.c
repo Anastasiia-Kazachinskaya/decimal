@@ -70,6 +70,23 @@ START_TEST(s21_null_decimal_already_zero){
 }
 END_TEST
 
+START_TEST(s21_null_decimal_test) {
+    s21_decimal d;
+    // Намеренно заполняем мусором
+    d.bits[0] = 0xDEADBEEF;
+    d.bits[1] = 0xCAFEBABE;
+    d.bits[2] = 0x12345678;
+    d.bits[3] = 0xFFFFFFFF;
+    
+    s21_null_decimal(&d);
+    
+    ck_assert_int_eq(d.bits[0], 0);
+    ck_assert_int_eq(d.bits[1], 0);
+    ck_assert_int_eq(d.bits[2], 0);
+    ck_assert_int_eq(d.bits[3], 0);
+}
+END_TEST
+
 
 // s21_get_bit tests section
 START_TEST(s21_get_bit_basic){
@@ -142,6 +159,7 @@ Suite* s21_helpers_suite(void) {
     tcase_add_test(tc_core, s21_is_zero_fourth_bit_is_digit);
     tcase_add_test(tc_core, s21_is_zero_all_zero);
     tcase_add_test(tc_core, s21_is_zero_multiple_nonzero);
+    tcase_add_test(tc_core, s21_null_decimal_test);
     tcase_add_test(tc_core, s21_null_decimal_basic);
     tcase_add_test(tc_core, s21_null_decimal_garbage);
     tcase_add_test(tc_core, s21_null_decimal_already_zero);

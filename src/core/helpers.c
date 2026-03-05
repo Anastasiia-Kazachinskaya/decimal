@@ -42,8 +42,18 @@ int s21_get_scale(s21_decimal* value) {
   return scale;
 }
 
-void s21_null_decimal(s21_decimal* value) { memset(value, 0, sizeof(*value)); }
-void s21_null_big_decimal(s21_big_decimal* value) { memset(value, 0, sizeof(*value)); }
+
+void s21_null_decimal(s21_decimal* value) {
+    if (value) {
+        memset(value, 0, sizeof(s21_decimal));
+    }
+}
+
+void s21_null_big_decimal(s21_big_decimal* value) {
+    if (value) {
+        memset(value, 0, sizeof(s21_big_decimal));
+    }
+}
 
 int s21_is_zero(s21_decimal value) {
   int result = 1;

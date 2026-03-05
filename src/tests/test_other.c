@@ -460,7 +460,6 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_round_1_5001);
     tcase_add_test(tc_core, s21_round_neg_1_5);
     
-
     
     suite_add_tcase(s, tc_core);
     return s;
