@@ -170,7 +170,9 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     }
     
     s21_set_scale_internal(result, 0);
-    result->bits[3] = sign << 31;
+    if (sign) {
+        result->bits[3] |= sign << 31;
+    }
 
     return status;
 }
