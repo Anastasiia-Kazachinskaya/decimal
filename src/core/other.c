@@ -25,18 +25,13 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
     result->bits[2] = value.bits[2];
 
     int divisions = scale > 28 ? 28 : scale;
-    for (int i = 0; i < divisions && !s21_is_zero(*result); i++) {
+    for (int i = 0; i < divisions; i++) {
         s21_divide_mantissa_by_10(result);
     }
 
-    if (s21_is_zero(*result)) {
-        sign = 0;
-    }
-
-    // Собираем bits[3]: знак + scale
-    result->bits[3] = 0;
-    if (sign) {
-        result->bits[3] |= 1u << 31;
+    result->bits[3] = sign << 31;
+    if (result->bits[0] == 0 && result->bits[1] == 0 && result->bits[2] == 0) {
+        result->bits[3] = 0;
     }
 
     return OK;
@@ -72,13 +67,14 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
 
 
 int s21_divide_mantissa_by_10(s21_decimal* value) {
+    if (!value) return 1;
+    
     uint32_t remainder = 0;
-
+    
     for (int i = 2; i >= 0; i--) {
-        uint64_t temp = ((uint64_t) remainder << 32) | value->bits[i];
+        uint64_t temp = ((uint64_t)remainder << 32) | (uint32_t)value->bits[i];
         value->bits[i] = (uint32_t)(temp / 10);
-        
-        remainder = temp % 10; 
+        remainder = (uint32_t)(temp % 10);
     }
     return remainder == 0 ? OK : 1;
 }
@@ -189,20 +185,21 @@ static void s21_pow10_big(int scale, s21_big_decimal* result) {
     for (int i = 0; i < scale; i++) {
         uint64_t carry = 0;
         for (int j = 0; j < 7; j++) {
-            uint64_t prod = (uint64_t) result->bits[j] * 10 + carry;
-            result->bits[j] = (uint32_t) (prod & 0xFFFFFFFF);
+            uint64_t prod = (uint64_t)result->bits[j] * 10ULL + carry;
+            result->bits[j] = (uint32_t)(prod & 0xFFFFFFFFULL);
             carry = prod >> 32;
         }
     }
 }
 
+
 // Вспомогательная: деление big_decimal на 2
 static void s21_big_div2(s21_big_decimal* value) {
     unsigned int remainder = 0;
     for (int i = 6; i >= 0; i--) {
-        unsigned int current = value->bits[i];
-        value->bits[i] = (current >> 1) | (remainder ? 0x80000000 : 0);
-        remainder = (current & 1);
+        uint32_t current = (uint32_t)value->bits[i];
+        value->bits[i] = (current >> 1) | (remainder ? 0x80000000u : 0);
+        remainder = (current & 1u);
     }
 }
 
@@ -235,9 +232,6 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     
     int scale = s21_get_scale(&value);
 
-    printf(">>> ROUND START: value={%u,%u,%u}, scale=%d\n",
-           value.bits[0], value.bits[1], value.bits[2], scale);
-           
     if(scale == 0) {
         *result = value;
         return OK;
@@ -247,9 +241,6 @@ int s21_round(s21_decimal value, s21_decimal* result) {
 
     // 1 получаем целую часть
     s21_truncate(value, result);
-
-    printf(">>> AFTER TRUNCATE: result={%u,%u,%u}, scale=%d\n",
-           result->bits[0], result->bits[1], result->bits[2], s21_get_scale(result));
 
     // 2 Вычисляем divisor = 10^scale и half = divisor / 2
     s21_big_decimal divisor, half;
@@ -271,8 +262,9 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     for (int i = 0; i < diff_scale; i++) {
         uint64_t carry = 0;
         for (int j = 0; j < 7; j++) {
-            uint64_t prod = (uint64_t)big_truncated.bits[j] * 10 + carry;
-            big_truncated.bits[j] = (uint32_t)(prod & 0xFFFFFFFF);
+            // ⚠️ Фикс: явное приведение
+            uint64_t prod = (uint64_t)big_truncated.bits[j] * 10ULL + carry;
+            big_truncated.bits[j] = (uint32_t)(prod & 0xFFFFFFFFULL);
             carry = prod >> 32;
         }
         big_truncated.scale++;
@@ -280,10 +272,8 @@ int s21_round(s21_decimal value, s21_decimal* result) {
 
     // 4 Вычисляем дробную часть: fractional = value - truncated_scaled
     s21_big_decimal fractional;
+    s21_null_big_decimal(&fractional);
 
-     printf(">>> FRACTIONAL: {%u,%u,%u}, scale=%d | HALF: {%u,%u,%u}, scale=%d\n",
-           fractional.bits[0], fractional.bits[1], fractional.bits[2], fractional.scale,
-           half.bits[0], half.bits[1], half.bits[2], half.scale);
     s21_big_sub(big_val, big_truncated, &fractional);  // fractional = value - truncated
 
     fractional.scale = big_val.scale;
@@ -310,8 +300,6 @@ int s21_round(s21_decimal value, s21_decimal* result) {
         result->bits[3] &= ~(1u << 31);
     }
 
-    printf(">>> FINAL RESULT: {%u,%u,%u}, scale=%d\n\n",
-           result->bits[0], result->bits[1], result->bits[2], s21_get_scale(result));
     return status;
 }
 
