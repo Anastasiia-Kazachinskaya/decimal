@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Werror -Wextra
-DECIMAL_SOURCES = $(wildcard core/decimal/*.c)
+DECIMAL_SOURCES = $(wildcard core/decimal/*.c core/big_decimal/*.c)
 HEADERS = s21_decimal.h headers/s21_big_decimal.h headers/s21_utils.h
 OBJECTS = $(DECIMAL_SOURCES:.c=.o)
 LIB = s21_decimal.a

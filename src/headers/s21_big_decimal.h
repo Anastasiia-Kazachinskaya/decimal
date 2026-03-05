@@ -4,19 +4,32 @@
 #include "../s21_decimal.h"
 
 typedef struct {
-  unsigned bits[7];
+  unsigned bits[8];
   int sign;
   int scale;
 } s21_big_decimal;
 
-s21_big_decimal s21_decimal_to_big(s21_decimal value);  // DO
-s21_decimal s21_big_to_decimal(s21_big_decimal value);  // TODO
+s21_big_decimal* s21_decimal_to_big(s21_decimal* value);  // DO
+s21_decimal s21_big_to_decimal(s21_big_decimal* value);  // TODO
+s21_big_decimal* s21_big_zero();
 
-int s21_set_sign(s21_big_decimal* val, s21_decimal* value);  // DO
+int get_scale(s21_big_decimal* value);
 
-int s21_shift_left(s21_big_decimal* value, int shift);   // TODO
-int s21_shift_right(s21_big_decimal* value, int shift);  // TODO
+void s21_div_ten(s21_big_decimal* value);
 
-void s21_round_big_decimal(s21_big_decimal* value, int target_scale);  // TODO
+void s21_mul_ten(s21_big_decimal* value);
+
+int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2,
+            s21_big_decimal* result);  // TODO
+int s21_big_decimal_sub(s21_big_decimal* value_1, s21_big_decimal* value_2,
+            s21_big_decimal* result);
+int s21_big_decimal_mul(s21_big_decimal* value_1, s21_big_decimal* value_2,
+            s21_big_decimal* result);
+int s21_big_decimal_div(s21_big_decimal* value_1, s21_big_decimal* value_2,
+            s21_big_decimal* result);
+
+int big_get_bit(s21_big_decimal* value, int index);
+
+int big_set_bit(s21_big_decimal* value, int index, char bit);
 
 #endif
