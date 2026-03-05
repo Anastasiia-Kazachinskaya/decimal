@@ -150,7 +150,9 @@ int s21_round(s21_decimal value, s21_decimal* result) {
         return OK;
     }
 
+    int sign = s21_get_sign(&value);
 
+    // получаем целую часть
     s21_truncate(value, result);
 
     uint32_t divisor = s21_pow10_unint32(scale); // 10^scale
@@ -158,7 +160,7 @@ int s21_round(s21_decimal value, s21_decimal* result) {
 
     uint32_t half = divisor / 2; 
 
-    int sign = s21_get_sign(&value);
+    
 
  
     if (fractional > half) {
