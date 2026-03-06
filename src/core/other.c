@@ -38,6 +38,17 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
     return OK;
 }
 
+static int s21_increment_mantissa(s21_decimal* value) {
+    if (!value) return CALCULATION_ERROR;
+
+    for (int i = 0; i < 3; i++) {
+        if (++value->bits[i] != 0) { // при переполнении bit[i] = 0, bits[1] = 1 etc.
+            return OK;
+        }
+    }
+
+    return CALCULATION_ERROR;
+}
 
 int s21_floor(s21_decimal value, s21_decimal* result) {
     int status = OK;
@@ -49,7 +60,7 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
     s21_null_decimal(result);
 
     if (s21_is_zero(value)) {
-        return 0;
+        return status;
     }
 
     int sign = s21_get_sign(&value);
@@ -58,7 +69,10 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
     s21_truncate(value, result);
     
     if (sign && scale && !s21_is_zero(*result)) {
-        result->bits[0] = result->bits[0] + 1;
+        if(s21_increment_mantissa(result) != OK) {
+            return CALCULATION_ERROR;
+        }
+
     }
 
     return status;
