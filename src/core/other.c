@@ -262,6 +262,15 @@ static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
 }
 
 
+static void s21_compute_rounding_treshold(int scale, s21_big_decimal* half) {
+    s21_big_decimal divisor;
+    s21_null_big_decimal(&divisor);
+    s21_pow10_big(scale, &divisor); // divisor = 10^scale
+    *half = divisor; // копируем
+    s21_big_div2(&half);  // half = divisor / 2
+    half->scale = scale;
+    half->sign = 0;
+}
 
 int s21_round(s21_decimal value, s21_decimal* result) {
     int status = OK;
@@ -285,13 +294,10 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     s21_truncate(value, result);
 
     // 2 Вычисляем divisor = 10^scale и half = divisor / 2
-    s21_big_decimal divisor, half;
-    s21_pow10_big(scale, &divisor); // divisor = 10^scale
-    half = divisor; 
-    s21_big_div2(&half);
+    s21_big_decimal half;
+    s21_null_big_decimal(&half);
+    s21_compute_rounding_treshold(scale, &half);
 
-    half.scale = scale; 
-    half.sign = 0;
     
     // 3 Подготовка чисел для вычисления дробной части
     // Извлекаем дробную часть fractional = value % divisor
