@@ -186,6 +186,8 @@ END_TEST
 
 
 // int s21_floor tests section
+
+
 // 1.234 → 1
 START_TEST(s21_floor_positive_fractional) {
     s21_decimal value, result;
@@ -424,6 +426,35 @@ START_TEST(s21_round_neg_1_5) {
 }
 END_TEST
 
+// Тест на перенос: -4294967295.0 → -4294967296
+// Проверяет, что при добавлении 1 к 0xFFFFFFFF происходит правильный carry в bits[1]
+START_TEST(s21_floor_negative_carry_bits0_to_bits1) {
+    s21_decimal value, result;
+    s21_null_decimal(&value);
+    s21_null_decimal(&result);
+    
+    // Мантисса: 42949672950 = 9 * 2^32 + 4294967286
+    // В шестнадцатеричном виде: 0x9FFFFFFF6
+    value.bits[0] = 0xFFFFFFF6;  // 4294967286
+    value.bits[1] = 9;           // 9
+    value.bits[2] = 0;
+    value.bits[3] = (1 << 16) | (1u << 31);
+    
+    int ret = s21_floor(value, &result);
+    
+    ck_assert_int_eq(ret, OK);
+    
+    // Ожидаем: -4294967296 = -0x100000000
+    ck_assert_uint_eq(result.bits[0], 0);  // Перенос: было 0xFFFFFFFF, стало 0
+    ck_assert_uint_eq(result.bits[1], 1);  // Перенос: было 0, стало 1
+    ck_assert_uint_eq(result.bits[2], 0);
+    
+    ck_assert_int_eq(s21_get_scale(&result), 0);
+    ck_assert_int_eq(s21_get_sign(&result), 1);
+}
+END_TEST
+
+
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
     TCase *tc_core = tcase_create("Core");
@@ -437,6 +468,7 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_truncate_normal_positive);
     tcase_add_test(tc_core, s21_truncate_normal_negative);
     tcase_add_test(tc_core, s21_truncate_scale_28_max);
+    
 
     tcase_add_test(tc_core, s21_divide_mantissa_by_10_zero_bit);
     tcase_add_test(tc_core, s21_divide_mantissa_remainder);
@@ -447,6 +479,8 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_floor_negative_integer);
     tcase_add_test(tc_core, s21_floor_zero_negative);
     tcase_add_test(tc_core, s21_floor_negative_near_zero);
+    tcase_add_test(tc_core, s21_floor_negative_carry_bits0_to_bits1);
+
 
     tcase_add_test(tc_core, s21_round_1_5_up);
     tcase_add_test(tc_core, s21_round_2_5_stay);
