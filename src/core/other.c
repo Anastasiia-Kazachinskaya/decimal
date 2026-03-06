@@ -261,64 +261,58 @@ static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
     return 0;
 }
 
-
+// вычисляет порог округления 10^scale / 2
 static void s21_compute_rounding_treshold(int scale, s21_big_decimal* half) {
     s21_big_decimal divisor;
     s21_null_big_decimal(&divisor);
     s21_pow10_big(scale, &divisor); // divisor = 10^scale
     *half = divisor; // копируем
-    s21_big_div2(&half);  // half = divisor / 2
+    s21_big_div2(half);  // half = divisor / 2
     half->scale = scale;
     half->sign = 0;
 }
+
+static int s21_compute_fractional_big(s21_decimal original, s21_decimal truncated, s21_big_decimal* fractional) {
+        s21_big_decimal big_orig = s21_decimal_to_big(&original); // исходное число
+        s21_big_decimal big_truncated = s21_decimal_to_big(&truncated); // целая часть
+
+        if(s21_scale_normalize_big_to(&big_truncated, big_orig.scale)) return 1;
+
+        // fractional = original - truncated
+        s21_null_big_decimal(fractional);
+        s21_big_sub(big_orig, big_truncated, fractional);
+
+        fractional->scale = big_orig.scale;
+        fractional->sign = 0;   // дробная часть всегда положительная
+        return 0;
+    }
 
 int s21_round(s21_decimal value, s21_decimal* result) {
     int status = OK;
 
     if (!result) return CALCULATION_ERROR;
-
     s21_null_decimal(result);
-
     if (s21_is_zero(value)) return OK;
-    
     int scale = s21_get_scale(&value);
     // если число целое..
     if(scale == 0) {
         *result = value;
         return OK;
     }
-
     int sign = s21_get_sign(&value);
 
     // 1 получаем целую часть
     s21_truncate(value, result);
 
-    // 2 Вычисляем divisor = 10^scale и half = divisor / 2
+    // 2 Вычисляем порог округления
     s21_big_decimal half;
     s21_null_big_decimal(&half);
     s21_compute_rounding_treshold(scale, &half);
-
     
-    // 3 Подготовка чисел для вычисления дробной части
-    // Извлекаем дробную часть fractional = value % divisor
-    // fractional = value - (truncated * divisor)
-    s21_big_decimal big_value = s21_decimal_to_big(&value); // исходное число
-    s21_big_decimal big_truncated = s21_decimal_to_big(result); // целая часть
-
-    // нормализуем big_truncated до масштаба big_val
-    int diff_scale = big_value.scale - big_truncated.scale;
-    for (int i = 0; i < diff_scale; i++) {
-        if (s21_scale_normalize_big_to(&big_truncated, big_value.scale)) return CALCULATION_ERROR;
-    }
-
-    // 4 Вычисляем дробную часть: fractional = value - truncated_scaled
+    // 3 Вычисляем дробную часть
     s21_big_decimal fractional;
     s21_null_big_decimal(&fractional);
-
-    s21_big_sub(big_val, big_truncated, &fractional);  // fractional = value - truncated
-
-    fractional.scale = big_value.scale;
-    fractional.sign = 0;   
+    if(s21_compute_fractional_big(value, *result, &fractional)) return CALCULATION_ERROR;
 
     // банковское округление
     if (s21_is_big_greater(fractional, half)) {
