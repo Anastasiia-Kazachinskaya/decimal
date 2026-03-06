@@ -29,7 +29,8 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
         s21_divide_mantissa_by_10(result);
     }
 
-    result->bits[3] = sign << 31;
+
+    result->bits[3] = (sign << 31) | (0 << 16); 
     if (result->bits[0] == 0 && result->bits[1] == 0 && result->bits[2] == 0) {
         result->bits[3] = 0;
     }
