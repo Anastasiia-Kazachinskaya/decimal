@@ -202,9 +202,9 @@ static void s21_pow10_big(int scale, s21_big_decimal* result) {
     for (int i = 0; i < scale; i++) {
         uint64_t carry = 0;
         for (int j = 0; j < 7; j++) {
-            uint64_t prod = (uint64_t)result->bits[j] * 10ULL + carry;
+            uint64_t prod = (uint64_t)result->bits[j] * 10ULL + carry; // 10ULL (unsigned long long) 64 битное умножение
             result->bits[j] = (uint32_t)(prod & 0xFFFFFFFFULL);
-            carry = prod >> 32;
+            carry = prod >> 32; // получаем старшие биты через перенос
         }
     }
 }
@@ -238,17 +238,42 @@ int s21_is_big_equal(s21_big_decimal a, s21_big_decimal b) {
     return 1;
 }
 
+// Умножает big_decimal на 10, возвращает 0 при успехе, 1 при переполнении
+static int s21_multiply_big_by_10(s21_big_decimal* value) {
+    if (!value) return 1;
+    uint64_t carry = 0;
+    for (int j = 0; j < 7; j++) {
+        uint64_t prod = value->bits[j] * 10ULL + carry;
+        value->bits[j] = (uint32_t)(prod & 0xFFFFFFFFULL);
+        carry = prod >> 32;
+    }
+    if (carry) return 1; // переполнение 224 бит (28 scale)
+    value->scale++;
+    return 0;
+
+}
+
+static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
+    if (!val || target_scale < val->scale) return 1;
+    while (val->scale < target_scale) {
+        if (s21_multiply_big_by_10(val)) return 1;
+    }
+    return 0;
+}
+
+
+
 int s21_round(s21_decimal value, s21_decimal* result) {
     int status = OK;
-    
+
     if (!result) return CALCULATION_ERROR;
 
     s21_null_decimal(result);
 
-    if (s21_is_zero(value)) return status;
+    if (s21_is_zero(value)) return OK;
     
     int scale = s21_get_scale(&value);
-
+    // если число целое..
     if(scale == 0) {
         *result = value;
         return OK;
@@ -261,30 +286,23 @@ int s21_round(s21_decimal value, s21_decimal* result) {
 
     // 2 Вычисляем divisor = 10^scale и half = divisor / 2
     s21_big_decimal divisor, half;
-    s21_pow10_big(scale, &divisor);
+    s21_pow10_big(scale, &divisor); // divisor = 10^scale
     half = divisor; 
     s21_big_div2(&half);
 
     half.scale = scale; 
     half.sign = 0;
     
-    // 3 Конвертируем в big_decimal для вычисления дробной части
+    // 3 Подготовка чисел для вычисления дробной части
     // Извлекаем дробную часть fractional = value % divisor
-    // Для этого: fractional = value - (truncated * divisor)
-    s21_big_decimal big_val = s21_decimal_to_big(&value);
-    s21_big_decimal big_truncated = s21_decimal_to_big(result);
+    // fractional = value - (truncated * divisor)
+    s21_big_decimal big_value = s21_decimal_to_big(&value); // исходное число
+    s21_big_decimal big_truncated = s21_decimal_to_big(result); // целая часть
 
-    // масштабируем big_truncated до масштаба big_val
-    int diff_scale = big_val.scale - big_truncated.scale;
+    // нормализуем big_truncated до масштаба big_val
+    int diff_scale = big_value.scale - big_truncated.scale;
     for (int i = 0; i < diff_scale; i++) {
-        uint64_t carry = 0;
-        for (int j = 0; j < 7; j++) {
-            // ⚠️ Фикс: явное приведение
-            uint64_t prod = (uint64_t)big_truncated.bits[j] * 10ULL + carry;
-            big_truncated.bits[j] = (uint32_t)(prod & 0xFFFFFFFFULL);
-            carry = prod >> 32;
-        }
-        big_truncated.scale++;
+        if (s21_scale_normalize_big_to(&big_truncated, big_value.scale)) return CALCULATION_ERROR;
     }
 
     // 4 Вычисляем дробную часть: fractional = value - truncated_scaled
@@ -293,7 +311,7 @@ int s21_round(s21_decimal value, s21_decimal* result) {
 
     s21_big_sub(big_val, big_truncated, &fractional);  // fractional = value - truncated
 
-    fractional.scale = big_val.scale;
+    fractional.scale = big_value.scale;
     fractional.sign = 0;   
 
     // банковское округление
