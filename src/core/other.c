@@ -39,15 +39,16 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
 }
 
 static int s21_increment_mantissa(s21_decimal* value) {
+    int status = CALCULATION_ERROR;
     if (!value) return CALCULATION_ERROR;
 
     for (int i = 0; i < 3; i++) {
         if (++value->bits[i] != 0) { // при переполнении bit[i] = 0, bits[1] = 1 etc.
-            return OK;
+            status = OK;
+            break;
         }
     }
-
-    return CALCULATION_ERROR;
+    return status;
 }
 
 int s21_floor(s21_decimal value, s21_decimal* result) {
@@ -70,7 +71,7 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
         if (s21_increment_mantissa(result) != OK) {
             status = CALCULATION_ERROR;
         }
-        
+
     }
 
     return status;
