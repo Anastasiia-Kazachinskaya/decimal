@@ -2,54 +2,34 @@
 #include <stdio.h>
 #include "../headers/s21_helpers.h"
 
+#define S21_MAX_SCALE 28
 
 int s21_floor(s21_decimal value, s21_decimal* result);
 int s21_negate(s21_decimal value, s21_decimal* result);
 int s21_round(s21_decimal value, s21_decimal* result);
 int s21_truncate(s21_decimal value, s21_decimal* result);
+
 int s21_divide_mantissa_by_10(s21_decimal *dec);
+static int s21_increment_mantissa(s21_decimal* value);
+int s21_normalize_and_check_overflow(s21_big_decimal* value);
+static void s21_set_scale_internal(s21_decimal *value, int scale);
+static void s21_pow10_big(int scale, s21_big_decimal* result);
+static void s21_big_div2(s21_big_decimal* value);
+static int s21_inc_decimal(s21_decimal* value);
+int s21_is_big_equal(s21_big_decimal value_1, s21_big_decimal value_2);
+static int s21_multiply_big_by_10(s21_big_decimal* value);
+static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale);
+static void s21_compute_rounding_threshold(int scale, s21_big_decimal* half);
+static int s21_compute_fractional_big(
+    s21_decimal original,
+    s21_decimal truncated,
+    s21_big_decimal* fractional);
+static int s21_apply_bankers_rounding(
+    s21_decimal* result,
+    s21_big_decimal* fractional,
+    s21_big_decimal* half);
+static void s21_set_sign_internal(s21_decimal* result, int sign);
 
-int s21_truncate(s21_decimal value, s21_decimal* result) {
-    if (!result) {
-        return CALCULATION_ERROR;
-    }
-
-    s21_null_decimal(result);
-
-    int scale = s21_get_scale(&value);
-    int sign = s21_get_sign(&value);
-
-    // Копируем мантиссу
-    result->bits[0] = value.bits[0];
-    result->bits[1] = value.bits[1];
-    result->bits[2] = value.bits[2];
-
-    int divisions = scale > 28 ? 28 : scale;
-    for (int i = 0; i < divisions; i++) {
-        s21_divide_mantissa_by_10(result);
-    }
-
-
-    result->bits[3] = (sign << 31) | (0 << 16); 
-    if (result->bits[0] == 0 && result->bits[1] == 0 && result->bits[2] == 0) {
-        result->bits[3] = 0;
-    }
-
-    return OK;
-}
-
-static int s21_increment_mantissa(s21_decimal* value) {
-    int status = CALCULATION_ERROR;
-    if (!value) return CALCULATION_ERROR;
-
-    for (int i = 0; i < 3; i++) {
-        if (++value->bits[i] != 0) { // при переполнении bit[i] = 0, bits[1] = 1 etc.
-            status = OK;
-            break;
-        }
-    }
-    return status;
-}
 
 int s21_floor(s21_decimal value, s21_decimal* result) {
     int status = OK;
@@ -77,8 +57,72 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
     return status;
 }
 
+int s21_round(s21_decimal value, s21_decimal* result) {
+    int status = OK;
+
+    if (!result) return CALCULATION_ERROR;
+
+    s21_null_decimal(result);
+
+    if (s21_is_zero(value)) return status;
+
+    int scale = s21_get_scale(&value);
+    if (scale == 0) {
+        *result = value;
+        return status;
+    }
+
+    int sign = s21_get_sign(&value);
+
+    // 1 получаем целую часть
+    s21_truncate(value, result);
+
+    // 2 Вычисляем порог округления 10^scale / 2
+    s21_big_decimal half;
+    s21_null_big_decimal(&half);
+    s21_compute_rounding_threshold(scale, &half);
+    
+    // 3 Вычисляем дробную часть
+    s21_big_decimal fractional;
+    s21_null_big_decimal(&fractional);
+    if(s21_compute_fractional_big(value, *result, &fractional) != OK) return CALCULATION_ERROR;
+
+    if (s21_apply_bankers_rounding(result, &fractional, &half) != OK) return CALCULATION_ERROR;
+    
+    s21_set_scale_internal(result, 0);
+    s21_set_sign_internal(result, sign);
+
+    return status;
+}
+
+int s21_truncate(s21_decimal value, s21_decimal* result) {
+    if (!result) {
+        return CALCULATION_ERROR;
+    }
+
+    s21_null_decimal(result);
+
+    int scale = s21_get_scale(&value);
+    int sign = s21_get_sign(&value);
+
+    // Копируем мантиссу
+    result->bits[0] = value.bits[0];
+    result->bits[1] = value.bits[1];
+    result->bits[2] = value.bits[2];
+
+    int divisions = scale > S21_MAX_SCALE ? S21_MAX_SCALE : scale;
+    for (int i = 0; i < divisions; i++) {
+        s21_divide_mantissa_by_10(result);
+    }
 
 
+    result->bits[3] = (sign << 31) | (0 << 16); 
+    if (result->bits[0] == 0 && result->bits[1] == 0 && result->bits[2] == 0) {
+        result->bits[3] = 0;
+    }
+
+    return OK;
+}
 
 int s21_divide_mantissa_by_10(s21_decimal* value) {
     int status = OK;
@@ -98,6 +142,20 @@ int s21_divide_mantissa_by_10(s21_decimal* value) {
     
     return status;
 }
+
+static int s21_increment_mantissa(s21_decimal* value) {
+    int status = CALCULATION_ERROR;
+    if (!value) return CALCULATION_ERROR;
+
+    for (int i = 0; i < 3; i++) {
+        if (++value->bits[i] != 0) { // при переполнении bit[i] = 0, bits[1] = 1 etc.
+            status = OK;
+            break;
+        }
+    }
+    return status;
+}
+
 
 
 int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2) {
@@ -189,10 +247,10 @@ static int s21_inc_decimal(s21_decimal* value) {
 }
 
 
-int s21_is_big_equal(s21_big_decimal a, s21_big_decimal b) {
-    if (a.sign != b.sign || a.scale != b.scale) return 0;
+int s21_is_big_equal(s21_big_decimal value_1, s21_big_decimal value_2) {
+    if (value_1.sign != value_2.sign || value_1.scale != value_2.scale) return 0;
     for (int i = 0; i < 7; i++) {
-        if (a.bits[i] != b.bits[i]) return 0;
+        if (value_1.bits[i] != value_2.bits[i]) return 0;
     }
     return 1;
 }
@@ -295,44 +353,4 @@ static void s21_set_sign_internal(s21_decimal* result, int sign) {
     }
 
 }
-
-
-int s21_round(s21_decimal value, s21_decimal* result) {
-    int status = OK;
-
-    if (!result) return CALCULATION_ERROR;
-
-    s21_null_decimal(result);
-
-    if (s21_is_zero(value)) return status;
-
-    int scale = s21_get_scale(&value);
-    if (scale == 0) {
-        *result = value;
-        return status;
-    }
-
-    int sign = s21_get_sign(&value);
-
-    // 1 получаем целую часть
-    s21_truncate(value, result);
-
-    // 2 Вычисляем порог округления 10^scale / 2
-    s21_big_decimal half;
-    s21_null_big_decimal(&half);
-    s21_compute_rounding_threshold(scale, &half);
-    
-    // 3 Вычисляем дробную часть
-    s21_big_decimal fractional;
-    s21_null_big_decimal(&fractional);
-    if(s21_compute_fractional_big(value, *result, &fractional) != OK) return CALCULATION_ERROR;
-
-    if (s21_apply_bankers_rounding(result, &fractional, &half) != OK) return CALCULATION_ERROR;
-    
-    s21_set_scale_internal(result, 0);
-    s21_set_sign_internal(result, sign);
-
-    return status;
-}
-
 
