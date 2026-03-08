@@ -159,9 +159,23 @@ static int s21_increment_mantissa(s21_decimal* value) {
 
 
 int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2) {
-    (void) value_1;
-    (void) value_2;
-    return 0;
+    int status = OK;
+
+    if (!value_1 || !value_2) {
+        return CALCULATION_ERROR;
+    } 
+
+    int target_scale = (value_1->scale > value_2->scale) ? value_1->scale : value_2->scale;
+
+    if (s21_scale_normalize_big_to(value_1, target_scale) != OK) {
+        status = CALCULATION_ERROR;
+    }
+
+    if (s21_scale_normalize_big_to(value_2, target_scale) != OK) {
+        status = CALCULATION_ERROR;
+    }
+
+    return status;
 }
 
 
