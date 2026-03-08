@@ -269,20 +269,23 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     int status = OK;
 
     if (!result) return CALCULATION_ERROR;
+
     s21_null_decimal(result);
-    if (s21_is_zero(value)) return OK;
+
+    if (s21_is_zero(value)) return status;
+
     int scale = s21_get_scale(&value);
-    // если число целое..
-    if(scale == 0) {
+    if (scale == 0) {
         *result = value;
-        return OK;
+        return status;
     }
+
     int sign = s21_get_sign(&value);
 
     // 1 получаем целую часть
     s21_truncate(value, result);
 
-    // 2 Вычисляем порог округления
+    // 2 Вычисляем порог округления 10^scale / 2
     s21_big_decimal half;
     s21_null_big_decimal(&half);
     s21_compute_rounding_threshold(scale, &half);
@@ -290,11 +293,10 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     // 3 Вычисляем дробную часть
     s21_big_decimal fractional;
     s21_null_big_decimal(&fractional);
-    if(s21_compute_fractional_big(value, *result, &fractional)) return CALCULATION_ERROR;
+    if(s21_compute_fractional_big(value, *result, &fractional) != OK) return CALCULATION_ERROR;
 
-    if (s21_apply_bankers_rounding(result, &fractional, &half)) return CALCULATION_ERROR;
+    if (s21_apply_bankers_rounding(result, &fractional, &half) != OK) return CALCULATION_ERROR;
     
-
     s21_set_scale_internal(result, 0);
     s21_set_sign_internal(result, sign);
 
