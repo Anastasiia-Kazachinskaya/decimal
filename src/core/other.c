@@ -182,23 +182,28 @@ int s21_is_big_equal(s21_big_decimal a, s21_big_decimal b) {
 
 // Умножает big_decimal на 10, возвращает 0 при успехе, 1 при переполнении
 static int s21_multiply_big_by_10(s21_big_decimal* value) {
-    if (!value) return 1;
+    int status = OK;
+
+    if (!value) return CALCULATION_ERROR;
     uint64_t carry = 0;
     for (int j = 0; j < 7; j++) {
         uint64_t prod = value->bits[j] * 10ULL + carry;
         value->bits[j] = (uint32_t)(prod & 0xFFFFFFFFULL);
         carry = prod >> 32;
     }
-    if (carry) return 1; // переполнение 224 бит (28 scale)
-    value->scale++;
-    return 0;
+    if (carry) {
+        status = CALCULATION_ERROR;  // переполнение 224 бит (28 scale)
+    } else {
+         value->scale++;
+    }
 
+    return status;
 }
 
 static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
     int status = OK;
 
-    if (!val || target_scale < val->scale) return ERROR;
+    if (!val || target_scale < val->scale) return CALCULATION_ERROR;
     while (val->scale < target_scale) {
         if (s21_multiply_big_by_10(val) != OK) {
             break;
