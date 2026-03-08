@@ -273,19 +273,44 @@ static void s21_compute_rounding_treshold(int scale, s21_big_decimal* half) {
 }
 
 static int s21_compute_fractional_big(s21_decimal original, s21_decimal truncated, s21_big_decimal* fractional) {
-        s21_big_decimal big_orig = s21_decimal_to_big(&original); // исходное число
-        s21_big_decimal big_truncated = s21_decimal_to_big(&truncated); // целая часть
+    s21_big_decimal big_orig = s21_decimal_to_big(&original); // исходное число
+    s21_big_decimal big_truncated = s21_decimal_to_big(&truncated); // целая часть
 
-        if(s21_scale_normalize_big_to(&big_truncated, big_orig.scale)) return 1;
+    if(s21_scale_normalize_big_to(&big_truncated, big_orig.scale)) return 1;
 
-        // fractional = original - truncated
-        s21_null_big_decimal(fractional);
-        s21_big_sub(big_orig, big_truncated, fractional);
+    // fractional = original - truncated
+    s21_null_big_decimal(fractional);
+    s21_big_sub(big_orig, big_truncated, fractional);
 
-        fractional->scale = big_orig.scale;
-        fractional->sign = 0;   // дробная часть всегда положительная
-        return 0;
+    fractional->scale = big_orig.scale;
+    fractional->sign = 0;   // дробная часть всегда положительная
+    return 0;
     }
+
+static int s21_apply_bankers_rounding(
+    s21_decimal* result,
+    s21_big_decimal* fractional,
+    s21_big_decimal* half) {
+    int status = OK;
+    // банковское округление
+    if (s21_is_big_greater(*fractional, *half)) {
+        // > 0.5 → округляем "от нуля"
+        if (s21_inc_decimal(result) != 0) {
+            status = CALCULATION_ERROR;
+        }
+    } else if (s21_is_big_equal(*fractional, *half)) {
+        // == 0.5 → округляем к ближайшему чётному
+        // Проверяем чётность всей 96-битной мантиссы (достаточно bits[0])
+        if (result->bits[0] % 2 != 0) {
+            if (s21_inc_decimal(result) != 0) {
+                status = CALCULATION_ERROR;
+            }
+        }
+    }
+
+    // fractional < half → округление вниз (ничего не делаем)
+    return status;
+}
 
 int s21_round(s21_decimal value, s21_decimal* result) {
     int status = OK;
@@ -314,19 +339,8 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     s21_null_big_decimal(&fractional);
     if(s21_compute_fractional_big(value, *result, &fractional)) return CALCULATION_ERROR;
 
-    // банковское округление
-    if (s21_is_big_greater(fractional, half)) {
-        // > 0.5 → округляем "от нуля"
-        if (s21_inc_decimal(result) != 0) return CALCULATION_ERROR;
-    } else if (s21_is_big_equal(fractional, half)) {
-        // == 0.5 → округляем к ближайшему чётному
-        // Проверяем чётность всей 96-битной мантиссы (достаточно bits[0])
-        if (result->bits[0] % 2 != 0) {
-            if (s21_inc_decimal(result) != 0) return CALCULATION_ERROR;
-        }
-    }
+    if (s21_apply_bankers_rounding(result, &fractional, &half)) return CALCULATION_ERROR;
     
-    // fractional < half → округление вниз (ничего не делаем)
 
     s21_set_scale_internal(result, 0);
     if (sign){
