@@ -312,6 +312,17 @@ static int s21_apply_bankers_rounding(
     return status;
 }
 
+
+static void s21_set_sign_internal(s21_decimal* result, int sign) {
+    if (sign){
+        result->bits[3] |= (1u << 31);
+    } else {
+        result->bits[3] &= ~(1u << 31);
+    }
+
+}
+
+
 int s21_round(s21_decimal value, s21_decimal* result) {
     int status = OK;
 
@@ -343,11 +354,7 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     
 
     s21_set_scale_internal(result, 0);
-    if (sign){
-        result->bits[3] |= (1u << 31);
-    } else {
-        result->bits[3] &= ~(1u << 31);
-    }
+    s21_set_sign_internal(result, sign);
 
     return status;
 }
