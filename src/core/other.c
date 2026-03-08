@@ -140,57 +140,7 @@ static void s21_set_scale_internal(s21_decimal *value, int scale) {
     }
     value->bits[3] = (value->bits[3] & ~(0xFF << 16)) | (scale << 16);
 }
-/*
-int s21_round(s21_decimal value, s21_decimal* result) {
-    int status = OK;
-    
-    if (!result) {
-        return CALCULATION_ERROR;
-    }
 
-    s21_null_decimal(result);
-
-    if (s21_is_zero(value)) {
-        return 0;
-    }
-    
-    int scale = s21_get_scale(&value);
-
-    if(scale == 0) {
-        *result = value;
-        return OK;
-    }
-
-    int sign = s21_get_sign(&value);
-
-    // получаем целую часть
-    s21_truncate(value, result);
-
-    uint32_t divisor = s21_pow10_unint32(scale); // 10^scale
-    uint32_t fractional = value.bits[0] % divisor;
-
-    uint32_t half = divisor / 2; 
-
-    
-
- 
-    if (fractional > half) {
-        result->bits[0] += 1;
-    } else if (fractional == half) {
-        if (result->bits[0] % 2 != 0) {
-            result->bits[0] += 1;
-        }
-    }
-    
-    s21_set_scale_internal(result, 0);
-    if (sign) {
-        result->bits[3] |= sign << 31;
-    }
-
-    return status;
-}
-
-*/
 
 // вычисляем divisor (10^scale) , где scale 0-28
 static void s21_pow10_big(int scale, s21_big_decimal* result) {
@@ -215,7 +165,7 @@ static void s21_big_div2(s21_big_decimal* value) {
     unsigned int remainder = 0;
     for (int i = 6; i >= 0; i--) {
         uint32_t current = (uint32_t)value->bits[i];
-        value->bits[i] = (current >> 1) | (remainder ? 0x80000000u : 0);
+        value->bits[i] = (current >> 1) | (remainder ? 0x80000000u : 0); // 0x80000000u - 32-битное число с установленным старшим битом = 2^31
         remainder = (current & 1u);
     }
 }
