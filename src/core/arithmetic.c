@@ -42,7 +42,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
         }
     }
     
-    if (s21_get_overflow(&res_big) == 1) {
+    if (s21_normalize_and_check_overflow(&res_big) == 1) {
         return ERROR;
     }
     s21_big_to_decimal(&res_big, result);

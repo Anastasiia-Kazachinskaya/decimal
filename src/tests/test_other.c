@@ -7,8 +7,8 @@
 #include "../s21_decimal.h"
 #include "../headers/s21_helpers.h"
 
-// s21_get_overflow tests section
-START_TEST(s21_get_overflow_no_overflow) {
+// s21_normalize_and_check_overflow tests section
+START_TEST(s21_normalize_and_check_overflow_no_overflow) {
     
     s21_big_decimal value;
     s21_null_big_decimal(&value);
@@ -16,7 +16,7 @@ START_TEST(s21_get_overflow_no_overflow) {
     // bits[1..6] = 0
     
     
-    int result = s21_get_overflow(&value);
+    int result = s21_normalize_and_check_overflow(&value);
     ck_assert_int_eq(result, 0);
 }
 END_TEST
@@ -458,7 +458,7 @@ END_TEST
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
     TCase *tc_core = tcase_create("Core");
-    tcase_add_test(tc_core, s21_get_overflow_no_overflow);
+    tcase_add_test(tc_core, s21_normalize_and_check_overflow_no_overflow);
     
     tcase_add_test(tc_core, s21_big_add_overflow_integration);
 
