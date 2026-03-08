@@ -53,9 +53,7 @@ static int s21_increment_mantissa(s21_decimal* value) {
 int s21_floor(s21_decimal value, s21_decimal* result) {
     int status = OK;
     
-    if (!result) {
-        return CALCULATION_ERROR;
-    }
+    if (!result) return CALCULATION_ERROR;
 
     s21_null_decimal(result);
 
@@ -69,10 +67,10 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
     s21_truncate(value, result);
     
     if (sign && scale && !s21_is_zero(*result)) {
-        if(s21_increment_mantissa(result) != OK) {
-            return CALCULATION_ERROR;
+        if (s21_increment_mantissa(result) != OK) {
+            status = CALCULATION_ERROR;
         }
-
+        
     }
 
     return status;
