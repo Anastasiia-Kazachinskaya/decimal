@@ -164,11 +164,19 @@ static void s21_big_div2(s21_big_decimal* value) {
 
 // Безопасный инкремент decimal (96 бит с переносом)
 static int s21_inc_decimal(s21_decimal* value) {
-    if (!value) return 1;
-    for (int i = 0; i < 3; i++) {
-        if (++value->bits[i] != 0) return 0;  // нет переполнения разряда
+    int status = CALCULATION_ERROR;
+
+    if (!value) {
+        return status;
     }
-    return 1;  // переполнение 96 бит
+
+    for (int i = 0; i < 3; i++) {
+        if (++value->bits[i] != 0) {
+            status = OK;
+            break;
+        }
+    }
+    return status;
 }
 
 
