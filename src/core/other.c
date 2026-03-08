@@ -198,7 +198,7 @@ static int s21_multiply_big_by_10(s21_big_decimal* value) {
 static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
     int status = OK;
 
-    if (!val || target_scale < val->scale) return CALCULATION_ERROR;
+    if (!val || target_scale < val->scale) return ERROR;
     while (val->scale < target_scale) {
         if (s21_multiply_big_by_10(val) != OK) {
             break;
