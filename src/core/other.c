@@ -121,15 +121,7 @@ int s21_get_overflow(s21_big_decimal* value) {
     return OK; // 0
 }
 
-/*
-static uint32_t s21_pow10_unint32(int scale) {
-    uint32_t result = 1;
-    for (int i = 0; i < scale; i++) {
-        result *= 10;
-    }
-    return result;
-}
-*/
+
 static void s21_set_scale_internal(s21_decimal *value, int scale) {
     if (!value) return;
     if (scale < 0) {
