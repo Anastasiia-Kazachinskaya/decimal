@@ -204,7 +204,7 @@ static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
 }
 
 // вычисляет порог округления 10^scale / 2
-static void s21_compute_rounding_treshold(int scale, s21_big_decimal* half) {
+static void s21_compute_rounding_threshold(int scale, s21_big_decimal* half) {
     s21_big_decimal divisor;
     s21_null_big_decimal(&divisor);
     s21_pow10_big(scale, &divisor); // divisor = 10^scale
@@ -285,7 +285,7 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     // 2 Вычисляем порог округления
     s21_big_decimal half;
     s21_null_big_decimal(&half);
-    s21_compute_rounding_treshold(scale, &half);
+    s21_compute_rounding_threshold(scale, &half);
     
     // 3 Вычисляем дробную часть
     s21_big_decimal fractional;
