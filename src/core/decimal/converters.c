@@ -1,4 +1,5 @@
-#include "../headers/s21_helpers.h"
+#include "../../headers/s21_utils.h"
+#include "../../s21_decimal.h"
 
 int s21_from_decimal_to_float(s21_decimal src, float* dst) {
   if (s21_is_zero(src)) *dst = 0.0f;
@@ -58,7 +59,8 @@ int s21_from_int_to_decimal(int src, s21_decimal* dst) {
   return res;
 }
 
-s21_big_decimal s21_decimal_to_big(s21_decimal* value) {
+
+s21_big_decimal s21_decimal_to_big_internal(s21_decimal* value) {
     s21_big_decimal res = {0};
     if (value) {
     for (int i = 0; i < 3; ++i) res.bits[i] = value->bits[i];
@@ -69,7 +71,7 @@ s21_big_decimal s21_decimal_to_big(s21_decimal* value) {
 }
 
 
-s21_decimal s21_big_to_decimal(s21_big_decimal* big_result, s21_decimal* result) {
+s21_decimal s21_big_to_decimal_internal(s21_big_decimal* big_result, s21_decimal* result) {
   s21_null_decimal(result);
   result->bits[0] = big_result->bits[0];
   if(big_result->sign) {

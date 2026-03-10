@@ -1,12 +1,6 @@
-#include "../headers/s21_helpers.h"
+#include "../headers/s21_big_decimal.h"
 
-int s21_is_equal(s21_decimal, s21_decimal);
-int s21_is_not_equal(s21_decimal, s21_decimal);
-int s21_is_greater(s21_decimal, s21_decimal);
-int s21_is_greater_or_equal(s21_decimal, s21_decimal);
-int s21_is_less(s21_decimal, s21_decimal);
-int s21_is_less_or_equal(s21_decimal, s21_decimal);
-
+#include "../headers/s21_utils.h"
 
 int s21_is_big_less(s21_big_decimal value1, s21_big_decimal value2) {
     int result = 0;
@@ -39,4 +33,3 @@ int s21_is_big_greater(s21_big_decimal value1, s21_big_decimal value2) {
 
     return result;
 }
-

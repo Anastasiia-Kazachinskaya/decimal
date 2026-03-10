@@ -1,3 +1,5 @@
+#include "../s21_decimal.h"
+
 #include <check.h>
 #include <limits.h>
 #include <math.h>
@@ -5,7 +7,7 @@
 #include <stdlib.h>
 
 #include "../s21_decimal.h"
-#include "../headers/s21_helpers.h"
+#include "../headers/s21_utils.h"
 
 // s21_sub tests section
 START_TEST(s21_sub_positive_minus_zero){
@@ -13,8 +15,8 @@ START_TEST(s21_sub_positive_minus_zero){
 
     s21_decimal value_1 = {{5, 0, 0, 0}};
     s21_decimal value_2 = {{0, 0, 0, 0}};
-    s21_big_decimal five = s21_decimal_to_big(&value_1);
-    s21_big_decimal zero = s21_decimal_to_big(&value_2);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal zero = s21_decimal_to_big_internal(&value_2);
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
@@ -38,8 +40,8 @@ START_TEST(s21_sub_positive_minus_lower_positive){
 
     s21_decimal value_1 = {{5, 0, 0, 0}};
     s21_decimal value_2 = {{3, 0, 0, 0}};
-    s21_big_decimal five = s21_decimal_to_big(&value_1);
-    s21_big_decimal three = s21_decimal_to_big(&value_2);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal three = s21_decimal_to_big_internal(&value_2);
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
@@ -59,8 +61,8 @@ START_TEST(s21_sub_positive_minus_larger_positive){
 
     s21_decimal value_1 = {{3, 0, 0, 0}};
     s21_decimal value_2 = {{5, 0, 0, 0}};
-    s21_big_decimal five = s21_decimal_to_big(&value_1);
-    s21_big_decimal three = s21_decimal_to_big(&value_2);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal three = s21_decimal_to_big_internal(&value_2);
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
@@ -80,8 +82,8 @@ START_TEST(s21_sub_modules_two_minus_five){
 
     s21_decimal value_1 = {{2, 0, 0, 0}};
     s21_decimal value_2 = {{5, 0, 0, 0}};
-    s21_big_decimal two = s21_decimal_to_big(&value_1);
-    s21_big_decimal five = s21_decimal_to_big(&value_2);
+    s21_big_decimal two = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_2);
     two.sign = 1;
     five.sign = 1;
     s21_big_decimal big_result;
@@ -103,8 +105,8 @@ START_TEST(s21_sub_modules_five_minus_two){
 
     s21_decimal value_1 = {{5, 0, 0, 0}};
     s21_decimal value_2 = {{2, 0, 0, 0}};
-    s21_big_decimal five = s21_decimal_to_big(&value_1);
-    s21_big_decimal two = s21_decimal_to_big(&value_2);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal two = s21_decimal_to_big_internal(&value_2);
     five.sign = 1;
     two.sign = 1;
     s21_big_decimal big_result;
@@ -127,8 +129,8 @@ START_TEST(s21_sub_modules_five_minus_five){
 
     s21_decimal value_1 = {{5, 0, 0, 0}};
     s21_decimal value_2 = {{5, 0, 0, 0}};
-    s21_big_decimal five = s21_decimal_to_big(&value_1);
-    s21_big_decimal five2 = s21_decimal_to_big(&value_2);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal five2 = s21_decimal_to_big_internal(&value_2);
     five.sign = 1;
     five2.sign = 1;
     s21_big_decimal big_result;
@@ -152,8 +154,8 @@ START_TEST(s21_sub_negative_minus_positive){
 
     s21_decimal value_1 = {{2, 0, 0, 0}};
     s21_decimal value_2 = {{5, 0, 0, 0}};
-    s21_big_decimal two = s21_decimal_to_big(&value_1);
-    s21_big_decimal five = s21_decimal_to_big(&value_2);
+    s21_big_decimal two = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_2);
     two.sign = 1;
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
@@ -176,8 +178,8 @@ START_TEST(s21_sub_positive_minus_negative){
 
     s21_decimal value_1 = {{2, 0, 0, 0}};
     s21_decimal value_2 = {{5, 0, 0, 0}};
-    s21_big_decimal two = s21_decimal_to_big(&value_1);
-    s21_big_decimal five = s21_decimal_to_big(&value_2);
+    s21_big_decimal two = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_2);
     five.sign = 1;
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
@@ -212,4 +214,3 @@ Suite *s21_arithmetic_suite(void) {
     suite_add_tcase(s, tc_core);
     return s;
 }
-

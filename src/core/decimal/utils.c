@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../headers/s21_helpers.h"
+#include "../../s21_decimal.h"
+#include "../../headers/s21_utils.h"
 
-#define S21_BIG_DECIMAL_DATA_BITS 3
 
 // получить значение (0 или 1) конкретного бита по его индексу (0-95)
 int s21_get_bit(s21_decimal value, int bit_index) {
@@ -42,7 +42,6 @@ int s21_get_scale(s21_decimal* value) {
   return scale;
 }
 
-
 void s21_null_decimal(s21_decimal* value) {
     if (value) {
         memset(value, 0, sizeof(s21_decimal));
@@ -78,8 +77,17 @@ int s21_get_sign(s21_decimal* value) {
   return sign;
 }
 
-// при конвертации big_decimal в decimal
-int s21_set_sign(s21_big_decimal* val, s21_decimal* value) {
-  if (val->sign == 1) value->bits[3] |= 1u << 31;
-  return 0;
+
+s21_decimal s21_get_zero(){
+  s21_decimal zero;
+  char* ptr = (char*)&zero;
+  for (size_t i = 0; i < sizeof(s21_decimal); i++) {
+    ptr[i] = 0;
+  }
+  return zero;
 }
+
+void s21_set_sign(char val, s21_decimal* value) {
+  value->bits[3] |= val << 31;
+}
+

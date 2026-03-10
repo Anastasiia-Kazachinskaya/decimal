@@ -1,8 +1,10 @@
+#include "../s21_decimal.h"
+
 #include <check.h>
 #include <stdlib.h> 
-#include "../headers/s21_helpers.h"
 
-Suite* s21_helpers_suite(void);
+
+Suite* s21_utils_suite(void);
 Suite *s21_arithmetic_suite(void);
 Suite *s21_comparison_suite(void);
 Suite *s21_other_suite(void);
@@ -11,7 +13,7 @@ int main(void) {
     int failed = 0;
     
     Suite* suites[] = {
-        s21_helpers_suite(),
+        s21_utils_suite(),
         s21_arithmetic_suite(),
         s21_comparison_suite(),
         s21_other_suite(),

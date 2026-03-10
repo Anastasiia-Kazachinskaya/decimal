@@ -1,6 +1,9 @@
+
 #include <stdint.h>
 #include <stdio.h>
-#include "../headers/s21_helpers.h"
+#include "../headers/s21_utils.h"
+
+#include "../../s21_decimal.h"
 
 #define S21_MAX_SCALE 28
 
@@ -314,8 +317,8 @@ static void s21_compute_rounding_threshold(int scale, s21_big_decimal* half) {
 
 static int s21_compute_fractional_big(s21_decimal original, s21_decimal truncated, s21_big_decimal* fractional) {
     int status = OK;
-    s21_big_decimal big_orig = s21_decimal_to_big(&original); // исходное число
-    s21_big_decimal big_truncated = s21_decimal_to_big(&truncated); // целая часть
+    s21_big_decimal big_orig = s21_decimal_to_big_internal(&original); // исходное число
+    s21_big_decimal big_truncated = s21_decimal_to_big_internal(&truncated); // целая часть
 
     if(s21_scale_normalize_big_to(&big_truncated, big_orig.scale) != OK) {
         status = CALCULATION_ERROR;

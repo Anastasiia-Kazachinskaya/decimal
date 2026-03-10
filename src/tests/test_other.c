@@ -1,3 +1,5 @@
+#include "../s21_decimal.h"
+
 #include <check.h>
 #include <limits.h>
 #include <math.h>

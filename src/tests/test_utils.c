@@ -1,5 +1,7 @@
+#include "../s21_decimal.h"
+#include "../headers/s21_utils.h"
+
 #include <check.h>
-#include "../headers/s21_helpers.h"
 
 
 // s21_is_zero tests section
@@ -150,8 +152,8 @@ START_TEST(s21_set_sign_case_big_decimal_convert_to_decimal){
 END_TEST
 
 
-Suite* s21_helpers_suite(void) {
-    Suite *s = suite_create("helpers");
+Suite* s21_utils_suite(void) {
+    Suite *s = suite_create("utils");
     TCase *tc_core = tcase_create("Core");
     tcase_add_test(tc_core, s21_is_zero_first_bit_is_digit);
     tcase_add_test(tc_core, s21_is_zero_second_bit_is_digit);

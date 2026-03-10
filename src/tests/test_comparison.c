@@ -1,3 +1,5 @@
+#include "../s21_decimal.h"
+
 #include <check.h>
 #include <limits.h>
 #include <math.h>
@@ -5,14 +7,14 @@
 #include <stdlib.h>
 
 #include "../s21_decimal.h"
-#include "../headers/s21_helpers.h"
+#include "../headers/s21_utils.h"
 
 
 START_TEST(s21_is_big_greater_five_minus_zero) {
     s21_decimal value_1 = {{5, 0, 0, 0}};
     s21_decimal value_2 = {{0, 0, 0, 0}};
-    s21_big_decimal five = s21_decimal_to_big(&value_1);
-    s21_big_decimal zero = s21_decimal_to_big(&value_2);
+    s21_big_decimal five = s21_decimal_to_big_internal(&value_1);
+    s21_big_decimal zero = s21_decimal_to_big_internal(&value_2);
 
     int result = s21_is_big_greater(five, zero);
     ck_assert_int_eq(result, 1); 
