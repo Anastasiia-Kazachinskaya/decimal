@@ -6,8 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../s21_decimal.h"
+#include "../headers/s21_big_decimal.h"
 #include "../headers/s21_utils.h"
+
+
 
 // s21_sub tests section
 START_TEST(s21_sub_positive_minus_zero){

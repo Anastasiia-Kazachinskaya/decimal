@@ -1,4 +1,5 @@
 #include "../../headers/s21_utils.h"
+#include "../../headers/s21_big_decimal.h"
 #include "../../s21_decimal.h"
 
 int s21_from_decimal_to_float(s21_decimal src, float* dst) {

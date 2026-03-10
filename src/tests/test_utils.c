@@ -1,5 +1,6 @@
 #include "../s21_decimal.h"
 #include "../headers/s21_utils.h"
+#include "../headers/s21_big_decimal.h"
 
 #include <check.h>
 
@@ -144,7 +145,7 @@ START_TEST(s21_set_sign_case_big_decimal_convert_to_decimal){
     val1.sign = 1;
     val2.bits[3] = 0;
 
-    s21_set_sign(&val1, &val2);
+    s21_set_sign(val1.sign, &val2);
     int result = s21_get_sign(&val2);
     ck_assert_int_eq(result, 1);
 

@@ -8,6 +8,7 @@
 
 #include "../s21_decimal.h"
 #include "../headers/s21_utils.h"
+#include "../headers/s21_big_decimal.h"
 
 
 START_TEST(s21_is_big_greater_five_minus_zero) {

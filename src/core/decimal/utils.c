@@ -3,6 +3,7 @@
 
 #include "../../s21_decimal.h"
 #include "../../headers/s21_utils.h"
+#include "../../headers/s21_big_decimal.h"
 
 
 // получить значение (0 или 1) конкретного бита по его индексу (0-95)

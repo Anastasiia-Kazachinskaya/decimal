@@ -17,7 +17,8 @@ REPORT = coverage_report.details.html
 OS = $(shell uname -s)
 
 ifeq ($(OS), Darwin)
-    CHECK_FLAGS = $(shell pkg-config --cflags --libs check)
+    CHECK_CFLAGS = $(shell pkg-config --cflags check 2>/dev/null || echo "")
+    CHECK_LIBS = $(shell pkg-config --libs check 2>/dev/null || echo "-lcheck -lpthread -lm")
     OPEN_CMD = open
 else
     CHECK_CFLAGS = $(shell pkg-config --cflags check 2>/dev/null || echo "")

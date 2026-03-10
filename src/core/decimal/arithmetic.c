@@ -1,7 +1,7 @@
 #include "../../s21_decimal.h"
 #include "../../headers/s21_big_decimal.h"
 
-#include "../headers/s21_utils.h"
+#include "../../headers/s21_utils.h"
 
 #include <stdlib.h>
 #include <string.h>

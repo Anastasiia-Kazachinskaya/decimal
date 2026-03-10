@@ -1,6 +1,6 @@
-#include "../headers/s21_big_decimal.h"
+#include "../../headers/s21_big_decimal.h"
 
-#include "../headers/s21_utils.h"
+#include "../../headers/s21_utils.h"
 
 int s21_is_big_less(s21_big_decimal value1, s21_big_decimal value2) {
     int result = 0;

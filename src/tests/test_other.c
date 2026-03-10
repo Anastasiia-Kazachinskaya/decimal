@@ -7,7 +7,8 @@
 #include <stdlib.h>
 
 #include "../s21_decimal.h"
-#include "../headers/s21_helpers.h"
+#include "../headers/s21_utils.h"
+#include "../headers/s21_big_decimal.h"
 
 // s21_normalize_and_check_overflow tests section
 START_TEST(s21_normalize_and_check_overflow_no_overflow) {

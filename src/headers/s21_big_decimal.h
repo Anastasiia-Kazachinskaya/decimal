@@ -36,7 +36,7 @@ int big_get_bit(s21_big_decimal* value, int index);
 
 int big_set_bit(s21_big_decimal* value, int index, char bit);
 
-int s21_big_add_internal(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result);
-int s21_big_sub_internal(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result);
+int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result);
+int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result);
 
 #endif

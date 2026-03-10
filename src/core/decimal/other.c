@@ -1,7 +1,8 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include "../headers/s21_utils.h"
+#include "../../headers/s21_utils.h"
+#include "../../headers/s21_big_decimal.h"
 
 #include "../../s21_decimal.h"
 
@@ -31,7 +32,7 @@ static int s21_apply_bankers_rounding(
     s21_decimal* result,
     s21_big_decimal* fractional,
     s21_big_decimal* half);
-static void s21_set_sign_internal(s21_decimal* result, int sign);
+void s21_set_sign_internal(s21_decimal* result, int sign);
 
 
 int s21_floor(s21_decimal value, s21_decimal* result) {
@@ -362,7 +363,7 @@ static int s21_apply_bankers_rounding(
 }
 
 
-static void s21_set_sign_internal(s21_decimal* result, int sign) {
+void s21_set_sign_internal(s21_decimal* result, int sign) {
     if (sign){
         result->bits[3] |= (1u << 31);
     } else {

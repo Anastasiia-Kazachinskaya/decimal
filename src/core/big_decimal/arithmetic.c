@@ -1,7 +1,7 @@
 #include "../../headers/s21_big_decimal.h"
 
 #include <stdlib.h>
-
+/*
 int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2, s21_big_decimal* result){
   if (value_1 -> sign != value_2 -> sign){
     value_1 -> sign *= -1;
@@ -37,10 +37,10 @@ int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2, s21_
   
   return 0;
 }
+*/
 
 
-
-int s21_big_add_internal(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
+int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
     uint32_t carry = 0;
     
     // Складываем по словам с учётом переноса
@@ -58,7 +58,7 @@ int s21_big_add_internal(s21_big_decimal value_1, s21_big_decimal value_2, s21_b
     return OK;
 }
 
-int s21_big_sub_internal(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
+int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
     int32_t borrow = 0;
     
     for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
