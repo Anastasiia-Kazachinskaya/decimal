@@ -8,6 +8,7 @@ Suite* s21_utils_suite(void);
 Suite *s21_arithmetic_suite(void);
 Suite *s21_comparison_suite(void);
 Suite *s21_other_suite(void);
+Suite *s21_converters_suite(void);
 
 int main(void) {
     int failed = 0;
@@ -17,6 +18,7 @@ int main(void) {
         s21_arithmetic_suite(),
         s21_comparison_suite(),
         s21_other_suite(),
+        s21_converters_suite(),
         NULL
     };
     
