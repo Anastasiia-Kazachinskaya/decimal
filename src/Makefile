@@ -63,4 +63,13 @@ clang_check:
 style:
 	clang-format -i $(DECIMAL_SOURCES) $(HEADERS)
 
-.PHONY: clean all rebuild test gcov_report clang_check style
+
+
+# Docker тесты (запуск из src/)
+docker_test:
+	@echo "Cleaning src/ before docker tests..."
+	$(MAKE) clean
+	@echo "Running docker tests from project root..."
+	cd .. && docker run --rm -v .:/project checkimages/decimal
+
+.PHONY: clean all rebuild test gcov_report clang_check style docker_test
