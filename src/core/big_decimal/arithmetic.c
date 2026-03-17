@@ -1,7 +1,7 @@
 #include "../../headers/s21_big_decimal.h"
 
 #include <stdlib.h>
-/*
+
 int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2, s21_big_decimal* result){
   if (value_1 -> sign != value_2 -> sign){
     value_1 -> sign *= -1;
@@ -37,7 +37,7 @@ int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2, s21_
   
   return 0;
 }
-*/
+
 
 
 int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
@@ -59,21 +59,22 @@ int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decima
 }
 
 int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
-    int32_t borrow = 0;
+  if (!result) return ERROR;
+
+  uint32_t borrow = 0;
     
     for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
-        // Приводим к int64_t, чтобы корректно обработать отрицательный результат
-        int64_t diff = (int64_t)value_1.bits[i] - value_2.bits[i] - borrow;
-        
-        if (diff < 0) {
-            result->bits[i] = (uint32_t)(diff + 0x100000000LL);  // "занимаем" единицу из старшего разряда
-            borrow = 1;
-        } else {
-            result->bits[i] = (uint32_t)diff;
-            borrow = 0;
-        }
+      uint64_t a = value_1.bits[i];
+      uint64_t b = value_2.bits[i];
+
+      // вычисляем разность
+      uint64_t diff = a - b - borrow;
+
+      borrow = (a < b + borrow) ? 1 : 0;
+
+      result->bits[i] = (uint32_t)diff;
     }
-    
+
     // Если после последнего разряда остался borrow — переполнение (underflow)
     if (borrow) {
         return ERROR;
