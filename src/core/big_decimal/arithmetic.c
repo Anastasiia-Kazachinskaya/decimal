@@ -1,7 +1,9 @@
 #include "../../headers/s21_big_decimal.h"
 
 #include <stdlib.h>
+#include <stdint.h>
 
+/*
 int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2, s21_big_decimal* result){
   if (value_1 -> sign != value_2 -> sign){
     value_1 -> sign *= -1;
@@ -38,7 +40,7 @@ int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2, s21_
   return 0;
 }
 
-
+*/
 
 int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result) {
     uint32_t carry = 0;

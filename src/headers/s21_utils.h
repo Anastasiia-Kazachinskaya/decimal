@@ -3,6 +3,7 @@
 
 #include "../s21_decimal.h"
 #include "s21_big_decimal.h"
+#include <stdint.h>
 
 #define MAX4BITE 0xffffffff // исп в other.c
 #define S21_DECIMAL_LIMIT 5 // исп в other.c

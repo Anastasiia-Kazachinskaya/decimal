@@ -1,4 +1,6 @@
 #include "../../s21_decimal.h"
+#include "../../headers/s21_utils.h"
+#include "../../headers/s21_big_decimal.h"
 
 static int s21_compare(s21_decimal value_1, s21_decimal value_2) {
     if (s21_is_zero(value_1) && s21_is_zero(value_2)) {
