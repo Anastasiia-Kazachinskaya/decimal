@@ -50,10 +50,16 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
     int scale = s21_get_scale(&value);
 
     s21_truncate(value, result);
-    
-    if (sign && scale && !s21_is_zero(*result)) {
-        if (s21_increment_mantissa(result) != OK) {
-            status = CALCULATION_ERROR;
+
+    if (sign && scale) {
+        if (s21_is_zero(*result)) {
+            // Особый случай: -0.5 → 0 после truncate, но floor должен дать -1
+            result->bits[0] = 1;
+            result->bits[3] |= (1u << 31);
+        } else {
+            if (s21_increment_mantissa(result) != OK) {
+                return CALCULATION_ERROR;
+            }
         }
 
     }
@@ -146,6 +152,7 @@ int s21_divide_mantissa_by_10(s21_decimal* value) {
     
     return status;
 }
+
 
 static int s21_increment_mantissa(s21_decimal* value) {
     int status = CALCULATION_ERROR;
