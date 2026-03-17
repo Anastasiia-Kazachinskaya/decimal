@@ -272,7 +272,7 @@ START_TEST(s21_floor_zero_negative) {
 }
 END_TEST
 
-// -0.0001 -> +0
+// -0.0001 -> -1
 START_TEST(s21_floor_negative_near_zero) {
     s21_decimal value = {0}, result = {0};
     
@@ -281,8 +281,8 @@ START_TEST(s21_floor_negative_near_zero) {
     
     s21_floor(value, &result);
     
-    ck_assert_int_eq(s21_is_zero(result), 1);
-    ck_assert_int_eq(s21_get_sign(&result), 0);
+    ck_assert_int_eq(result.bits[0], 1);   
+    ck_assert_int_eq(s21_get_sign(&result), 1);
     ck_assert_int_eq(s21_get_scale(&result), 0);
 }
 END_TEST
