@@ -626,6 +626,66 @@ START_TEST(test_from_decimal_to_float_combined) {
 }
 END_TEST
 
+START_TEST(test_from_int_decimal_int) {
+    int dst = 12;
+    int res = 0;
+    s21_decimal value = {{0, 0, 0, 0}};
+    s21_from_int_to_decimal(dst, &value);
+    s21_from_decimal_to_int(value, &res);
+    ck_assert_int_eq(dst, res);
+}
+END_TEST
+
+START_TEST(test_from_int_decimal_int_2) {
+    int dst = -999;
+    int res = 0;
+    s21_decimal value = {{0, 0, 0, 0}};
+    s21_from_int_to_decimal(dst, &value);
+    s21_from_decimal_to_int(value, &res);
+    ck_assert_int_eq(dst, res);
+}
+END_TEST
+
+START_TEST(test_from_int_decimal_int_3) {
+    int dst = -999;
+    int res = 100;
+    s21_decimal value = {{0, 0, 0, 0}};
+    s21_from_int_to_decimal(dst, &value);
+    s21_from_decimal_to_int(value, &res);
+    ck_assert_int_eq(dst, res);
+}
+END_TEST
+
+START_TEST(test_from_int_decimal_int_4) {
+    int dst = -0;
+    int res = 2222;
+    s21_decimal value = {{0, 0, 0, 0}};
+    s21_from_int_to_decimal(dst, &value);
+    s21_from_decimal_to_int(value, &res);
+    ck_assert_int_eq(dst, res);
+}
+END_TEST
+
+START_TEST(test_from_int_decimal_int_5) {
+    int dst = -2147483648;
+    int res = -0;
+    s21_decimal value = {{0, 0, 0, 0}};
+    s21_from_int_to_decimal(dst, &value);
+    s21_from_decimal_to_int(value, &res);
+    ck_assert_int_eq(dst, res);
+}
+END_TEST
+
+START_TEST(test_from_int_decimal_int_6) {
+    int dst = 2147483647;
+    int res = -0;
+    s21_decimal value = {{0, 0, 0, 0}};
+    s21_from_int_to_decimal(dst, &value);
+    s21_from_decimal_to_int(value, &res);
+    ck_assert_int_eq(dst, res);
+}
+END_TEST
+
 Suite *int_conversion_suite(void) {
     Suite *s = suite_create("Converters");
     
@@ -677,7 +737,12 @@ Suite *int_conversion_suite(void) {
     tcase_add_test(tc_core, test_from_decimal_to_float_combined);
     
     
-    
+    tcase_add_test(tc_core, test_from_int_decimal_int);
+    tcase_add_test(tc_core, test_from_int_decimal_int_2);
+    tcase_add_test(tc_core, test_from_int_decimal_int_3);
+    tcase_add_test(tc_core, test_from_int_decimal_int_4);
+    tcase_add_test(tc_core, test_from_int_decimal_int_5);
+    tcase_add_test(tc_core, test_from_int_decimal_int_6);
 
     suite_add_tcase(s, tc_core);
     
