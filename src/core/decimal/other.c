@@ -21,7 +21,7 @@ static void s21_pow10_big(int scale, s21_big_decimal* result);
 static void s21_big_div2(s21_big_decimal* value);
 static int s21_inc_decimal(s21_decimal* value);
 int s21_is_big_equal(s21_big_decimal value_1, s21_big_decimal value_2);
-static int s21_multiply_big_by_10(s21_big_decimal* value);
+int s21_multiply_big_by_10(s21_big_decimal* value);
 static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale);
 static void s21_compute_rounding_threshold(int scale, s21_big_decimal* half);
 static int s21_compute_fractional_big(
@@ -274,7 +274,7 @@ int s21_is_big_equal(s21_big_decimal value_1, s21_big_decimal value_2) {
 }
 
 // Умножает big_decimal на 10, возвращает 0 при успехе, 1 при переполнении
-static int s21_multiply_big_by_10(s21_big_decimal* value) {
+int s21_multiply_big_by_10(s21_big_decimal* value) {
     int status = OK;
 
     if (!value) return CALCULATION_ERROR;

@@ -45,5 +45,5 @@ int s21_normalize_and_check_overflow(s21_big_decimal* value);
 void s21_set_sign_internal(s21_decimal* result, int sign);
 int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2);
 s21_decimal s21_get_zero();
-
+int s21_multiply_big_by_10(s21_big_decimal* value);
 #endif
