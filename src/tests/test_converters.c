@@ -387,7 +387,6 @@ START_TEST(test_big_decimal_structure) {
     ck_assert_uint_eq(result.bits[3], 0U);
     ck_assert_uint_eq(result.bits[4], 0U);
     ck_assert_uint_eq(result.bits[5], 0U);
-    
     ck_assert_int_eq(result.sign, 1);
     ck_assert_int_eq(result.scale, 7);
 }
@@ -407,7 +406,7 @@ START_TEST(test_from_decimal_to_float_null_pointer) {
 END_TEST
 
 START_TEST(test_from_decimal_to_float_invalid_decimal) {
-    s21_decimal invalid = {{0, 0, 0, 0x00FF0000}}; // мусор в зарезервированных битах
+    s21_decimal invalid = {{0, 0, 0, 0x00FF0000}};
     float dst;
     int res = s21_from_decimal_to_float(invalid, &dst);
     ck_assert_int_eq(res, CONVERTATION_ERROR);
@@ -427,25 +426,203 @@ START_TEST(test_from_decimal_to_float_simple_integers) {
     s21_decimal value = {{0, 0, 0, 0}};
     float dst;
     int res;
-    
-    // 1
+
     value.bits[0] = 1;
     res = s21_from_decimal_to_float(value, &dst);
     ck_assert_int_eq(res, OK);
     ck_assert_float_eq_tol(dst, 1.0f, 1e-6);
-    
-    // 42
+
     value.bits[0] = 42;
     res = s21_from_decimal_to_float(value, &dst);
     ck_assert_int_eq(res, OK);
     ck_assert_float_eq_tol(dst, 42.0f, 1e-6);
-    
-    // -123
+
     value.bits[0] = 123;
     value.bits[3] |= 1u << 31;
     res = s21_from_decimal_to_float(value, &dst);
     ck_assert_int_eq(res, OK);
     ck_assert_float_eq_tol(dst, -123.0f, 1e-6);
+}
+END_TEST
+
+START_TEST(test_from_decimal_to_float_with_scale) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+    value.bits[0] = 123;
+    value.bits[3] |= (2 << 16);
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, 1.23f, FLOAT_EPS);
+    value.bits[0] = 314159;
+    value.bits[3] = 0;
+    value.bits[3] |= (5 << 16);
+    value.bits[3] |= 1u << 31;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, -3.14159f, FLOAT_EPS);
+}
+END_TEST
+
+// Тест 6: Числа, использующие bits[1]
+START_TEST(test_from_decimal_to_float_using_bits1) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+    value.bits[1] = 1;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, 4294967296.0f, FLOAT_EPS * 1e9);
+}
+END_TEST
+
+// Тест 7: Числа, использующие bits[2]
+START_TEST(test_from_decimal_to_float_using_bits2) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+    value.bits[2] = 1;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert(fabs(dst - 1.8446744e19f) < FLOAT_EPS * 1e19);
+}
+END_TEST
+
+// Тест 8: Максимальное представимое значение
+START_TEST(test_from_decimal_to_float_max) {
+    s21_decimal value = {{
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0xFFFFFFFF,
+        0
+    }};
+    float dst;
+    int res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert(dst < FLT_MAX);
+}
+END_TEST
+
+// Тест 9: Проверка на переполнение
+START_TEST(test_from_decimal_to_float_max_decimal) {
+    s21_decimal value;
+    value.bits[0] = 0xFFFFFFFF;
+    value.bits[1] = 0xFFFFFFFF;
+    value.bits[2] = 0xFFFFFFFF;
+    value.bits[3] = 0;
+    
+    float dst = -999.999f;
+    int res = s21_from_decimal_to_float(value, &dst);
+    
+    ck_assert_int_eq(res, OK);
+    ck_assert(dst > 0);
+}
+END_TEST
+
+// Тест 10: Проверка минимального положительного значения
+START_TEST(test_from_decimal_to_float_min_positive) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+
+    value.bits[0] = 1;
+    value.bits[3] |= (28 << 16);
+    
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert(dst > 0);
+    ck_assert(dst < 1e-27f);
+}
+END_TEST
+
+// Тест 11: Проверка очень больших чисел 
+START_TEST(test_from_decimal_to_float_very_large) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+    
+    value.bits[0] = 0xFFFFFFFF;
+    value.bits[1] = 0xFFFFFFFF;
+    value.bits[2] = 0xFFFFFFF0;
+    
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert(isfinite(dst));
+}
+END_TEST
+
+// Тест 10: Проверка очень маленьких чисел
+START_TEST(test_from_decimal_to_float_very_small) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+
+    value.bits[0] = 1;
+    value.bits[3] |= (28 << 16);
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert(dst > 0.0f);
+    ck_assert(dst < 1e-27f);
+}
+END_TEST
+
+// Тест 11: Проверка знака и масштаба одновременно
+START_TEST(test_from_decimal_to_float_sign_and_scale) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+
+    value.bits[0] = 123;
+    value.bits[3] = 0;
+    value.bits[3] |= (5 << 16);
+    value.bits[3] |= 1u << 31;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, -0.00123f, FLOAT_EPS);
+}
+END_TEST
+
+// Тест 12: Проверка граничных значений масштаба
+START_TEST(test_from_decimal_to_float_scale_boundaries) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+
+    value.bits[0] = 12345;
+    value.bits[3] = 0;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, 12345.0f, FLOAT_EPS);
+
+    value.bits[0] = 12345;
+    value.bits[3] = 0;
+    value.bits[3] |= (28 << 16);
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, 1.2345e-24f, FLOAT_EPS * 1e-24);
+}
+END_TEST
+
+// Тест 13: Комбинированный тест с разными масштабами и знаками
+START_TEST(test_from_decimal_to_float_combined) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+
+    value.bits[0] = 123456;
+    value.bits[3] = 0;
+    value.bits[3] |= (3 << 16);
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, 123.456f, FLOAT_EPS);
+
+    value.bits[0] = 987654321;
+    value.bits[3] = 0;
+    value.bits[3] |= (4 << 16);
+    value.bits[3] |= 1u << 31;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, -98765.4321f, FLOAT_EPS * 1000);
 }
 END_TEST
 
@@ -487,6 +664,17 @@ Suite *int_conversion_suite(void) {
     tcase_add_test(tc_core, test_from_decimal_to_float_invalid_decimal);
     tcase_add_test(tc_core, test_from_decimal_to_float_zero);
     tcase_add_test(tc_core, test_from_decimal_to_float_simple_integers);
+    tcase_add_test(tc_core, test_from_decimal_to_float_with_scale);
+    tcase_add_test(tc_core, test_from_decimal_to_float_using_bits1);
+    tcase_add_test(tc_core, test_from_decimal_to_float_using_bits2);
+    tcase_add_test(tc_core, test_from_decimal_to_float_max);
+    tcase_add_test(tc_core, test_from_decimal_to_float_max_decimal);
+    tcase_add_test(tc_core, test_from_decimal_to_float_min_positive);
+    tcase_add_test(tc_core, test_from_decimal_to_float_very_large);
+    tcase_add_test(tc_core, test_from_decimal_to_float_very_small);
+    tcase_add_test(tc_core, test_from_decimal_to_float_sign_and_scale);
+    tcase_add_test(tc_core, test_from_decimal_to_float_scale_boundaries);
+    tcase_add_test(tc_core, test_from_decimal_to_float_combined);
     
     
     
