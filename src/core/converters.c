@@ -13,14 +13,16 @@ int s21_from_decimal_to_float(s21_decimal src, float* dst) {
   if (s21_is_zero(src)) {
     res = OK;
   } else {
-    double result = src.bits[0];
-    if (src.bits[1] != 0) result += (double)src.bits[1] * 4294967296.0;
+    long double result = 0.0;
+    result = src.bits[0];
+    if (src.bits[1] != 0) result += (long double)src.bits[1] * 4294967296.0;
     if (src.bits[2] != 0)
-      result += (double)src.bits[2] * 18446744073709551616.0;
+      result += (long double)src.bits[2] * 18446744073709551616.0;
     int scale = s21_get_scale(&src);
     if (scale != 0)
-      for (int i = 0; i < scale; ++i) result /= 10;
-    if (s21_get_sign(&src) != 0) result = -result;
+      for (int i = 0; i < scale; ++i) result /= 10.0L;
+    if (result < 0) result = - result;
+    if (s21_get_sign(&src) == 1) result = - result;
     if (result > FLT_MAX || result < -FLT_MAX) {
       res = CONVERTATION_ERROR;
     } else {
