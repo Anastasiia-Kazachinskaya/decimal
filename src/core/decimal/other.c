@@ -94,11 +94,13 @@ int s21_round(s21_decimal value, s21_decimal* result) {
     // 2 Вычисляем порог округления 10^scale / 2
     s21_big_decimal half;
     s21_null_big_decimal(&half);
+    // Вычисляем 0.5 в нужном масштабе
     s21_compute_rounding_threshold(scale, &half);
     
     // 3 Вычисляем дробную часть
     s21_big_decimal fractional;
     s21_null_big_decimal(&fractional);
+    // Извлекаем дробную часть
     if(s21_compute_fractional_big(value, *result, &fractional) != OK) return CALCULATION_ERROR;
 
     if (s21_apply_rounding(result, &fractional, &half) != OK) return CALCULATION_ERROR;
