@@ -195,8 +195,11 @@ int s21_normalize_pair(s21_decimal* value_1, s21_decimal* value_2) {
   (void)value_2;
   return 0;
 }
-
+// 0 = ОК (в перделах 96 бит)
+// 1 = нужно банковское округление (данные в битах [3 .. 6])
+// 2 = фатальная ошибка (переполнение 224 (S21_BIG_DECIMAL_SIZE))
 int s21_normalize_and_check_overflow(s21_big_decimal* value) {
+
   int status = OK;
 
   int overflow = 0;
@@ -211,6 +214,7 @@ int s21_normalize_and_check_overflow(s21_big_decimal* value) {
     status = OK;
   }
   return status;  // 0
+
 }
 
 static void s21_set_scale_internal(s21_decimal* value, int scale) {
