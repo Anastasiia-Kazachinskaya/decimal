@@ -14,7 +14,7 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   if (s21_is_zero(src)) {
     res = OK;
   } else if (src.bits[2] == 0) {
-    int sign = s21_get_sign(&src);
+    int sign = s21_get_sign(src);
     int scale = s21_get_scale(&src);
     unsigned int max_allowed = sign ? 2147483648U : 2147483647U;
     unsigned long long mantissa = src.bits[0];

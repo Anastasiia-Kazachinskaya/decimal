@@ -70,7 +70,7 @@ int s21_is_zero(s21_decimal value) {
   return result;
 }
 
-int s21_get_sign(s21_decimal* value) {
+int s21_get_sign(s21_decimal value) {
   int sign = 0;
   if (value) {
     sign = (value->bits[3] & 1u << 31) != 0;
