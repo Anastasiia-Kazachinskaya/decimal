@@ -6,6 +6,10 @@
 
 #include "../headers/s21_helpers.h"
 
+#ifndef FLOAT_EPS
+#define FLOAT_EPS 1e-6
+#endif
+
 // int_to_decimal
 // Тест 1: Конвертация положительных чисел
 START_TEST(int_to_decimal_test_positive_int) {
@@ -389,6 +393,62 @@ START_TEST(test_big_decimal_structure) {
 }
 END_TEST
 
+//decimal_to_float
+START_TEST(test_from_decimal_to_float_null_pointer) {
+    float dst;
+    s21_decimal zero = {{0, 0, 0, 0}};
+    
+    int res = s21_from_decimal_to_float(zero, NULL);
+    ck_assert_int_eq(res, CONVERTATION_ERROR);
+    
+    res = s21_from_decimal_to_float(zero, &dst);
+    ck_assert_int_eq(res, OK);
+}
+END_TEST
+
+START_TEST(test_from_decimal_to_float_invalid_decimal) {
+    s21_decimal invalid = {{0, 0, 0, 0x00FF0000}}; // мусор в зарезервированных битах
+    float dst;
+    int res = s21_from_decimal_to_float(invalid, &dst);
+    ck_assert_int_eq(res, CONVERTATION_ERROR);
+}
+END_TEST
+
+START_TEST(test_from_decimal_to_float_zero) {
+    s21_decimal zero = {{0, 0, 0, 0}};
+    float dst = 123.456f;
+    int res = s21_from_decimal_to_float(zero, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert(fabs(dst - 0.0f) < FLOAT_EPS);
+}
+END_TEST
+
+START_TEST(test_from_decimal_to_float_simple_integers) {
+    s21_decimal value = {{0, 0, 0, 0}};
+    float dst;
+    int res;
+    
+    // 1
+    value.bits[0] = 1;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, 1.0f, 1e-6);
+    
+    // 42
+    value.bits[0] = 42;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, 42.0f, 1e-6);
+    
+    // -123
+    value.bits[0] = 123;
+    value.bits[3] |= 1u << 31;
+    res = s21_from_decimal_to_float(value, &dst);
+    ck_assert_int_eq(res, OK);
+    ck_assert_float_eq_tol(dst, -123.0f, 1e-6);
+}
+END_TEST
+
 Suite *int_conversion_suite(void) {
     Suite *s = suite_create("Converters");
     
@@ -408,6 +468,7 @@ Suite *int_conversion_suite(void) {
     tcase_add_test(tc_core, int_to_decimal_test_large_positive);
     tcase_add_test(tc_core, int_to_decimal_test_large_negative);
 
+
     tcase_add_test(tc_core, test_positive_decimal_to_big);
     tcase_add_test(tc_core, test_negative_decimal_to_big);
     tcase_add_test(tc_core, test_decimal_with_scale_to_big);
@@ -421,6 +482,15 @@ Suite *int_conversion_suite(void) {
     tcase_add_test(tc_core, test_boundary_values_to_big);
     tcase_add_test(tc_core, test_big_decimal_structure);
     
+    //decimal_to_float
+    tcase_add_test(tc_core, test_from_decimal_to_float_null_pointer);
+    tcase_add_test(tc_core, test_from_decimal_to_float_invalid_decimal);
+    tcase_add_test(tc_core, test_from_decimal_to_float_zero);
+    tcase_add_test(tc_core, test_from_decimal_to_float_simple_integers);
+    
+    
+    
+
     suite_add_tcase(s, tc_core);
     
     return s;

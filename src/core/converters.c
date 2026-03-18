@@ -8,6 +8,7 @@
 int s21_from_decimal_to_float(s21_decimal src, float* dst) {
   int res = CONVERTATION_ERROR;
   if (!dst) return res;
+  if (s21_decimal_check(src)) return res;
   *dst = 0.0f;
   if (s21_is_zero(src)) {
     res = OK;
@@ -33,6 +34,7 @@ int s21_from_decimal_to_float(s21_decimal src, float* dst) {
 int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   int res = CONVERTATION_ERROR;
   if (!dst) return res;
+  if (s21_decimal_check(src)) return res;
   *dst = 0;
   s21_decimal result;
   copy_decimal(&src, &result);
@@ -64,40 +66,38 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   return res;
 }
 
-int s21_from_float_to_decimal(float src, s21_decimal* dst) {
-  int res = CONVERTATION_ERROR;
-  if (!dst) return res;
-  s21_null_decimal(dst);
-  if (isinf(src) || isnan(src)) {
-    return res;
-  }
-  if (src < 0) dst->bits[3] |= 1u << 31;
-  float result = 0.00;
-  if (src == 0.0f) {
-    if (src < 0) dst->bits[3] |= 1u << 31;
-    res = OK;
-  } else {
-    char str[100];
-    sprintf(str, "%.8g", src);
-    int i = strlen(str);
-    char tmp[100];
-    char dot = '.';
-    char small_ex = 'e';
-    char big_ex = 'E';
-    if (strchr(str, small_ex)){
+// int s21_from_float_to_decimal(float src, s21_decimal* dst) {
+//   int res = CONVERTATION_ERROR;
+//   if (!dst) return res;
+//   s21_null_decimal(dst);
+//   if (isinf(src) || isnan(src)) {
+//     return res;
+//   }
+//   if (src < 0) dst->bits[3] |= 1u << 31;
+//   float result = 0.00;
+//   if (src == 0.0f) {
+//     if (src < 0) dst->bits[3] |= 1u << 31;
+//     res = OK;
+//   } else {
+//     char str[100];
+//     sprintf(str, "%.8g", src);
+//     int i = strlen(str);
+//     char *e_pos = strchr(str, 'e');
+//     if (!e_pos) e_pos = strchr(str, 'E');
+//     if (strchr(str, small_ex)){
 
-    }
-    if (strchr(str, big_ex)){
+//     }
+//     if (strchr(str, big_ex)){
 
-    }
-    for (; i < 0 ; --i) {
-      if (str[i] == '0' && str[i+1] == '\0')
-      strcpy(tmp, str - 1);
-      strcpy(str, tmp);
-    }
-  }
-  return res;
-}
+//     }
+//     for (; i > 0 ; --i) {
+//       if (str[i] == '0' && str[i+1] == '\0')
+//       strcpy(tmp, str - 1);
+//       strcpy(str, tmp);
+//     }
+//   }
+//   return res;
+// }
     
 int s21_from_int_to_decimal(int src, s21_decimal* dst) {
   int res = CONVERTATION_ERROR;
