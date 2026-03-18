@@ -1,27 +1,28 @@
 #include <float.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "../headers/s21_helpers.h"
 
 int s21_from_decimal_to_float(s21_decimal src, float* dst) {
   int res = CONVERTATION_ERROR;
-  if (!dst) return res;
-  if (s21_decimal_check(src)) return res;
-  *dst = 0.0f;
-    double result = 0.0;
-    result = (unsigned)src.bits[0];
-    if (src.bits[1] != 0) result += (unsigned)src.bits[1] * 4294967296.0;
-    if (src.bits[2] != 0)
-      result += (unsigned)src.bits[2] * 18446744073709551616.0;
-    int scale = s21_get_scale(&src);
-    if (scale != 0 && result != 0.0)
-      for (int i = 0; i < scale; ++i) result /= 10.0L;
-    if (s21_get_sign(&src) == 1) result = (src.bits[0] == 0 && src.bits[1] == 0 && src.bits[2] == 0) ? -0.0 : - result;
+  if (dst) {
+    if (!s21_decimal_check(src)) {
+      *dst = 0.0f;
+      double result = 0.0;
+      result = (unsigned)src.bits[0];
+      if (src.bits[1] != 0) result += (unsigned)src.bits[1] * 4294967296.0;
+      if (src.bits[2] != 0)
+        result += (unsigned)src.bits[2] * 18446744073709551616.0;
+      int scale = s21_get_scale(&src);
+      if (scale != 0 && result != 0.0)
+        for (int i = 0; i < scale; ++i) result /= 10.0L;
+      if (s21_get_sign(&src) == 1) result = result == 0.0 ? -0.0 : -result;
       *dst = (float)result;
       res = OK;
-
+    }
+  }
   return res;
 }
 
@@ -51,7 +52,7 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
         if (sign) {
           *dst = mantissa == 2147483648U ? MIN_INT : -(int)mantissa;
         } else {
-                *dst = (int)mantissa;
+          *dst = (int)mantissa;
         }
         res = OK;
       }
@@ -92,7 +93,7 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
 //   }
 //   return res;
 // }
-    
+
 int s21_from_int_to_decimal(int src, s21_decimal* dst) {
   int res = CONVERTATION_ERROR;
   if (!dst) return res;

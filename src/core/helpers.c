@@ -80,23 +80,23 @@ void copy_decimal(s21_decimal* value_1, s21_decimal* value_2) {
 }
 
 int s21_decimal_check(s21_decimal value) {
-    int result = 0;  
+  int result = 0;
 
-    int scale = s21_get_scale(&value);
-    if (scale < 0 || scale > 28) {
-        result = 1;
-    }
-    
-    unsigned int allowed_mask = 0;
-    allowed_mask |= (scale << 16);  // разрешаем биты масштаба
-    if (s21_get_sign(&value)) {
-        allowed_mask |= (1u << 31); // разрешаем бит знака, если он установлен
-    }
-    
-    // Проверяем, что все остальные биты равны 0
-    if ((value.bits[3] & ~allowed_mask) != 0) {
-        result = 1;
-    }
-   
-    return result;
+  int scale = s21_get_scale(&value);
+  if (scale < 0 || scale > 28) {
+    result = 1;
+  }
+
+  unsigned int allowed_mask = 0;
+  allowed_mask |= (scale << 16);  // разрешаем биты масштаба
+  if (s21_get_sign(&value)) {
+    allowed_mask |= (1u << 31);  // разрешаем бит знака, если он установлен
+  }
+
+  // Проверяем, что все остальные биты равны 0
+  if ((value.bits[3] & ~allowed_mask) != 0) {
+    result = 1;
+  }
+
+  return result;
 }
