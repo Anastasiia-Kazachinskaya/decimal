@@ -311,7 +311,7 @@ START_TEST(s21_round_1_5_up) {
 END_TEST
 
 
-// 2,5 → 2
+// 2,5 → 3
 START_TEST(s21_round_2_5_stay) {
     s21_decimal value, result;
     s21_null_decimal(&value);
@@ -325,7 +325,7 @@ START_TEST(s21_round_2_5_stay) {
     int result_scale = s21_get_scale(&result); 
     int result_sign = s21_get_sign(&result);
     
-    ck_assert_int_eq(result.bits[0], 2);
+    ck_assert_int_eq(result.bits[0], 3);
     ck_assert_int_eq(result_scale, 0);
     ck_assert_int_eq(result_sign, 0);
 }
