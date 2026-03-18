@@ -50,7 +50,7 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
         return status;
     }
 
-    int sign = s21_get_sign(&value);
+    int sign = s21_get_sign(value);
     int scale = s21_get_scale(&value);
 
     s21_truncate(value, result);
@@ -86,7 +86,7 @@ int s21_round(s21_decimal value, s21_decimal* result) {
         return status;
     }
 
-    int sign = s21_get_sign(&value);
+    int sign = s21_get_sign(value);
 
     // 1 получаем целую часть
     s21_truncate(value, result);
@@ -119,7 +119,7 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
     s21_null_decimal(result);
 
     int scale = s21_get_scale(&value);
-    int sign = s21_get_sign(&value);
+    int sign = s21_get_sign(value);
 
     // Копируем мантиссу
     result->bits[0] = value.bits[0];
