@@ -1,19 +1,18 @@
-#include "../../headers/s21_big_decimal.h"
 #include <stdlib.h>
 
-int get_scale(s21_big_decimal* value){
+#include "../../headers/s21_big_decimal.h"
+
+int get_scale(s21_big_decimal* value) {
   int p = 0;
-  while (value->bits[p] == 0 && p < 8 * 32){
-    p++;  
+  while (value->bits[p] == 0 && p < 8 * 32) {
+    p++;
   }
-  return 8 * 32 - p; 
+  return 8 * 32 - p;
 }
 
-s21_big_decimal* s21_big_zero(){
-  return calloc(1, sizeof(s21_big_decimal));
-}
+s21_big_decimal* s21_big_zero() { return calloc(1, sizeof(s21_big_decimal)); }
 
-int big_get_bit(s21_big_decimal* value, int bit_index){
+int big_get_bit(s21_big_decimal* value, int bit_index) {
   if (bit_index < 0 || bit_index >= 8 * 32) {
     return 0;
   }
@@ -23,7 +22,7 @@ int big_get_bit(s21_big_decimal* value, int bit_index){
   return (value->bits[word_index] >> bit_in_word) & 1;
 }
 
-int big_set_bit(s21_big_decimal* value, int bit_index, char bit){
+int big_set_bit(s21_big_decimal* value, int bit_index, char bit) {
   if (!value || bit_index < 0 || bit_index >= 8 * 32) {
     return 0;
   }
@@ -37,8 +36,7 @@ int big_set_bit(s21_big_decimal* value, int bit_index, char bit){
   return 0;
 }
 
-
-void s21_multiply_big_by_10(s21_big_decimal *value) {
+void s21_multiply_big_by_10(s21_big_decimal* value) {
   unsigned long long carry = 0;
 
   for (int i = 0; i < 8; i++) {
@@ -47,4 +45,3 @@ void s21_multiply_big_by_10(s21_big_decimal *value) {
     carry = temp >> 32;
   }
 }
-

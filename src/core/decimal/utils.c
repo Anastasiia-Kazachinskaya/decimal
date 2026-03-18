@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../../s21_decimal.h"
-#include "../../headers/s21_utils.h"
 #include "../../headers/s21_big_decimal.h"
-
+#include "../../headers/s21_utils.h"
+#include "../../s21_decimal.h"
 
 // получить значение (0 или 1) конкретного бита по его индексу (0-95)
 int s21_get_bit(s21_decimal value, int bit_index) {
@@ -35,7 +34,7 @@ int s21_set_bit(s21_decimal* value, int bit_index, int bit_value) {
 int s21_get_scale(s21_decimal* value) {
   int scale = 0;
   if (value) {
-    scale = value->bits[3] >> 16 & 0xFF;  // 0xFF = 11111111 
+    scale = value->bits[3] >> 16 & 0xFF;  // 0xFF = 11111111
   }
   if (scale > 28) {
     return 0;
@@ -44,15 +43,15 @@ int s21_get_scale(s21_decimal* value) {
 }
 
 void s21_null_decimal(s21_decimal* value) {
-    if (value) {
-        memset(value, 0, sizeof(s21_decimal));
-    }
+  if (value) {
+    memset(value, 0, sizeof(s21_decimal));
+  }
 }
 
 void s21_null_big_decimal(s21_big_decimal* value) {
-    if (value) {
-        memset(value, 0, sizeof(s21_big_decimal));
-    }
+  if (value) {
+    memset(value, 0, sizeof(s21_big_decimal));
+  }
 }
 
 int s21_is_zero(s21_decimal value) {
@@ -70,7 +69,7 @@ int s21_is_zero(s21_decimal value) {
   return result;
 }
 
-int s21_get_sign(s21_decimal value) {
+int s21_get_sign(s21_decimal* value) {
   int sign = 0;
   if (value) {
     sign = (value->bits[3] & 1u << 31) != 0;
@@ -78,8 +77,7 @@ int s21_get_sign(s21_decimal value) {
   return sign;
 }
 
-
-s21_decimal s21_get_zero(){
+s21_decimal s21_get_zero() {
   s21_decimal zero;
   char* ptr = (char*)&zero;
   for (size_t i = 0; i < sizeof(s21_decimal); i++) {
@@ -88,7 +86,28 @@ s21_decimal s21_get_zero(){
   return zero;
 }
 
-void s21_set_sign(char val, s21_decimal* value) {
-  value->bits[3] |= val << 31;
+void s21_set_sign(char val, s21_decimal* value) { value->bits[3] |= val << 31; }
+
+int s21_decimal_check(s21_decimal value) {
+  int result = 0;
+
+  int scale = s21_get_scale(&value);
+
+  unsigned int allowed_mask = 0;
+  allowed_mask |= (scale << 16);
+  if (s21_get_sign(&value)) {
+    allowed_mask |= (1u << 31);
+  }
+
+  if ((value.bits[3] & ~allowed_mask) != 0) {
+    result = 1;
+  }
+
+  return result;
 }
 
+void copy_decimal(s21_decimal* value_1, s21_decimal* value_2) {
+  if (value_1 && value_2) {
+    for (int i = 0; i < 4; ++i) value_2->bits[i] = value_1->bits[i];
+  }
+}

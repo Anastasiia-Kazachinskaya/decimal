@@ -14,7 +14,7 @@ typedef struct {
 } s21_big_decimal;
 
 s21_big_decimal* s21_decimal_to_big(s21_decimal* value);  // DO
-s21_decimal s21_big_to_decimal(s21_big_decimal* value);  // TODO
+s21_decimal s21_big_to_decimal(s21_big_decimal* value);   // TODO
 s21_big_decimal* s21_big_zero();
 
 int get_scale(s21_big_decimal* value);
@@ -24,19 +24,21 @@ void s21_div_ten(s21_big_decimal* value);
 void s21_mul_ten(s21_big_decimal* value);
 
 int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2,
-            s21_big_decimal* result);  // TODO
+                        s21_big_decimal* result);  // TODO
 int s21_big_decimal_sub(s21_big_decimal* value_1, s21_big_decimal* value_2,
-            s21_big_decimal* result);
+                        s21_big_decimal* result);
 int s21_big_decimal_mul(s21_big_decimal* value_1, s21_big_decimal* value_2,
-            s21_big_decimal* result);
+                        s21_big_decimal* result);
 int s21_big_decimal_div(s21_big_decimal* value_1, s21_big_decimal* value_2,
-            s21_big_decimal* result);
+                        s21_big_decimal* result);
 
 int big_get_bit(s21_big_decimal* value, int index);
 
 int big_set_bit(s21_big_decimal* value, int index, char bit);
 
-int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result);
-int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2, s21_big_decimal* result);
+int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
+                s21_big_decimal* result);
+int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
+                s21_big_decimal* result);
 
 #endif
