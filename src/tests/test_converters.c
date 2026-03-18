@@ -17,7 +17,6 @@ START_TEST(s21_big_to_decimal_scale_0) {
     s21_decimal dec;
     s21_big_to_decimal_internal(&big, &dec);
     ck_assert_int_eq(s21_get_scale(&dec), 0);
-
 }
 END_TEST
 
@@ -26,10 +25,6 @@ START_TEST(s21_big_to_decimal_scale_28) {
     s21_decimal dec;
     s21_big_to_decimal_internal(&big, &dec);
     ck_assert_int_eq(s21_get_scale(&dec), 28);
-
-
-
-
 }
 END_TEST
 
@@ -39,9 +34,6 @@ START_TEST(s21_big_to_decimal_scale_29) {
     s21_decimal dec;
     s21_big_to_decimal_internal(&big, &dec);
     ck_assert_int_eq(s21_get_scale(&dec), 0);  // Защита от невалидных данных
-
-
-
 }
 END_TEST
 
@@ -52,6 +44,7 @@ START_TEST(s21_big_to_decimal_scale_300) {
     ck_assert_int_eq(s21_get_scale(&dec), 0); 
 }
 END_TEST
+
 // int_to_decimal
 // Тест 1: Конвертация положительных чисел
 START_TEST(int_to_decimal_test_positive_int) {
