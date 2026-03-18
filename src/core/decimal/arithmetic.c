@@ -8,7 +8,10 @@
 
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
+
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
+
+
 
 
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result){
@@ -42,7 +45,6 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     s21_big_decimal res_big;
     s21_null_big_decimal(&res_big);
 
-    
     if (big1.sign != big2.sign) {
         s21_big_add(big1, big2, &res_big);
         res_big.sign = big1.sign;
