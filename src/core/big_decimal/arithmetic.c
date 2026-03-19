@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "../../headers/s21_big_decimal.h"
+#include "../../headers/s21_utils.h"
 
 /*
 int s21_big_decimal_add(s21_big_decimal* value_1, s21_big_decimal* value_2,
@@ -41,6 +42,7 @@ sign *= -1; return s21_big_decimal_sub(value_1, value_2, result);
 
 */
 
+
 int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
                 s21_big_decimal* result) {
   uint32_t carry = 0;
@@ -58,6 +60,7 @@ int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
   }
 
   return OK;
+
 }
 
 int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
