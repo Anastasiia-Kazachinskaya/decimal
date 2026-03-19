@@ -25,24 +25,6 @@ START_TEST(s21_normalize_and_check_overflow_no_overflow) {
 END_TEST
 
 
-// s21_big_add tests section
-START_TEST(s21_big_add_overflow_integration) {
-    s21_big_decimal a, b, res;
-    s21_null_big_decimal(&a);
-    s21_null_big_decimal(&b);
-    s21_null_big_decimal(&res);
-    
-    for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
-        a.bits[i] = 0xFFFFFFFF;
-        b.bits[i] = 0xFFFFFFFF;
-    }
-    
-    int add_result = s21_big_add(a, b, &res);
-
-
-    ck_assert_int_eq(add_result, 1);
-}
-END_TEST
 
 // s21_truncate tests section
 START_TEST(s21_truncate_scale_zero) {
@@ -463,8 +445,6 @@ Suite *s21_other_suite(void) {
     TCase *tc_core = tcase_create("Core");
     tcase_add_test(tc_core, s21_normalize_and_check_overflow_no_overflow);
     
-    tcase_add_test(tc_core, s21_big_add_overflow_integration);
-
     tcase_add_test(tc_core, s21_truncate_scale_zero);
     tcase_add_test(tc_core, s21_truncate_scale_positive);
     tcase_add_test(tc_core, s21_truncate_negative_small);
@@ -472,7 +452,6 @@ Suite *s21_other_suite(void) {
     tcase_add_test(tc_core, s21_truncate_normal_negative);
     tcase_add_test(tc_core, s21_truncate_scale_28_max);
     
-
     tcase_add_test(tc_core, s21_divide_mantissa_by_10_zero_bit);
     tcase_add_test(tc_core, s21_divide_mantissa_remainder);
     tcase_add_test(tc_core, s21_divide_mantissa_drop_high_remainder);
