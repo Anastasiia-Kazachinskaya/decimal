@@ -9,7 +9,7 @@
 
 #define MAX4BITE 0xffffffff     // исп в other.c
 #define S21_DECIMAL_LIMIT 5     // исп в other.c
-#define S21_BIG_DECIMAL_SIZE 7  // исп в arithmetic.c
+#define S21_BIG_DECIMAL_SIZE 8  // исп в arithmetic.c
 
 #define MIN_INT -2147483648
 #define MAX_INT 2147483647
