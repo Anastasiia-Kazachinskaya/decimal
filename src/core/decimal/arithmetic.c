@@ -18,7 +18,6 @@ int s21_big_bankers_round(s21_big_decimal* value);
 int s21_big_inc_lower_96(s21_big_decimal* value);
 
 
-
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result){
 //   s21_big_decimal* lhs = s21_decimal_to_big(&value_1);
 //   s21_big_decimal* rhs = s21_decimal_to_big(&value_2);
@@ -49,6 +48,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 
     s21_big_decimal res_big;
     s21_null_big_decimal(&res_big);
+
 
     if (big1.sign != big2.sign) {
         s21_big_add(big1, big2, &res_big);
