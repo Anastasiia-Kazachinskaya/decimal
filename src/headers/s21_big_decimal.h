@@ -3,7 +3,7 @@
 
 #include "../s21_decimal.h"
 
-#define S21_BIG_DECIMAL_SIZE 7
+#define S21_BIG_DECIMAL_SIZE 8
 #define ERROR 1;
 #define OK 0
 
