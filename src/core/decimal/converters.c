@@ -46,11 +46,11 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   return res;
 }
 
-int s21_from_float_to_decimal(float src, s21_decimal* dst) {
-  if (src < 0) dst->bits[3] |= 1u << 31;
+// int s21_from_float_to_decimal(float src, s21_decimal* dst) {
+//   if (src < 0) dst->bits[3] |= 1u << 31;
 
-  return 0;
-}
+//   return 0;
+// }
 
 int s21_from_int_to_decimal(int src, s21_decimal* dst) {
   int res = CONVERTATION_ERROR;
