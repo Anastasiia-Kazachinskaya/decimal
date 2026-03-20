@@ -36,12 +36,4 @@ int big_set_bit(s21_big_decimal* value, int bit_index, char bit) {
   return 0;
 }
 
-void s21_multiply_big_by_10(s21_big_decimal* value) {
-  unsigned long long carry = 0;
 
-  for (int i = 0; i < 8; i++) {
-    unsigned long long temp = (unsigned long long)value->bits[i] * 10 + carry;
-    value->bits[i] = (unsigned int)(temp & 0xFFFFFFFF);
-    carry = temp >> 32;
-  }
-}
