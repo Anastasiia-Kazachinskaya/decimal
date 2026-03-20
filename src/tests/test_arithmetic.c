@@ -1,4 +1,6 @@
 #include "../s21_decimal.h"
+#include "../headers/s21_big_decimal.h"
+#include "../headers/s21_utils.h"
 
 #include <check.h>
 #include <limits.h>
@@ -6,8 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../headers/s21_big_decimal.h"
-#include "../headers/s21_utils.h"
+
 
 
 
@@ -198,6 +199,20 @@ START_TEST(s21_sub_positive_minus_negative){
 }
 END_TEST
 
+START_TEST(s21_sub_basic) {
+    s21_decimal a = {{5, 0, 0, 0}};   // 5
+    s21_decimal b = {{3, 0, 0, 0}};   // 3
+    s21_decimal result = {0};
+    
+    int code = s21_sub(a, b, &result);
+    
+    ck_assert_int_eq(code, OK);              // Без ошибок
+    ck_assert_uint_eq(result.bits[0], 2);    // 5 - 3 = 2
+    ck_assert_uint_eq(result.bits[1], 0);    // Остальные биты 0
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_uint_eq(result.bits[3], 0);    // Положительный знак
+}
+END_TEST
 
 
 Suite *s21_arithmetic_suite(void) {
@@ -211,6 +226,8 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_modules_five_minus_five);
     tcase_add_test(tc_core, s21_sub_negative_minus_positive);
     tcase_add_test(tc_core, s21_sub_positive_minus_negative);
+
+    tcase_add_test(tc_core, s21_sub_basic);
 
 
     suite_add_tcase(s, tc_core);
