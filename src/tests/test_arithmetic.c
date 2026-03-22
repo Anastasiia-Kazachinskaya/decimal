@@ -10,8 +10,6 @@
 
 
 
-
-
 // s21_sub tests section
 START_TEST(s21_sub_positive_minus_zero){
     int status;
@@ -214,6 +212,38 @@ START_TEST(s21_sub_basic) {
 }
 END_TEST
 
+START_TEST(s21_sub_test_failing_0) {
+    s21_decimal value_1 = {{879, 0, 0, 0x00050000}};   // -0.00879, scale = 5
+    s21_decimal value_2 = {{123456, 0, 0, 0x00060000}}; // 0.123456, scale = 6
+
+    // переводим value_1 в scale = 6: -0.00879 → -0.008790
+    // value_2 уже scale = 6: 0.123456
+    // 0.008790 + 0.123456 = 0.132246 → result = -0.132246
+
+    value_1.bits[3] |= 0x80000000;  // sign = 1
+
+    s21_decimal result = {0};
+
+    // -0.132246, scale = 6, sign = 1
+    s21_decimal result_exp = {{132246, 0, 0, 0x80060000}};
+
+
+    int code = s21_sub(value_1, value_2, &result);
+
+    ck_assert_int_eq(code, OK);
+
+    ck_assert_uint_eq(result.bits[0], result_exp.bits[0]);
+    ck_assert_uint_eq(result.bits[1], result_exp.bits[1]);
+    ck_assert_uint_eq(result.bits[2], result_exp.bits[2]);
+
+    ck_assert_int_eq(s21_get_sign(&result), 1);
+    ck_assert_int_eq(s21_get_scale(&result), 6);
+    ck_assert_int_eq(s21_get_scale(&result_exp), 6);
+}
+END_TEST
+
+
+
 
 Suite *s21_arithmetic_suite(void) {
     Suite *s = suite_create("arithmetic");
@@ -228,6 +258,8 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_positive_minus_negative);
 
     tcase_add_test(tc_core, s21_sub_basic);
+
+    tcase_add_test(tc_core, s21_sub_test_failing_0);
 
 
     suite_add_tcase(s, tc_core);
