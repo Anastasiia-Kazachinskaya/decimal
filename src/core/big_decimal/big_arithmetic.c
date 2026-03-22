@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "../../headers/s21_big_decimal.h"
 #include "../../headers/s21_utils.h"
@@ -70,6 +71,7 @@ int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
   uint32_t borrow = 0;
 
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+    // printf("bits[%d] = %08x\n", i, value_1.bits[i]);
     uint64_t a = value_1.bits[i];
     uint64_t b = value_2.bits[i];
 

@@ -96,6 +96,8 @@ s21_big_decimal s21_decimal_to_big_internal(s21_decimal* value) {
   return res;
 }
 
+
+
 s21_decimal s21_big_to_decimal_internal(s21_big_decimal* big_result,
                                         s21_decimal* result) {
   if (!big_result || !result) {
@@ -113,7 +115,7 @@ s21_decimal s21_big_to_decimal_internal(s21_big_decimal* big_result,
     result->bits[3] |= 1u << 31;
   }
   // 0xFF это маска 11111111 (гарантирует, что при scale > 28 мы не выйдем за
-  // перделы диапазона 16 - 23 бит)
+  // пределы диапазона 16 - 23 бит)
   result->bits[3] |= (big_result->scale & 0xFF) << 16;
 
   return *result;
