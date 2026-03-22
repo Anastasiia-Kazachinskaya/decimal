@@ -242,6 +242,19 @@ START_TEST(s21_sub_test_failing_0) {
 }
 END_TEST
 
+START_TEST(s21_big_apply_bankers_round_test) {
+    s21_big_decimal big = {0};
+    big.bits[0] = 0xFFFFFFFF;  // 96‑бит = 0xFFFFFFFF
+    big.bits[3] = 1;            // 0.5
+    big.bits[4] = 1;            // rest_dropped = 1
+    
+    int code = s21_big_apply_bankers_round(&big);  // >> 0.5 → round up
+    ck_assert_int_eq(code, OK);
+    ck_assert_int_eq(big.bits[0], 0x00000000);  // increment
+    ck_assert_int_eq(big.bits[1], 0x00000001);  // carry
+    // bits[3..6] = 0
+}
+END_TEST
 
 
 
@@ -260,6 +273,8 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_basic);
 
     tcase_add_test(tc_core, s21_sub_test_failing_0);
+
+    tcase_add_test(tc_core, s21_big_apply_bankers_round_test);
 
 
     suite_add_tcase(s, tc_core);
