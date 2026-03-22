@@ -2,6 +2,7 @@
 #include "../../headers/s21_utils.h"
 #include "../../s21_decimal.h"
 
+
 int s21_from_decimal_to_float(s21_decimal src, float* dst) {
   int res = CONVERTATION_ERROR;
   if (dst) {
@@ -46,11 +47,46 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   return res;
 }
 
-// int s21_from_float_to_decimal(float src, s21_decimal* dst) {
-//   if (src < 0) dst->bits[3] |= 1u << 31;
+int s21_from_float_to_decimal(float src, s21_decimal* dst) {
+  int res = CONVERTATION_ERROR;
+  if (float_or_dec_error(src, dst)) return res;
 
-//   return 0;
-// }
+  int sign = float_sign(&src);
+  char str[64];
+  int precision = set_precision(src);
+  snprintf(str, sizeof(str), "%.*e", precision - 1, src);
+  long long mantissa = 0;
+  int exponent = 0;
+  int digits_after_dot = 0;
+  char* e_pos = strchr(str, 'e');
+  if (!e_pos) e_pos = strchr(str, 'E');
+  if (e_pos) {
+    apply_exponent(e_pos, &mantissa, &exponent, &digits_after_dot, str);
+  }
+  int scale = digits_after_dot - exponent;
+
+  if (scale > 28) {
+    if (scale_lower(&scale, &mantissa)) res = OK;
+  }
+
+  while (mantissa % 10 == 0 && mantissa != 0 && scale > 0) {
+    mantissa /= 10;
+    scale--;
+  }
+
+  if (scale < 0) {
+    if (scale_upper(&scale, &mantissa, dst)) res = OK;
+  } else {
+    dst->bits[0] = (unsigned int)(mantissa & 0xFFFFFFFF);
+    dst->bits[1] = (unsigned int)((mantissa >> 32) & 0xFFFFFFFF);
+    dst->bits[2] = 0;
+    res = OK;
+  }
+
+  dst->bits[3] = (unsigned int)((scale & 0xFF) << 16);
+  if (sign) dst->bits[3] |= (1u << 31);
+  return res;
+}
 
 int s21_from_int_to_decimal(int src, s21_decimal* dst) {
   int res = CONVERTATION_ERROR;

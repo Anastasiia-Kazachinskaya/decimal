@@ -35,5 +35,3 @@ int big_set_bit(s21_big_decimal* value, int bit_index, char bit) {
   }
   return 0;
 }
-
-

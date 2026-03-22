@@ -199,7 +199,6 @@ int s21_normalize_pair(s21_decimal* value_1, s21_decimal* value_2) {
 // 1 = нужно банковское округление (данные в битах [3 .. 6])
 // 2 = фатальная ошибка (переполнение 224 (S21_BIG_DECIMAL_SIZE))
 int s21_normalize_and_check_overflow(s21_big_decimal* value) {
-
   int status = OK;
 
   int overflow = 0;
@@ -214,7 +213,6 @@ int s21_normalize_and_check_overflow(s21_big_decimal* value) {
     status = OK;
   }
   return status;  // 0
-
 }
 
 static void s21_set_scale_internal(s21_decimal* value, int scale) {
@@ -284,7 +282,6 @@ int s21_is_big_equal(s21_big_decimal value_1, s21_big_decimal value_2) {
   return 1;
 }
 
-
 // Умножает big_decimal на 10, возвращает 0 при успехе, 1 при переполнении
 int s21_multiply_big_by_10(s21_big_decimal* value) {
   int status = OK;
@@ -303,13 +300,9 @@ int s21_multiply_big_by_10(s21_big_decimal* value) {
   }
 
   return status;
-
 }
 
-
-
 static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
-
   int status = OK;
 
   if (!val || target_scale < val->scale) return CALCULATION_ERROR;
@@ -319,9 +312,7 @@ static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
     }
   }
   return status;
-
 }
-
 
 // вычисляет порог округления 10^scale / 2
 static void s21_compute_rounding_threshold(int scale, s21_big_decimal* half) {
@@ -357,7 +348,6 @@ static int s21_compute_fractional_big(s21_decimal original,
   return status;
 }
 
-
 static int s21_apply_rounding(s21_decimal* result, s21_big_decimal* fractional,
                               s21_big_decimal* half) {
   int status = OK;
@@ -367,7 +357,6 @@ static int s21_apply_rounding(s21_decimal* result, s21_big_decimal* fractional,
       s21_is_big_equal(*fractional, *half)) {
     if (s21_inc_decimal(result) != OK) {
       status = CALCULATION_ERROR;
-
     }
   }
 
