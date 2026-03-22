@@ -53,22 +53,23 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     if (big1.sign != big2.sign) {
         s21_big_add(big1, big2, &res_big);
         res_big.sign = big1.sign;
+        res_big.scale = big1.scale;
     } else {
         if (s21_is_big_greater(big1, big2)) {
             s21_big_sub(big1, big2, &res_big);
             res_big.sign = big1.sign;
+            res_big.scale = big1.scale;
         } else if (s21_is_big_less(big1, big2)) {
             s21_big_sub(big2, big1, &res_big);
             res_big.sign = big2.sign;
+            res_big.scale = big2.scale;
         } else {
             s21_null_big_decimal(&res_big);
             res_big.sign = 0;
+            res_big.scale = big1.scale;
         }
     }
-    // пока не удалять
-    // if (s21_normalize_and_check_overflow(&res_big) == 1) {
-    //     return ERROR;
-    // }
+
 
     int overflow_status = s21_normalize_and_check_overflow(&res_big);
 
@@ -86,6 +87,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 }
 
 
+
 // Округляет 224-битное значение до 96 бит по правилу "половина к чётному"
 // Возвращает OK, если успешно; ERROR, если переполнение даже после округления
 int s21_big_apply_bankers_round(s21_big_decimal* value) {
@@ -96,7 +98,7 @@ int s21_big_apply_bankers_round(s21_big_decimal* value) {
     uint32_t first_dropped = value->bits[3];  // биты 96..127
     uint32_t rest_dropped = 0; 
     
-    // Есть ли ненулевые биты после позиции 127?
+    // Есть ли ненулевые биты после позиции 127? #TODO: убрать break
     for (int i = 4; i < S21_BIG_DECIMAL_SIZE; i++) {
         if (value->bits[i] != 0) {
             // Есть ли НЕЗНАЧИМЫЕ биты после 127?
