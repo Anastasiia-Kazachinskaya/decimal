@@ -134,9 +134,11 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     }
 
     if (is_greater_than_max) {
-      printf("%s\n",
-             "ошибка №7 - число превышает максимальное значение decimal");
-      return CONVERTATION_ERROR;
+        if (res_big.sign == 0) {
+            return 1;  // 1 - слишком велико
+        } else {
+            return 2;  // 2 - слишком мало
+        }
     }
   }
   printf("Final res_big before conversion:\n");
