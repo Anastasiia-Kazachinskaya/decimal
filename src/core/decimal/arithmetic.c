@@ -55,11 +55,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     big1.sign = 0;
     big2.sign = 0;
 
-    int code = s21_big_add(big1, big2, &res_big);
-    if (code != OK) {
-      printf("%s\n", "ошибка №2");
-      return CALCULATION_ERROR;
-    }
+    s21_big_add(big1, big2, &res_big);
 
     res_big.sign = sign1;
 
