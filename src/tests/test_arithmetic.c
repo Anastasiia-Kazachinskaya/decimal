@@ -242,6 +242,16 @@ START_TEST(s21_sub_test_failing_0) {
 }
 END_TEST
 
+START_TEST (s21_sub_test_result_is_null) {
+    s21_decimal a = {{5, 0, 0, 0}};
+    s21_decimal b = {{3, 0, 0, 0}};
+
+
+    int code = s21_sub(a, b, NULL);
+
+    ck_assert_int_eq(code, 1); 
+}
+END_TEST
 
 
 
@@ -260,6 +270,8 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_basic);
 
     tcase_add_test(tc_core, s21_sub_test_failing_0);
+
+    tcase_add_test(tc_core, s21_sub_test_result_is_null);
 
 
     suite_add_tcase(s, tc_core);
