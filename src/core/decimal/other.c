@@ -179,10 +179,11 @@ int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2) {
   int target_scale =
       (value_1->scale > value_2->scale) ? value_1->scale : value_2->scale;
 
-  if (target_scale > 14) {  // не поднимать до 28; ограничение по требованиям задачи
-    target_scale = 15;
-  }
-  
+  // if (target_scale > 14) {  // не поднимать до 28; ограничение по требованиям
+  // задачи
+  //   target_scale = 15;
+  // }
+
   if (s21_scale_normalize_big_to(value_1, target_scale) != OK) {
     status = CALCULATION_ERROR;
   }
@@ -203,7 +204,6 @@ int s21_normalize_pair(s21_decimal* value_1, s21_decimal* value_2) {
 // 1 = нужно банковское округление (данные в битах [3 .. 6])
 // 2 = фатальная ошибка (переполнение 224 (S21_BIG_DECIMAL_SIZE))
 int s21_normalize_and_check_overflow(s21_big_decimal* value) {
-
   int status = OK;
 
   int overflow = 0;
@@ -213,6 +213,7 @@ int s21_normalize_and_check_overflow(s21_big_decimal* value) {
     value->bits[i] &= MAX4BITE;
   }
   if (overflow) {
+    printf("/n%s/n", "overflow");
     status = 1;  // 1
   } else {
     status = OK;
@@ -228,16 +229,17 @@ int s21_normalize_and_check_overflow(s21_big_decimal* value) {
   // 224‑битный диапазон: проверка только на true переполнение,
   // а не на просто "есть биты [3..6]"
   for (int i = 3; i < 8; i++) {
-      if (value->bits[i] != 0 && overflow != 0) {  // переполнение и биты дальше 96
-          status = 2;  // 2 = фатальная ошибка
-      }
+    if (value->bits[i] != 0 &&
+        overflow != 0) {  // переполнение и биты дальше 96
+      status = 2;         // 2 = фатальная ошибка
+    }
   }
 
   // добавь вывод:
-  printf("s21_normalize_and_check_overflow: overflow = %d, status = %d\n", overflow, status);
+  printf("s21_normalize_and_check_overflow: overflow = %d, status = %d\n",
+         overflow, status);
 
   return status;  // 0
-
 }
 
 static void s21_set_scale_internal(s21_decimal* value, int scale) {
@@ -307,7 +309,6 @@ int s21_is_big_equal(s21_big_decimal value_1, s21_big_decimal value_2) {
   return 1;
 }
 
-
 // Умножает big_decimal на 10, возвращает 0 при успехе, 1 при переполнении
 int s21_multiply_big_by_10(s21_big_decimal* value) {
   int status = OK;
@@ -326,25 +327,21 @@ int s21_multiply_big_by_10(s21_big_decimal* value) {
   }
 
   return status;
-
 }
 
-
-
 static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
+  if (!val || target_scale < val->scale) {
+    return CALCULATION_ERROR;
+  }
 
-  int status = OK;
-
-  if (!val || target_scale < val->scale) return CALCULATION_ERROR;
   while (val->scale < target_scale) {
     if (s21_multiply_big_by_10(val) != OK) {
       return CALCULATION_ERROR;
     }
   }
-  return status;
 
+  return OK;
 }
-
 
 // вычисляет порог округления 10^scale / 2
 static void s21_compute_rounding_threshold(int scale, s21_big_decimal* half) {
@@ -380,7 +377,6 @@ static int s21_compute_fractional_big(s21_decimal original,
   return status;
 }
 
-
 static int s21_apply_rounding(s21_decimal* result, s21_big_decimal* fractional,
                               s21_big_decimal* half) {
   int status = OK;
@@ -390,7 +386,6 @@ static int s21_apply_rounding(s21_decimal* result, s21_big_decimal* fractional,
       s21_is_big_equal(*fractional, *half)) {
     if (s21_inc_decimal(result) != OK) {
       status = CALCULATION_ERROR;
-
     }
   }
 

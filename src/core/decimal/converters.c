@@ -96,8 +96,6 @@ s21_big_decimal s21_decimal_to_big_internal(s21_decimal* value) {
   return res;
 }
 
-
-
 s21_decimal s21_big_to_decimal_internal(s21_big_decimal* big_result,
                                         s21_decimal* result) {
   if (!big_result || !result) {
@@ -107,16 +105,40 @@ s21_decimal s21_big_to_decimal_internal(s21_big_decimal* big_result,
   }
 
   s21_null_decimal(result);
-  for (int i = 0; i < 3; ++i) {
-    result->bits[i] = big_result->bits[i];
+
+  // Проверяем, есть ли биты выше 96-го (bits[3] и выше)
+  // Но если bits[3] ненулевой, это часть 128-битной мантиссы
+  // Проверяем bits[4] и выше для реального переполнения
+  int has_overflow = 0;
+  for (int i = 4; i < 8; i++) {
+    if (big_result->bits[i] != 0) {
+      has_overflow = 1;
+      break;
+    }
   }
 
+  if (has_overflow) {
+    // Есть переполнение - нужно уменьшать scale
+    // Для простоты пока возвращаем ошибку
+    return *result;
+  }
+
+  // Копируем 96-битную мантиссу (bits[0-2])
+  // bits[3] содержит старшие биты 128-битного числа, но для decimal
+  // нужно 96 бит, поэтому берём только bits[0-2]
+  result->bits[0] = big_result->bits[0];
+  result->bits[1] = big_result->bits[1];
+  result->bits[2] = big_result->bits[2];
+
+  // Устанавливаем знак
   if (big_result->sign) {
     result->bits[3] |= 1u << 31;
   }
-  // 0xFF это маска 11111111 (гарантирует, что при scale > 28 мы не выйдем за
-  // пределы диапазона 16 - 23 бит)
-  result->bits[3] |= (big_result->scale & 0xFF) << 16;
+
+  // Устанавливаем scale
+  int scale = big_result->scale;
+  if (scale > 28) scale = 28;
+  result->bits[3] |= (scale & 0xFF) << 16;
 
   return *result;
 }
