@@ -266,13 +266,9 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_modules_five_minus_five);
     tcase_add_test(tc_core, s21_sub_negative_minus_positive);
     tcase_add_test(tc_core, s21_sub_positive_minus_negative);
-
     tcase_add_test(tc_core, s21_sub_basic);
-
     tcase_add_test(tc_core, s21_sub_test_failing_0);
-
     tcase_add_test(tc_core, s21_sub_test_result_is_null);
-
 
     suite_add_tcase(s, tc_core);
     return s;
