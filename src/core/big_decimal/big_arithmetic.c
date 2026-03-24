@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "../../headers/s21_big_decimal.h"
@@ -48,13 +49,19 @@ int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
 
   // Складываем по словам с учётом переноса
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+    printf("сложение до биг децимал \nval1 bits[%d] = %d\n", i,
+           value_1.bits[i]);
+    printf("val 2 bits[%d] = %d\n", i, value_2.bits[i]);
     uint64_t sum = (uint64_t)value_1.bits[i] + value_2.bits[i] + carry;
     result->bits[i] = (uint32_t)(sum & 0xFFFFFFFF);  // младшие 32 бита
     carry = (uint32_t)(sum >> 32);  // старшие биты = перенос
+    printf("сложение после биг децимал \nres bits[%d] = %d\n", i,
+           result->bits[i]);
   }
 
   // Если после обработки последнего слова остался carry — это переполнение
   if (carry) {
+    printf("/n%s/n", "переполнение");
     return ERROR;
   }
 
@@ -68,6 +75,8 @@ int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
   uint32_t borrow = 0;
 
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+    printf("вычитание биг децимал \nbits[%d] = %d\n", i, value_1.bits[i]);
+    printf("bits[%d] = %d\n", i, value_2.bits[i]);
     uint64_t a = value_1.bits[i];
     uint64_t b = value_2.bits[i];
 
@@ -81,6 +90,7 @@ int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
 
   // Если после последнего разряда остался borrow — переполнение (underflow)
   if (borrow) {
+    printf("/n%s/n", "переполнение");
     return ERROR;
   }
 

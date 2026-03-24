@@ -44,12 +44,24 @@ test: $(TEST_OBJ) $(LIB)
 	$(CC) $(CFLAGS) -o $(TEST_EXE) $(TEST_OBJ) $(LIB) $(CHECK_LIBS)
 	@./$(TEST_EXE)
 
+# gcov_report: $(DECIMAL_SOURCES) $(TEST_SRC)
+# 	$(CC) $(CFLAGS) --coverage -o $(TEST_EXE) $(DECIMAL_SOURCES) $(TEST_SRC) $(CHECK_LIBS)
+# 	./$(TEST_EXE)
+# 	@mkdir -p $(REPORT_DIR)
+# 	@gcovr --html-details $(REPORT_DIR)/$(REPORT)
+# 	@rm -rf *.gcov *.gcno *.gcda
+
 gcov_report: $(DECIMAL_SOURCES) $(TEST_SRC)
 	$(CC) $(CFLAGS) --coverage -o $(TEST_EXE) $(DECIMAL_SOURCES) $(TEST_SRC) $(CHECK_LIBS)
 	./$(TEST_EXE)
-	@mkdir -p $(REPORT_DIR)
-	@gcovr --html-details $(REPORT_DIR)/$(REPORT)
-	@rm -rf *.gcov *.gcno *.gcda
+	mkdir -p $(REPORT_DIR)
+	gcovr --html-details $(REPORT_DIR)/$(REPORT) \
+		--filter 'core/decimal/arithmetic.c' \
+		--filter 'core/decimal/comparison.c' \
+		--filter 'core/decimal/converters.c' \
+		--filter 'core/decimal/other.c'
+	rm -rf *.gcov *.gcno *.gcda
+
 
 clean:
 	rm -rf $(OBJECTS) $(LIB) $(TEST_OBJ) $(TEST_EXE) *.gcov *.gcno *.gcda

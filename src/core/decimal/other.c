@@ -137,8 +137,7 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
 }
 
 int s21_divide_mantissa_by_10(s21_decimal* value) {
-  int status = OK;
-
+  
   if (!value) return CALCULATION_ERROR;
 
   uint32_t remainder = 0;
@@ -148,11 +147,9 @@ int s21_divide_mantissa_by_10(s21_decimal* value) {
     value->bits[i] = (uint32_t)(temp / 10);
     remainder = (uint32_t)(temp % 10);
   }
-  if (remainder) {
-    status = CALCULATION_ERROR;
-  }
 
-  return status;
+
+  return remainder ? 1 : 0;
 }
 
 static int s21_increment_mantissa(s21_decimal* value) {
@@ -178,6 +175,11 @@ int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2) {
 
   int target_scale =
       (value_1->scale > value_2->scale) ? value_1->scale : value_2->scale;
+
+  // if (target_scale > 14) {  // не поднимать до 28; ограничение по требованиям
+  // задачи
+  //   target_scale = 15;
+  // }
 
   if (s21_scale_normalize_big_to(value_1, target_scale) != OK) {
     status = CALCULATION_ERROR;
@@ -208,7 +210,8 @@ int s21_normalize_and_check_overflow(s21_big_decimal* value) {
     value->bits[i] &= MAX4BITE;
   }
   if (overflow) {
-    status = CALCULATION_ERROR;  // 1
+    printf("/n%s/n", "overflow");
+    status = 1;  // 1
   } else {
     status = OK;
   }
@@ -308,7 +311,7 @@ static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
   if (!val || target_scale < val->scale) return CALCULATION_ERROR;
   while (val->scale < target_scale) {
     if (s21_multiply_big_by_10(val) != OK) {
-      break;
+      return CALCULATION_ERROR;
     }
   }
   return status;

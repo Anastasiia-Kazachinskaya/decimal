@@ -5,6 +5,7 @@
 
 #define S21_BIG_DECIMAL_SIZE 8
 #define ERROR 1;
+
 #define OK 0
 
 typedef struct {
@@ -40,5 +41,7 @@ int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
                 s21_big_decimal* result);
 int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
                 s21_big_decimal* result);
+
+int s21_big_apply_bankers_round(s21_big_decimal* value);
 
 #endif

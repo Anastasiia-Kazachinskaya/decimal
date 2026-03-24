@@ -3,7 +3,7 @@
 
 #define OK 0
 
-#define CALCULATION_ERROR 1
+#define CALCULATION_ERROR 2
 
 #define CONVERTATION_ERROR 1
 #define NUMNER_TO_LARGE 1

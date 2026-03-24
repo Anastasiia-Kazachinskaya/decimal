@@ -440,6 +440,7 @@ START_TEST(s21_floor_negative_carry_bits0_to_bits1) {
 END_TEST
 
 
+
 Suite *s21_other_suite(void) {
     Suite *s = suite_create("other");
     TCase *tc_core = tcase_create("Core");
