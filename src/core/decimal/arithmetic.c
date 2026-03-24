@@ -30,7 +30,6 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   if (!result) {
-    printf("%s\n", "ошибка №1");
     return ERROR;
   }
 
@@ -39,107 +38,41 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_big_decimal big1 = s21_decimal_to_big_internal(&value_1);
   s21_big_decimal big2 = s21_decimal_to_big_internal(&value_2);
 
-  int sign1 = big1.sign;
-  int sign2 = big2.sign;
-
   s21_normalize_big_pair(&big1, &big2);
 
   s21_big_decimal res_big;
   s21_null_big_decimal(&res_big);
 
-  int target_scale = big1.scale;
-
-  if (sign1 != sign2) {
-    // Разные знаки: (-A) - (+B) = -(A + B)
-    big1.sign = 0;
-    big2.sign = 0;
-
+  if (big1.sign != big2.sign) {
     s21_big_add(big1, big2, &res_big);
-
-    res_big.sign = sign1;
-
+    res_big.sign = big1.sign;
   } else {
-    // Одинаковые знаки
     if (s21_is_big_greater(big1, big2)) {
-      int code = s21_big_sub(big1, big2, &res_big);
-      if (code != OK) {
-        printf("%s\n", "ошибка №3");
-        return CALCULATION_ERROR;
-      }
-      res_big.sign = sign1;
+      s21_big_sub(big1, big2, &res_big);
+      res_big.sign = big1.sign;
     } else if (s21_is_big_less(big1, big2)) {
-      int code = s21_big_sub(big2, big1, &res_big);
-      if (code != OK) {
-        printf("%s\n", "ошибка №4");
-        return CALCULATION_ERROR;
-      }
-      res_big.sign = sign1 ? 0 : 1;
+      s21_big_sub(big2, big1, &res_big);
+      res_big.sign = big2.sign;
     } else {
       s21_null_big_decimal(&res_big);
       res_big.sign = 0;
     }
   }
+  // пока не удалять
+  // if (s21_normalize_and_check_overflow(&res_big) == 1) {
+  //     return ERROR;
+  // }
 
-  res_big.scale = target_scale;
+  int overflow_status = s21_normalize_and_check_overflow(&res_big);
 
-  // === ВАЖНО: Проверяем и обрабатываем переполнение ===
-  int has_overflow = 0;
-  for (int i = 3; i < 8; i++) {
-    if (res_big.bits[i] != 0) {
-      has_overflow = 1;
-      break;
-    }
-  }
-
-  if (has_overflow) {
-    printf("Applying bankers round (bits[3]=%08x)\n", res_big.bits[3]);
-
+  if (overflow_status == 1) {  // 1 - нужно банковское округление
     if (s21_big_apply_bankers_round(&res_big) != OK) {
-      printf("%s\n", "ошибка №5");
-      return CALCULATION_ERROR;
+      return ERROR;
     }
-
-    for (int i = 3; i < 8; i++) {
-      if (res_big.bits[i] != 0) {
-        printf("FATAL: bits[%d] = %08x after rounding\n", i, res_big.bits[i]);
-        printf("%s\n", "ошибка №6");
-        return CALCULATION_ERROR;
-      }
-    }
-
-    // При округлении scale должен уменьшиться на 1
-    if (res_big.scale > 0) {
-      res_big.scale--;
-    }
+  } else if (overflow_status ==
+             2) {  // фатальная ошибка при обработке переполнения
+    return ERROR;
   }
-  if (res_big.scale == 0) {
-    // Проверяем, не превышает ли мантисса максимальное значение
-    int is_greater_than_max = 0;
-
-    if (res_big.bits[2] > 0x1F3F) {
-      is_greater_than_max = 1;
-    } else if (res_big.bits[2] == 0x1F3F) {
-      if (res_big.bits[1] > 0xFFFFFFFF) {
-        is_greater_than_max = 1;
-      } else if (res_big.bits[1] == 0xFFFFFFFF) {
-        if (res_big.bits[0] > 0xFFFFFFFF) {
-          is_greater_than_max = 1;
-        }
-      }
-    }
-
-    if (is_greater_than_max) {
-        if (res_big.sign == 0) {
-            return 1;  // 1 - слишком велико
-        } else {
-            return 2;  // 2 - слишком мало
-        }
-    }
-  }
-  printf("Final res_big before conversion:\n");
-  printf("  bits[0-3]: %08x %08x %08x %08x\n", res_big.bits[0], res_big.bits[1],
-         res_big.bits[2], res_big.bits[3]);
-  printf("  scale = %d, sign = %d\n", res_big.scale, res_big.sign);
 
   s21_big_to_decimal_internal(&res_big, result);
 
