@@ -2,6 +2,7 @@
 #define S21_BIG_DECIMAL_H
 
 #include "../s21_decimal.h"
+#include <stdint.h>
 
 #define S21_BIG_DECIMAL_SIZE 8
 #define ERROR 1;
