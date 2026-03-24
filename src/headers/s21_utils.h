@@ -2,6 +2,8 @@
 #define S21_UTIL_H
 
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "../s21_decimal.h"
 #include "s21_big_decimal.h"
@@ -12,6 +14,7 @@
 
 #define MIN_INT -2147483648
 #define MAX_INT 2147483647
+#define FLOAT_DIGITS 7
 
 int s21_get_sign(s21_decimal* value);              // DO
 int s21_get_scale(s21_decimal* value);             // TODO
@@ -46,5 +49,14 @@ int s21_multiply_big_by_10(s21_big_decimal* value);
 
 int s21_decimal_check(s21_decimal value);
 void copy_decimal(s21_decimal* value_1, s21_decimal* value_2);
+int set_precision(float src);
+void apply_exponent(char* e_pos, long long* mantissa, int* exponent,
+                    int* digits_after_dot, char* str);
+int scale_upper(int* scale, long long* mantissa, s21_decimal* dst);
+int scale_lower(int* scale, long long* mantissa);
+int float_sign(float* src);
+int float_or_dec_error(float src, s21_decimal* dst);
+int s21_str_to_int(const char* str);
+long long s21_str_to_ll(const char* str);
 
 #endif

@@ -215,27 +215,6 @@ int s21_normalize_and_check_overflow(s21_big_decimal* value) {
   } else {
     status = OK;
   }
-
-  // // проверка на overflow 224-битный диапазон
-  // for (int i = S21_DECIMAL_LIMIT; i < S21_BIG_DECIMAL_SIZE; i++) {
-  //     if (value->bits[i] != 0) {
-  //         status = 2;  // 2
-  //     }
-  // }
-
-  // 224‑битный диапазон: проверка только на true переполнение,
-  // а не на просто "есть биты [3..6]"
-  for (int i = 3; i < 8; i++) {
-    if (value->bits[i] != 0 &&
-        overflow != 0) {  // переполнение и биты дальше 96
-      status = 2;         // 2 = фатальная ошибка
-    }
-  }
-
-  // добавь вывод:
-  printf("s21_normalize_and_check_overflow: overflow = %d, status = %d\n",
-         overflow, status);
-
   return status;  // 0
 }
 
@@ -327,17 +306,15 @@ int s21_multiply_big_by_10(s21_big_decimal* value) {
 }
 
 static int s21_scale_normalize_big_to(s21_big_decimal* val, int target_scale) {
-  if (!val || target_scale < val->scale) {
-    return CALCULATION_ERROR;
-  }
+  int status = OK;
 
+  if (!val || target_scale < val->scale) return CALCULATION_ERROR;
   while (val->scale < target_scale) {
     if (s21_multiply_big_by_10(val) != OK) {
       return CALCULATION_ERROR;
     }
   }
-
-  return OK;
+  return status;
 }
 
 // вычисляет порог округления 10^scale / 2
