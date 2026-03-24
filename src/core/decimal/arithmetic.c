@@ -12,7 +12,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 int s21_big_apply_bankers_round(s21_big_decimal* value);
 int s21_big_bankers_round(s21_big_decimal* value);
-int s21_big_inc_lower_96(s21_big_decimal* value);
+
 
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result){
 //   s21_big_decimal* lhs = s21_decimal_to_big(&value_1);
@@ -239,14 +239,4 @@ int s21_big_apply_bankers_round(s21_big_decimal* value) {
 
   return OK;
 }
-// Вспомогательная: инкремент только нижних 96 бит (биты 0..2)
-int s21_big_inc_lower_96(s21_big_decimal* value) {
-  if (!value) return ERROR;
-  uint32_t carry = 1;
-  for (int i = 0; i < 3; i++) {
-    uint64_t sum = (uint64_t)value->bits[i] + carry;
-    value->bits[i] = (uint32_t)(sum & MAX4BITE);
-    carry = (uint32_t)(sum >> 32);
-  }
-  return (carry == 0) ? OK : ERROR;
-}
+
