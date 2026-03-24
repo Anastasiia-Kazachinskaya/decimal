@@ -10,9 +10,6 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
-<<<<<<< HEAD
-
-
 
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result){
 //   s21_big_decimal* lhs = s21_decimal_to_big(&value_1);
@@ -28,10 +25,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 //   return code;
 // }
-=======
-int s21_big_apply_bankers_round(s21_big_decimal* value);
-int s21_big_bankers_round(s21_big_decimal* value);
->>>>>>> 98124b4d9fe82c57d844678eb4109ff11b9373a1
+
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   if (!result) {
