@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "../../headers/s21_big_decimal.h"
+#include "../../headers/s21_utils.h"
 
 int get_scale(s21_big_decimal* value) {
   int p = 0;
@@ -131,3 +132,42 @@ int s21_big_apply_bankers_round(s21_big_decimal* value) {
 }
 
 
+
+int s21_big_perform_signed_operation(
+  int sign_1,
+  int sign_2,
+  s21_big_decimal* big_value_1,
+  s21_big_decimal* big_value_2,
+  s21_big_decimal* res_big) {
+  
+  
+  if (sign_1 != sign_2) {
+    // Разные знаки: (-A) - (+B) = -(A + B)
+    big_value_1->sign = 0;
+    big_value_2->sign = 0;
+
+    s21_big_add(*big_value_1, *big_value_2, res_big);
+
+    res_big->sign = sign_1;
+
+  } else {
+    // Одинаковые знаки
+    if (s21_is_big_greater(*big_value_1, *big_value_2)) {
+      int code = s21_big_sub(*big_value_1, *big_value_2, res_big);
+      if (code != OK) {
+        return CALCULATION_ERROR;
+      }
+      res_big->sign = sign_1;
+    } else if (s21_is_big_less(*big_value_1, *big_value_2)) {
+      int code = s21_big_sub(*big_value_2, *big_value_1, res_big);
+      if (code != OK) {
+        return CALCULATION_ERROR;
+      }
+      res_big->sign = sign_1 ? 0 : 1;
+    } else {
+      s21_null_big_decimal(res_big);
+      res_big->sign = 0;
+    }
+  }
+  return OK;
+}
