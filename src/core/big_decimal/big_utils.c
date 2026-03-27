@@ -171,3 +171,15 @@ int s21_big_perform_signed_operation(
   }
   return OK;
 }
+
+
+
+int check_overflow(s21_big_decimal value) {
+    int overflow = 0;
+    for (int i = 3; i < 8 && !overflow; i++) {
+      if (value.bits[i] != 0) {
+        overflow = 1;
+      }
+    }
+    return overflow;
+  }

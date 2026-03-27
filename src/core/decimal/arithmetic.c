@@ -11,7 +11,6 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 
-
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result){
 //   s21_big_decimal* lhs = s21_decimal_to_big(&value_1);
 //   s21_big_decimal* rhs = s21_decimal_to_big(&value_2);
@@ -55,15 +54,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 
   res_big.scale = target_scale;
 
-  // Проверяем и обрабатываем переполнение
-  int has_overflow = 0;
-  for (int i = 3; i < 8 && !has_overflow; i++) {
-    if (res_big.bits[i] != 0) {
-      has_overflow = 1;
-      // break;
-    }
-  }
-
+  int has_overflow = check_overflow(res_big);
   if (has_overflow) {
     // printf("Applying bankers round (bits[3]=%08x)\n", res_big.bits[3]);
 
