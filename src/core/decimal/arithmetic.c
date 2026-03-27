@@ -29,7 +29,6 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   if (!result) {
-    printf("%s\n", "ошибка №1");
     return ERROR;
   }
 
@@ -62,14 +61,12 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     if (s21_is_big_greater(big1, big2)) {
       int code = s21_big_sub(big1, big2, &res_big);
       if (code != OK) {
-        printf("%s\n", "ошибка №3");
         return CALCULATION_ERROR;
       }
       res_big.sign = sign1;
     } else if (s21_is_big_less(big1, big2)) {
       int code = s21_big_sub(big2, big1, &res_big);
       if (code != OK) {
-        printf("%s\n", "ошибка №4");
         return CALCULATION_ERROR;
       }
       res_big.sign = sign1 ? 0 : 1;
@@ -81,27 +78,27 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 
   res_big.scale = target_scale;
 
-  // === ВАЖНО: Проверяем и обрабатываем переполнение ===
+  // Проверяем и обрабатываем переполнение
   int has_overflow = 0;
-  for (int i = 3; i < 8; i++) {
+  for (int i = 3; i < 8 && !has_overflow; i++) {
     if (res_big.bits[i] != 0) {
       has_overflow = 1;
-      break;
+      // break;
     }
   }
 
   if (has_overflow) {
-    printf("Applying bankers round (bits[3]=%08x)\n", res_big.bits[3]);
+    // printf("Applying bankers round (bits[3]=%08x)\n", res_big.bits[3]);
 
     if (s21_big_apply_bankers_round(&res_big) != OK) {
-      printf("%s\n", "ошибка №5");
+      // printf("%s\n", "ошибка №5");
       return CALCULATION_ERROR;
     }
 
     for (int i = 3; i < 8; i++) {
       if (res_big.bits[i] != 0) {
-        printf("FATAL: bits[%d] = %08x after rounding\n", i, res_big.bits[i]);
-        printf("%s\n", "ошибка №6");
+        // printf("FATAL: bits[%d] = %08x after rounding\n", i, res_big.bits[i]);
+        // printf("%s\n", "ошибка №6");
         return CALCULATION_ERROR;
       }
     }
@@ -135,10 +132,10 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
         }
     }
   }
-  printf("Final res_big before conversion:\n");
-  printf("  bits[0-3]: %08x %08x %08x %08x\n", res_big.bits[0], res_big.bits[1],
-         res_big.bits[2], res_big.bits[3]);
-  printf("  scale = %d, sign = %d\n", res_big.scale, res_big.sign);
+  // printf("Final res_big before conversion:\n");
+  // printf("  bits[0-3]: %08x %08x %08x %08x\n", res_big.bits[0], res_big.bits[1],
+  //        res_big.bits[2], res_big.bits[3]);
+  // printf("  scale = %d, sign = %d\n", res_big.scale, res_big.sign);
 
   s21_big_to_decimal_internal(&res_big, result);
 
