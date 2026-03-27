@@ -64,5 +64,7 @@ int s21_big_perform_signed_operation(
   s21_big_decimal* big_value_1,
   s21_big_decimal* big_value_2,
   s21_big_decimal* res_big);
+  
+int check_overflow(s21_big_decimal value);
 
 #endif
