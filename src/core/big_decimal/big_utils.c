@@ -200,3 +200,14 @@ int check_mantissa(s21_big_decimal res_big) {
   }
   return status;
 }
+
+
+int check_overflow_after_bankers_round(s21_big_decimal res_big) {
+  int overflow = 0;
+  for (int i = 3; i < 8 && !overflow; i++) {
+    if (res_big.bits[i] != 0) {
+      overflow = 1;
+    }
+  }
+  return overflow;
+}
