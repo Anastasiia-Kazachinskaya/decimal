@@ -77,20 +77,8 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     }
   }
   if (res_big.scale == 0) {
-    // Проверяем, не превышает ли мантисса максимальное значение
-    int is_greater_than_max = 0;
-
-    if (res_big.bits[2] > 0x1F3F) {
-      is_greater_than_max = 1;
-    } else if (res_big.bits[2] == 0x1F3F) {
-      if (res_big.bits[1] > 0xFFFFFFFF) {
-        is_greater_than_max = 1;
-      } else if (res_big.bits[1] == 0xFFFFFFFF) {
-        if (res_big.bits[0] > 0xFFFFFFFF) {
-          is_greater_than_max = 1;
-        }
-      }
-    }
+    // Проверяем, не превышает ли мантисса максимальное значение 7999 в десятичной
+    int is_greater_than_max = check_mantissa(res_big);
 
     if (is_greater_than_max) {
         if (res_big.sign == 0) {
