@@ -67,5 +67,6 @@ int s21_big_perform_signed_operation(
   
 int check_overflow(s21_big_decimal value);
 int check_mantissa(s21_big_decimal res_big);
+int check_overflow_after_bankers_round(s21_big_decimal res_big);
 
 #endif

@@ -10,7 +10,6 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
-
 // int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result){
 //   s21_big_decimal* lhs = s21_decimal_to_big(&value_1);
 //   s21_big_decimal* rhs = s21_decimal_to_big(&value_2);
@@ -61,11 +60,9 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
       return CALCULATION_ERROR;
     }
 
-    for (int i = 3; i < 8; i++) {
-      if (res_big.bits[i] != 0) {
-        return CALCULATION_ERROR;
-      }
-    }
+    if (check_overflow_after_bankers_round(res_big) != 0) {
+      return CALCULATION_ERROR;
+    };
 
     // При округлении scale должен уменьшиться на 1
     if (res_big.scale > 0) {
