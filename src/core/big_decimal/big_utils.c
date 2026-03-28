@@ -183,3 +183,20 @@ int check_overflow(s21_big_decimal value) {
     }
     return overflow;
   }
+
+
+int check_mantissa(s21_big_decimal res_big) {
+  int status = 0;
+  if (res_big.bits[2] > 0x1F3F) {
+    status = 1;
+  } else if (res_big.bits[2] == 0x1F3F) {
+    if (res_big.bits[1] > 0xFFFFFFFF) {
+      status = 1;
+    } else if (res_big.bits[1] == 0xFFFFFFFF) {
+      if (res_big.bits[0] > 0xFFFFFFFF) {
+        status = 1;
+      }
+    }
+  }
+  return status;
+}
