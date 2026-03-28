@@ -66,5 +66,6 @@ int s21_big_perform_signed_operation(
   s21_big_decimal* res_big);
   
 int check_overflow(s21_big_decimal value);
+int check_mantissa(s21_big_decimal res_big);
 
 #endif
