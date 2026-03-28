@@ -56,17 +56,13 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 
   int has_overflow = check_overflow(res_big);
   if (has_overflow) {
-    // printf("Applying bankers round (bits[3]=%08x)\n", res_big.bits[3]);
 
     if (s21_big_apply_bankers_round(&res_big) != OK) {
-      // printf("%s\n", "ошибка №5");
       return CALCULATION_ERROR;
     }
 
     for (int i = 3; i < 8; i++) {
       if (res_big.bits[i] != 0) {
-        // printf("FATAL: bits[%d] = %08x after rounding\n", i, res_big.bits[i]);
-        // printf("%s\n", "ошибка №6");
         return CALCULATION_ERROR;
       }
     }
@@ -88,10 +84,6 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
         }
     }
   }
-  // printf("Final res_big before conversion:\n");
-  // printf("  bits[0-3]: %08x %08x %08x %08x\n", res_big.bits[0], res_big.bits[1],
-  //        res_big.bits[2], res_big.bits[3]);
-  // printf("  scale = %d, sign = %d\n", res_big.scale, res_big.sign);
 
   s21_big_to_decimal_internal(&res_big, result);
 
