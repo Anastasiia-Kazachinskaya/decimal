@@ -254,6 +254,27 @@ START_TEST (s21_sub_test_result_is_null) {
 END_TEST
 
 
+START_TEST(s21_sub_overflow_max) {
+    s21_decimal v1 = {{4294967295U, 4294967295U, 4294967295U, 0}};  // ~2^96-1
+    s21_decimal v2 = {{1, 0, 0, 0}};
+    s21_decimal result = {0};
+    int code = s21_sub(v1, v2, &result);
+    ck_assert_int_eq(code, 1);  // Переполнение
+    ck_assert_msg(code != 0, "Code=%d (ожидали 1 или 2)", code);
+}
+END_TEST
+
+
+START_TEST(s21_sub_overflow_min) {
+    s21_decimal v1 = {{1, 0, 0, 0}}; // ~(1 - 2^96)
+    s21_decimal v2 = {{4294967295U, 4294967295U, 4294967295U, 0}};
+
+    s21_decimal result = {0};
+    int code = s21_sub(v1, v2, &result);
+    ck_assert_int_eq(code, 2);  // Переполнение
+}
+END_TEST
+
 
 Suite *s21_arithmetic_suite(void) {
     Suite *s = suite_create("arithmetic");
@@ -269,6 +290,8 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_basic);
     tcase_add_test(tc_core, s21_sub_test_failing_0);
     tcase_add_test(tc_core, s21_sub_test_result_is_null);
+    tcase_add_test(tc_core, s21_sub_overflow_max);
+    tcase_add_test(tc_core, s21_sub_overflow_min);
 
     suite_add_tcase(s, tc_core);
     return s;
