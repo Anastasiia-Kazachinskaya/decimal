@@ -58,5 +58,16 @@ int float_sign(float* src);
 int float_or_dec_error(float src, s21_decimal* dst);
 int s21_str_to_int(const char* str);
 long long s21_str_to_ll(const char* str);
+int s21_big_perform_signed_operation(
+  int sign_1,
+  int sign_2,
+  s21_big_decimal* big_value_1,
+  s21_big_decimal* big_value_2,
+  s21_big_decimal* res_big);
+  
+int check_overflow(s21_big_decimal value);
+int check_mantissa(s21_big_decimal res_big);
+int check_overflow_after_bankers_round(s21_big_decimal res_big);
+int s21_handle_overflow_and_rounding(s21_big_decimal* res_big);
 
 #endif
