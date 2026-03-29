@@ -211,3 +211,24 @@ int check_overflow_after_bankers_round(s21_big_decimal res_big) {
   }
   return overflow;
 }
+
+
+int s21_handle_overflow_and_rounding(s21_big_decimal* res_big) {
+  int final_code = OK;
+  int has_overflow = check_overflow(*res_big);
+  if (has_overflow) {
+    if (s21_big_apply_bankers_round(res_big) != OK) {
+      final_code = CALCULATION_ERROR;
+    } else if (check_overflow_after_bankers_round(*res_big) != 0) {
+      final_code = CALCULATION_ERROR;
+    } else {
+      // При округлении scale должен уменьшиться на 1
+      if (res_big->scale > 0) {
+        res_big->scale--;
+      }
+    }
+    
+  }
+
+  return final_code;
+}
