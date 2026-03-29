@@ -34,47 +34,46 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_null_decimal(result);
   s21_big_decimal big1 = s21_decimal_to_big_internal(&value_1);
   s21_big_decimal big2 = s21_decimal_to_big_internal(&value_2);
+
   int sign1 = big1.sign;
   int sign2 = big2.sign;
-
   s21_normalize_big_pair(&big1, &big2);
-
   s21_big_decimal res_big;
   s21_null_big_decimal(&res_big);
-
   int target_scale = big1.scale;
   int code = s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
   if (code != OK) {
     return CALCULATION_ERROR;
   }
   res_big.scale = target_scale;
-  
+  int final_code = OK;
   int has_overflow = check_overflow(res_big);
   if (has_overflow) {
     if (s21_big_apply_bankers_round(&res_big) != OK) {
-      return CALCULATION_ERROR;
+      final_code = CALCULATION_ERROR;
     }
     if (check_overflow_after_bankers_round(res_big) != 0) {
-      return CALCULATION_ERROR;
+      final_code = CALCULATION_ERROR;
     };
     // При округлении scale должен уменьшиться на 1
     if (res_big.scale > 0) {
       res_big.scale--;
     }
   }
-  if (res_big.scale == 0) {
+  if (final_code == OK && res_big.scale == 0) {
     int is_greater_than_max = check_mantissa(res_big);
-
     if (is_greater_than_max) {
         if (res_big.sign == 0) {
-            return 1;  // 1 - слишком велико
+            final_code = 1;  // 1 - слишком велико
         } else {
-            return 2;  // 2 - слишком мало
+            final_code = 2;  // 2 - слишком мало
         }
     }
   }
-  s21_big_to_decimal_internal(&res_big, result);
-
-  return OK;
+  if (final_code == OK) {
+    s21_big_to_decimal_internal(&res_big, result);
+  }
+  
+  return final_code;
 }
 
