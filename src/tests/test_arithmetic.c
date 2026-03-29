@@ -275,6 +275,23 @@ START_TEST(s21_sub_overflow_min) {
 }
 END_TEST
 
+START_TEST(s21_handle_overflow_scale_decrement) {
+    s21_big_decimal test_big;
+    s21_null_big_decimal(&test_big);
+    
+    test_big.scale = 15;
+    test_big.bits[3] = 1;
+    
+    int initial_scale = test_big.scale;
+    ck_assert_int_eq(check_overflow(test_big), 1);
+    
+    int code = s21_handle_overflow_and_rounding(&test_big);
+    
+    ck_assert_int_eq(code, OK);
+    ck_assert_int_eq(test_big.scale, initial_scale);
+    ck_assert_int_eq(test_big.bits[3], 0);
+}
+END_TEST
 
 Suite *s21_arithmetic_suite(void) {
     Suite *s = suite_create("arithmetic");
@@ -292,6 +309,7 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_test_result_is_null);
     tcase_add_test(tc_core, s21_sub_overflow_max);
     tcase_add_test(tc_core, s21_sub_overflow_min);
+    tcase_add_test(tc_core, s21_handle_overflow_scale_decrement);
 
     suite_add_tcase(s, tc_core);
     return s;
