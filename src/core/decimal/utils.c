@@ -43,6 +43,12 @@ int s21_get_scale(s21_decimal* value) {
   return scale;
 }
 
+int s21_set_scale(s21_decimal* value, int scale) {
+  if (!value || scale < 0 || scale > 28) return 1;
+  value->bits[3] = (value->bits[3] & ~(0xFF << 16)) | ((scale & 0xFF) << 16);
+  return 0;
+}
+
 void s21_null_decimal(s21_decimal* value) {
   if (value) {
     memset(value, 0, sizeof(s21_decimal));

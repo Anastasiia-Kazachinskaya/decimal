@@ -64,8 +64,7 @@ int s21_big_apply_bankers_round(s21_big_decimal* value) {
     remainder = current % 10;
   }
 
-  // Увеличиваем scale
-  value->scale++;
+  value->scale--;
 
   // Банковское округление
   int round_up = 0;
@@ -104,12 +103,11 @@ int s21_big_apply_bankers_round(s21_big_decimal* value) {
       if (carry == 0) break;
     }
 
-    // Если переполнение мантиссы
     if (carry) {
       value->bits[0] = 0;
       value->bits[1] = 0;
       value->bits[2] = 0;
-      value->scale++;
+      value->scale--;
     }
   }
 
@@ -187,15 +185,10 @@ int check_overflow(s21_big_decimal value) {
 
 int check_mantissa(s21_big_decimal res_big) {
   int status = 0;
-  if (res_big.bits[2] > 0x1F3F) {
-    status = 1;
-  } else if (res_big.bits[2] == 0x1F3F) {
-    if (res_big.bits[1] > 0xFFFFFFFF) {
+  for (int i = 3; i < S21_BIG_DECIMAL_SIZE; i++) {
+    if (res_big.bits[i] != 0) {
       status = 1;
-    } else if (res_big.bits[1] == 0xFFFFFFFF) {
-      if (res_big.bits[0] > 0xFFFFFFFF) {
-        status = 1;
-      }
+      break;
     }
   }
   return status;
@@ -221,13 +214,7 @@ int s21_handle_overflow_and_rounding(s21_big_decimal* res_big) {
       final_code = CALCULATION_ERROR;
     } else if (check_overflow_after_bankers_round(*res_big) != 0) {
       final_code = CALCULATION_ERROR;
-    } else {
-      // При округлении scale должен уменьшиться на 1
-      if (res_big->scale > 0) {
-        res_big->scale--;
-      }
     }
-    
   }
 
   return final_code;

@@ -9,7 +9,6 @@
 #define S21_MAX_SCALE 28
 
 int s21_floor(s21_decimal value, s21_decimal* result);
-int s21_negate(s21_decimal value, s21_decimal* result);
 int s21_round(s21_decimal value, s21_decimal* result);
 int s21_truncate(s21_decimal value, s21_decimal* result);
 
@@ -210,8 +209,7 @@ int s21_normalize_and_check_overflow(s21_big_decimal* value) {
     value->bits[i] &= MAX4BITE;
   }
   if (overflow) {
-    printf("/n%s/n", "overflow");
-    status = 1;  // 1
+    status = 1;
   } else {
     status = OK;
   }
@@ -372,4 +370,13 @@ void s21_set_sign_internal(s21_decimal* result, int sign) {
   } else {
     result->bits[3] &= ~(1u << 31);
   }
+}
+
+int s21_negate(s21_decimal value, s21_decimal* result) {
+  if (!result) return CALCULATION_ERROR;
+
+  *result = value;
+  result->bits[3] ^= (1u << 31);
+
+  return OK;
 }

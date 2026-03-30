@@ -255,40 +255,46 @@ END_TEST
 
 
 START_TEST(s21_sub_overflow_max) {
-    s21_decimal v1 = {{4294967295U, 4294967295U, 4294967295U, 0}};  // ~2^96-1
+    // (2^96-1) - 1 = valid result
+    s21_decimal v1 = {{4294967295U, 4294967295U, 4294967295U, 0}};
     s21_decimal v2 = {{1, 0, 0, 0}};
     s21_decimal result = {0};
     int code = s21_sub(v1, v2, &result);
-    ck_assert_int_eq(code, 1);  // Переполнение
-    ck_assert_msg(code != 0, "Code=%d (ожидали 1 или 2)", code);
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq((unsigned)result.bits[0], 4294967294U);
+    ck_assert_uint_eq((unsigned)result.bits[1], 4294967295U);
+    ck_assert_uint_eq((unsigned)result.bits[2], 4294967295U);
 }
 END_TEST
 
 
 START_TEST(s21_sub_overflow_min) {
-    s21_decimal v1 = {{1, 0, 0, 0}}; // ~(1 - 2^96)
+    // 1 - (2^96-1) = -(2^96-2), fits in decimal with negative sign
+    s21_decimal v1 = {{1, 0, 0, 0}};
     s21_decimal v2 = {{4294967295U, 4294967295U, 4294967295U, 0}};
-
     s21_decimal result = {0};
     int code = s21_sub(v1, v2, &result);
-    ck_assert_int_eq(code, 2);  // Переполнение
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq((unsigned)result.bits[0], 4294967294U);
+    ck_assert_uint_eq((unsigned)result.bits[1], 4294967295U);
+    ck_assert_uint_eq((unsigned)result.bits[2], 4294967295U);
+    ck_assert_int_eq(s21_get_sign(&result), 1);
 }
 END_TEST
 
 START_TEST(s21_handle_overflow_scale_decrement) {
     s21_big_decimal test_big;
     s21_null_big_decimal(&test_big);
-    
+
     test_big.scale = 15;
     test_big.bits[3] = 1;
-    
-    int initial_scale = test_big.scale;
+
     ck_assert_int_eq(check_overflow(test_big), 1);
-    
+
     int code = s21_handle_overflow_and_rounding(&test_big);
-    
+
     ck_assert_int_eq(code, OK);
-    ck_assert_int_eq(test_big.scale, initial_scale);
+    ck_assert_int_eq(test_big.scale, 14);
     ck_assert_int_eq(test_big.bits[3], 0);
 }
 END_TEST
