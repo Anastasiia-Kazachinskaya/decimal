@@ -42,6 +42,8 @@ int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
                 s21_big_decimal* result);
 int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
                 s21_big_decimal* result);
+int s21_big_mul(s21_big_decimal value_1, s21_big_decimal value_2,
+                s21_big_decimal* result);
 
 int s21_big_apply_bankers_round(s21_big_decimal* value);
 int s21_is_big_greater(s21_big_decimal value1, s21_big_decimal value2);

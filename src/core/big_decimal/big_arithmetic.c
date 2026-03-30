@@ -61,6 +61,37 @@ int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
   return OK;
 }
 
+int s21_big_mul(s21_big_decimal value_1, s21_big_decimal value_2,
+                s21_big_decimal* result) {
+  if (!result) return ERROR;
+
+  for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+    result->bits[i] = 0;
+  }
+
+  for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+    if (value_1.bits[i] == 0) continue;
+    uint64_t carry = 0;
+    for (int j = 0; j < S21_BIG_DECIMAL_SIZE; j++) {
+      if (i + j >= S21_BIG_DECIMAL_SIZE) {
+        if (carry || value_1.bits[i] != 0) {
+          return ERROR;
+        }
+        break;
+      }
+      uint64_t prod = (uint64_t)value_1.bits[i] * value_2.bits[j] +
+                       result->bits[i + j] + carry;
+      result->bits[i + j] = (uint32_t)(prod & 0xFFFFFFFF);
+      carry = prod >> 32;
+    }
+    if (carry) {
+      return ERROR;
+    }
+  }
+
+  return OK;
+}
+
 int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
                 s21_big_decimal* result) {
   if (!result) return ERROR;
