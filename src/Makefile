@@ -8,7 +8,7 @@ OBJECTS = $(DECIMAL_SOURCES:.c=.o)
 LIB = s21_decimal.a
 
 TEST_SRC = tests/test_s21_decimal_all.c tests/test_arithmetic.c tests/test_comparison.c \
-           tests/test_converters.c tests/test_other.c tests/test_utils.c
+           tests/test_converters.c tests/test_other.c tests/test_utils.c tests/test_complex.c
 TEST_OBJ = $(TEST_SRC:.c=.o)
 TEST_EXE = test.out
 REPORT_DIR = report
