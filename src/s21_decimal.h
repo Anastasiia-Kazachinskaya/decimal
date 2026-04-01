@@ -2,6 +2,9 @@
 #define S21_DECIMAL_H
 
 #define OK 0
+
+#define CALCULATION_ERROR 2
+
 #define CONVERTATION_ERROR 1
 #define NUMNER_TO_LARGE 1
 #define NUMNER_TO_SMALL 2
@@ -16,6 +19,7 @@
 #define S21_BIG_DECIMAL_DATA_BITS 3
 
 ///[][][][0-15/scale(16-23)/24-30/sign]
+
 typedef struct {
   int bits[4];
 } s21_decimal;
