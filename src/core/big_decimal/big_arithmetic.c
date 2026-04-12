@@ -86,3 +86,48 @@ int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
 
   return OK;
 }
+
+
+// вычитает из a b, если a >= b
+void big_sub(s21_big_decimal *a, s21_big_decimal b) {
+    uint32_t borrow = 0;
+    for (int i = 0; i < 8; i++) {
+        uint64_t diff = (uint64_t)a->bits[i] - b.bits[i] - borrow;
+        a->bits[i] = (uint32_t)(diff & 0xFFFFFFFF);
+        borrow = (diff > 0xFFFFFFFF) ? 1 : 0;
+    }
+}
+
+// умножение на 10, возращает 1, если переполнение
+int big_mul10(s21_big_decimal *v) {
+    uint32_t carry = 0; // беззнаковое 32-битное целое
+    for (int i = 0; i < 8; i++) {
+        uint64_t val = ((uint64_t)v->bits[i] * 10) + carry;
+        v->bits[i] = (uint32_t)(val & 0xFFFFFFFF);
+        carry = (uint32_t)(val >> 32);
+    }
+    return carry != 0 ? 1 : 0;
+}
+
+// прибавление 1, нужно для округления
+int big_add1(s21_big_decimal *v) {
+    uint32_t carry = 1; // беззнаковое 32-битное целое
+    for (int i = 0; i < 8; i++) {
+        uint64_t val = (uint64_t)v->bits[i] + carry;
+        v->bits[i] = (uint32_t)(val & 0xFFFFFFFF);
+        carry = (uint32_t)(val >> 32);
+        if (carry == 0) break;
+    }
+    return carry != 0 ? 1 : 0;
+}
+
+
+// сложение двух биг_децимал
+void big_add(s21_big_decimal *a, s21_big_decimal b) {
+    uint32_t carry = 0;
+    for (int i = 0; i < 8; i++) {
+        uint64_t sum = (uint64_t)a->bits[i] + b.bits[i] + carry;
+        a->bits[i] = (uint32_t)(sum & 0xFFFFFFFF);
+        carry = (uint32_t)(sum >> 32);
+    }
+}

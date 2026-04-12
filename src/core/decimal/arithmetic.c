@@ -8,8 +8,6 @@
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
 
-int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);
-
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   if (!result) {
     return ERROR;
@@ -94,5 +92,66 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   }
 
   return final_code;
+}
+
+int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    if (!result) return ERROR;
+    s21_null_decimal(result);
+    if (s21_is_zero(value_2)) return DIVISION_BY_ZERO;
+    if (s21_is_zero(value_1)) { s21_null_decimal(result); return OK; }
+
+    s21_big_decimal big1 = decimal_to_big(value_1);
+    s21_big_decimal big2 = decimal_to_big(value_2);
+
+    // знак результата
+    int result_sign = big1.sign ^ big2.sign;
+
+    int scale_correction = big1.scale - big2.scale;
+
+    // убираем знаки и scale — работаем с чистыми мантиссами
+    big1.sign = 0; big1.scale = 0;
+    big2.sign = 0; big2.scale = 0;
+
+    s21_big_decimal quotient;
+    int out_scale = 0;
+    int code = big_div_mantissa(big1, big2, &quotient, &out_scale);
+    if (code != OK) return result_sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+
+    // итоговый scale
+    int final_scale = out_scale + scale_correction;
+
+    // коррекция отрицательного scale
+    if (final_scale < 0) {
+        for (int i = 0; i < -final_scale; i++)
+            if (big_mul10(&quotient)) return result_sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+        final_scale = 0;
+    }
+
+    // коррекция scale > 28
+    while (final_scale > 28) {
+    uint64_t rem = 0;
+    for (int w = 7; w >= 0; w--) {
+        uint64_t cur = (rem << 32) | quotient.bits[w];
+        quotient.bits[w] = (uint32_t)(cur / 10);
+        rem = cur % 10;
+    }
+    final_scale--;
+
+    int round_up = 0;
+    if (rem > 5) {
+        round_up = 1;
+    } else if (rem == 5) {
+        round_up = (quotient.bits[0] & 1);
+    }
+    if (round_up) big_add1(&quotient);
+}
+
+    quotient.sign = result_sign;
+    quotient.scale = final_scale;
+
+    if (big_normalize(&quotient) != OK)
+        return result_sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+
+    return big_to_decimal(quotient, result);
 }
 

@@ -1,8 +1,8 @@
-// #ifndef CONVERTERS_H
-// #define CONVERTERS_H
+#ifndef CONVERTERS_H
+#define CONVERTERS_H
 
-// #include "../../headers/s21_big_decimal.h"
-// #include "../../headers/s21_utils.h"
+#include "../../headers/s21_big_decimal.h"
+#include "../../headers/s21_utils.h"
 
 // #include <string.h>
 // #include <stdlib.h>
@@ -39,4 +39,28 @@
 //   result;
 // }
 
-// #endif
+s21_big_decimal decimal_to_big(s21_decimal v) {
+    s21_big_decimal result;
+    big_zero(&result);
+    result.bits[0] = (uint32_t)v.bits[0];
+    result.bits[1] = (uint32_t)v.bits[1];
+    result.bits[2] = (uint32_t)v.bits[2];
+    result.sign  = (v.bits[3] >> 31) & 1;
+    result.scale = (v.bits[3] >> 16) & 0xFF;
+    return result;
+}
+
+// конвертация из биг_децимал в децимал
+int big_to_decimal(s21_big_decimal v, s21_decimal *result) {
+    for (int i = 3; i < 8; i++)
+        if (v.bits[i] != 0) return ERROR;
+    result->bits[0] = v.bits[0];
+    result->bits[1] = v.bits[1];
+    result->bits[2] = v.bits[2];
+    result->bits[3] = ((uint32_t)v.sign << 31) | ((uint32_t)v.scale << 16);
+    return OK;
+}
+
+#endif
+
+
