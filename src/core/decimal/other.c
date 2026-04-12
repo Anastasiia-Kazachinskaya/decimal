@@ -66,6 +66,17 @@ int s21_floor(s21_decimal value, s21_decimal* result) {
   return status;
 }
 
+int s21_negate(s21_decimal value, s21_decimal* result) {
+  int status = ERROR;
+  if (s21_decimal_check(value)) return status;
+  s21_null_decimal(result);
+  s21_big_decimal big1 = s21_decimal_to_big_internal(&value);
+  big1.sign = big1.sign == 0 ? 1 : 0;
+  s21_big_to_decimal_internal(&big1, result);
+  status = OK;
+  return status;
+}
+
 int s21_round(s21_decimal value, s21_decimal* result) {
   int status = OK;
 
