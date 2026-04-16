@@ -116,8 +116,8 @@ int s21_big_apply_bankers_round(s21_big_decimal* value) {
     value->bits[i] = 0;
   }
 
-  // Проверяем, нужно ли ещё деление
-  if (value->bits[3] != 0 && value->scale < 28) {
+  // Пока мантисса не помещается в 96 бит (bits[3] != 0), делим на 10
+  if (value->bits[3] != 0 && value->scale > 0) {
     return s21_big_apply_bankers_round(value);
   }
 
