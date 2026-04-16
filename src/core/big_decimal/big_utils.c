@@ -38,15 +38,36 @@ int big_set_bit(s21_big_decimal* value, int bit_index, char bit) {
 }
 
 
-/* Целочисленное деление мантиссы (8×uint32) на 10 — как при сдвиге запятой
- * при нормализации; повторное округление на каждом шаге ломало точность (max*max). */
-static void s21_big_div10_truncate(s21_big_decimal* value) {
+/* Деление мантиссы на 10 с округлением к ближайшему целому (banker: при .5 — к чётному). */
+static int s21_big_div10_bankers(s21_big_decimal* value) {
   uint64_t remainder = 0;
   for (int i = 7; i >= 0; i--) {
     uint64_t current = ((uint64_t)remainder << 32) | value->bits[i];
     value->bits[i] = (uint32_t)(current / 10);
     remainder = current % 10;
   }
+
+  int round_up = 0;
+  if (remainder > 5) {
+    round_up = 1;
+  } else if (remainder == 5) {
+    if ((value->bits[0] & 1u) != 0) {
+      round_up = 1;
+    }
+  }
+
+  if (round_up) {
+    uint64_t carry = 1;
+    for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+      uint64_t sum = (uint64_t)value->bits[i] + carry;
+      value->bits[i] = (uint32_t)(sum & 0xFFFFFFFFu);
+      carry = sum >> 32;
+    }
+    if (carry) {
+      return ERROR;
+    }
+  }
+  return OK;
 }
 
 
@@ -125,7 +146,9 @@ int s21_handle_overflow_and_rounding(s21_big_decimal* res_big) {
     if (res_big->scale <= 0) {
       return CALCULATION_ERROR;
     }
-    s21_big_div10_truncate(res_big);
+    if (s21_big_div10_bankers(res_big) != OK) {
+      return CALCULATION_ERROR;
+    }
     res_big->scale--;
   }
   return OK;
