@@ -60,13 +60,15 @@ int s21_big_perform_signed_operation(
   
   
   if (sign_1 != sign_2) {
-    // Разные знаки: (-A) - (+B) = -(A + B)
+    // Разные знаки: складываем модули (для s21_add после перекодировки знаков)
     big_value_1->sign = 0;
     big_value_2->sign = 0;
 
-    s21_big_add(*big_value_1, *big_value_2, res_big);
-
+    int add_code = s21_big_add(*big_value_1, *big_value_2, res_big);
     res_big->sign = sign_1;
+    if (add_code != OK) {
+      return CALCULATION_ERROR;
+    }
 
   } else {
     // Одинаковые знаки
