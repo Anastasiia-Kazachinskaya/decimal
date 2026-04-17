@@ -31,7 +31,7 @@ ifneq ($(CHECK_CFLAGS),)
     CFLAGS += $(CHECK_CFLAGS)
 endif
 
-all: $(LIB) gcov_report
+all: $(LIB)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $< -o $@

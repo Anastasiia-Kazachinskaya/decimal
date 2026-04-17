@@ -65,26 +65,36 @@ int s21_big_mul(s21_big_decimal value_1, s21_big_decimal value_2,
                 s21_big_decimal* result) {
   if (!result) return ERROR;
 
-  for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
-    result->bits[i] = 0;
+  uint32_t temp[16];
+  for (int i = 0; i < 16; i++) {
+    temp[i] = 0;
   }
 
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
-    if (value_1.bits[i] == 0) continue;
     uint64_t carry = 0;
     for (int j = 0; j < S21_BIG_DECIMAL_SIZE; j++) {
-      if (i + j >= S21_BIG_DECIMAL_SIZE) {
-        if (carry || value_1.bits[i] != 0) {
-          return ERROR;
-        }
-        break;
-      }
-      uint64_t prod = (uint64_t)value_1.bits[i] * value_2.bits[j] +
-                       result->bits[i + j] + carry;
-      result->bits[i + j] = (uint32_t)(prod & 0xFFFFFFFF);
+      uint64_t prod = (uint64_t)value_1.bits[i] * (uint64_t)value_2.bits[j] +
+                      temp[i + j] + carry;
+      temp[i + j] = (uint32_t)(prod & 0xFFFFFFFFu);
       carry = prod >> 32;
     }
+    int k = i + S21_BIG_DECIMAL_SIZE;
+    while (carry && k < 16) {
+      uint64_t sum = (uint64_t)temp[k] + carry;
+      temp[k] = (uint32_t)(sum & 0xFFFFFFFFu);
+      carry = sum >> 32;
+      k++;
+    }
     if (carry) {
+      return ERROR;
+    }
+  }
+
+  for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
+    result->bits[i] = temp[i];
+  }
+  for (int i = S21_BIG_DECIMAL_SIZE; i < 16; i++) {
+    if (temp[i] != 0) {
       return ERROR;
     }
   }

@@ -27,26 +27,22 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   int code = s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
 
   if (code != OK) {
-    return CALCULATION_ERROR;
+    return res_big.sign ? 2 : 1;
   }
 
   res_big.scale = target_scale;
   int final_code = s21_handle_overflow_and_rounding(&res_big);
-  if (final_code == OK && res_big.scale == 0) {
+  if (final_code != OK) {
+    return res_big.sign ? 2 : 1;
+  }
+  if (res_big.scale == 0) {
     int is_greater_than_max = check_mantissa(res_big);
     if (is_greater_than_max) {
-      if (res_big.sign == 0) {
-        final_code = 1;
-      } else {
-        final_code = 2;
-      }
+      return res_big.sign ? 2 : 1;
     }
   }
-  if (final_code == OK) {
-    s21_big_to_decimal_internal(&res_big, result);
-  }
-
-  return final_code;
+  s21_big_to_decimal_internal(&res_big, result);
+  return OK;
 }
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
@@ -70,26 +66,22 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   int code = s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
 
   if (code != OK) {
-    return CALCULATION_ERROR;
+    return res_big.sign ? 2 : 1;
   }
 
   res_big.scale = target_scale;
   int final_code = s21_handle_overflow_and_rounding(&res_big);
-  if (final_code == OK && res_big.scale == 0) {
+  if (final_code != OK) {
+    return res_big.sign ? 2 : 1;
+  }
+  if (res_big.scale == 0) {
     int is_greater_than_max = check_mantissa(res_big);
     if (is_greater_than_max) {
-        if (res_big.sign == 0) {
-            final_code = 1;  // 1 - слишком велико
-        } else {
-            final_code = 2;  // 2 - слишком мало
-        }
+      return res_big.sign ? 2 : 1;
     }
   }
-  if (final_code == OK) {
-    s21_big_to_decimal_internal(&res_big, result);
-  }
-
-  return final_code;
+  s21_big_to_decimal_internal(&res_big, result);
+  return OK;
 }
 
 int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
