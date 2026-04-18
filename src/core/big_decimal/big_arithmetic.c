@@ -4,15 +4,17 @@
 #include "../../headers/s21_big_decimal.h"
 #include "../../headers/s21_utils.h"
 
-int s21_big_add(s21_big_decimal* value_1, s21_big_decimal* value_2,
+#define MASK_32_BIT 0xFFFFFFFF
+
+int s21_big_add(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
                 s21_big_decimal* result) {
   uint32_t carry = 0;
 
   // Складываем по словам с учётом переноса
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
     uint64_t sum = (uint64_t)value_1->bits[i] + value_2->bits[i] + carry;
-    result->bits[i] = (uint32_t)(sum & 0xFFFFFFFF);  // младшие 32 бита
-    carry = (uint32_t)(sum >> 32);                   // старшие биты = перенос
+    result->bits[i] = (uint32_t)(sum & MASK_32_BIT);  // младшие 32 бита
+    carry = (uint32_t)(sum >> 32);                    // старшие биты = перенос
   }
 
   // Если после обработки последнего слова остался carry — это переполнение
@@ -23,7 +25,7 @@ int s21_big_add(s21_big_decimal* value_1, s21_big_decimal* value_2,
   return OK;
 }
 
-int s21_big_mul(s21_big_decimal* value_1, s21_big_decimal* value_2,
+int s21_big_mul(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
                 s21_big_decimal* result) {
   if (!result) return ERROR;
 
@@ -37,13 +39,13 @@ int s21_big_mul(s21_big_decimal* value_1, s21_big_decimal* value_2,
     for (int j = 0; j < S21_BIG_DECIMAL_SIZE; j++) {
       uint64_t prod = (uint64_t)value_1->bits[i] * (uint64_t)value_2->bits[j] +
                       temp[i + j] + carry;
-      temp[i + j] = (uint32_t)(prod & 0xFFFFFFFFu);
+      temp[i + j] = (uint32_t)(prod & MASK_32_BIT);
       carry = prod >> 32;
     }
     int k = i + S21_BIG_DECIMAL_SIZE;
     while (carry && k < 16) {
       uint64_t sum = (uint64_t)temp[k] + carry;
-      temp[k] = (uint32_t)(sum & 0xFFFFFFFFu);
+      temp[k] = (uint32_t)(sum & MASK_32_BIT);
       carry = sum >> 32;
       k++;
     }
@@ -64,7 +66,7 @@ int s21_big_mul(s21_big_decimal* value_1, s21_big_decimal* value_2,
   return OK;
 }
 
-int s21_big_sub(s21_big_decimal* value_1, s21_big_decimal* value_2,
+int s21_big_sub(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
                 s21_big_decimal* result) {
   if (!result) return ERROR;
 
@@ -92,7 +94,7 @@ int s21_big_sub(s21_big_decimal* value_1, s21_big_decimal* value_2,
 
 // делит 2 беззнаковых big_decimal, возвращает частное в quotient, scale в
 // out_scale
-int big_div_mantissa(s21_big_decimal* dividend, s21_big_decimal* divisor,
+int big_div_mantissa(const s21_big_decimal* dividend, const s21_big_decimal* divisor,
                      s21_big_decimal* quotient, int* out_scale) {
   s21_big_decimal remainder;
   big_zero(&remainder);
@@ -106,7 +108,7 @@ int big_div_mantissa(s21_big_decimal* dividend, s21_big_decimal* divisor,
     int d_bit = (dividend->bits[word] >> bit_pos) & 1;
     remainder.bits[0] |= d_bit;
     if (big_gte(&remainder, divisor)) {
-      big_sub(&remainder, *divisor);
+      s21_big_sub(&remainder, divisor, &remainder);
       quotient->bits[word] |= (1u << bit_pos);
     }
   }
@@ -128,13 +130,13 @@ int big_div_mantissa(s21_big_decimal* dividend, s21_big_decimal* divisor,
       int r_bit = (rem_copy.bits[word] >> bit_pos) & 1;
       remainder.bits[0] |= r_bit;
       if (big_gte(&remainder, divisor)) {
-        big_sub(&remainder, *divisor);
+        s21_big_sub(&remainder, divisor, &remainder);
         digit.bits[word] |= (1u << bit_pos);
       }
     }
 
     if (big_mul_ten(quotient)) return ERROR;
-    big_add(quotient, digit);
+    s21_big_add(quotient, &digit, quotient);
     (*out_scale)++;
   }
 
@@ -160,22 +162,12 @@ void big_bankers_round(s21_big_decimal* quotient, s21_big_decimal remainder,
   }
 }
 
-// сложение двух биг_децимал
-void big_add(s21_big_decimal* a, s21_big_decimal b) {
-  uint32_t carry = 0;
-  for (int i = 0; i < 8; i++) {
-    uint64_t sum = (uint64_t)a->bits[i] + b.bits[i] + carry;
-    a->bits[i] = (uint32_t)(sum & 0xFFFFFFFF);
-    carry = (uint32_t)(sum >> 32);
-  }
-}
-
 // прибавление 1, нужно для округления
 int big_inc(s21_big_decimal* v) {
   uint32_t carry = 1;  // беззнаковое 32-битное целое
   for (int i = 0; i < 8; i++) {
     uint64_t val = (uint64_t)v->bits[i] + carry;
-    v->bits[i] = (uint32_t)(val & 0xFFFFFFFF);
+    v->bits[i] = (uint32_t)(val & MASK_32_BIT);
     carry = (uint32_t)(val >> 32);
     if (carry == 0) break;
   }
@@ -187,18 +179,8 @@ int big_mul_ten(s21_big_decimal* v) {
   uint32_t carry = 0;  // беззнаковое 32-битное целое
   for (int i = 0; i < 8; i++) {
     uint64_t val = ((uint64_t)v->bits[i] * 10) + carry;
-    v->bits[i] = (uint32_t)(val & 0xFFFFFFFF);
+    v->bits[i] = (uint32_t)(val & MASK_32_BIT);
     carry = (uint32_t)(val >> 32);
   }
   return carry != 0 ? 1 : 0;
-}
-
-// вычитает из a b, если a >= b
-void big_sub(s21_big_decimal* a, s21_big_decimal b) {
-  uint32_t borrow = 0;
-  for (int i = 0; i < 8; i++) {
-    uint64_t diff = (uint64_t)a->bits[i] - b.bits[i] - borrow;
-    a->bits[i] = (uint32_t)(diff & 0xFFFFFFFF);
-    borrow = (diff > 0xFFFFFFFF) ? 1 : 0;
-  }
 }

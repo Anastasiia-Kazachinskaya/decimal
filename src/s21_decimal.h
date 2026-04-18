@@ -13,7 +13,7 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MIN_INT -2147483648
+#define MIN_INT (-2147483648)
 #define MAX_INT 2147483647
 
 #define S21_BIG_DECIMAL_DATA_BITS 3
