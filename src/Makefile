@@ -46,7 +46,7 @@ gcov_report: $(DECIMAL_SOURCES) $(TEST_SRC)
 	$(CC) $(CFLAGS) --coverage -o $(TEST_EXE) $(DECIMAL_SOURCES) $(TEST_SRC) $(CHECK_LIBS)
 	./$(TEST_EXE)
 	mkdir -p $(REPORT_DIR)
-	gcovr --html-details $(REPORT_DIR)/$(REPORT) \
+	gcovr --html-details $(REPORT_DIR)/$(REPORT)
 	rm -rf *.gcov *.gcno *.gcda
 
 clean:
