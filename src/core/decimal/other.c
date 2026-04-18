@@ -347,7 +347,7 @@ static int s21_apply_rounding(s21_decimal* result, s21_big_decimal* fractional,
   int status = OK;
 
   // Округляем вверх, если дробная часть >= 0,5
-  if (s21_is_big_greater(*fractional, *half) ||
+  if (s21_is_big_greater(fractional, half) ||
       s21_is_big_equal(*fractional, *half)) {
     if (s21_inc_decimal(result) != OK) {
       status = CALCULATION_ERROR;

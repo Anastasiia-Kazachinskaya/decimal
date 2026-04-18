@@ -53,13 +53,13 @@ int s21_big_perform_signed_operation(int sign_1, int sign_2,
 
   } else {
     // Одинаковые знаки
-    if (s21_is_big_greater(*big_value_1, *big_value_2)) {
+    if (s21_is_big_greater(big_value_1, big_value_2)) {
       int code = s21_big_sub(big_value_1, big_value_2, res_big);
       if (code != OK) {
         return CALCULATION_ERROR;
       }
       res_big->sign = sign_1;
-    } else if (s21_is_big_less(*big_value_1, *big_value_2)) {
+    } else if (s21_is_big_less(big_value_1, big_value_2)) {
       int code = s21_big_sub(big_value_2, big_value_1, res_big);
       if (code != OK) {
         return CALCULATION_ERROR;

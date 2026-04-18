@@ -17,13 +17,13 @@ START_TEST(s21_is_big_greater_five_minus_zero) {
     s21_big_decimal five = s21_decimal_to_big_internal(&value_1);
     s21_big_decimal zero = s21_decimal_to_big_internal(&value_2);
 
-    int result = s21_is_big_greater(five, zero);
+    int result = s21_is_big_greater(&five, &zero);
     ck_assert_int_eq(result, 1); 
     
-    result = s21_is_big_greater(zero, five);
+    result = s21_is_big_greater(&zero, &five);
     ck_assert_int_eq(result, 0);
 
-    result = s21_is_big_greater(five, five);
+    result = s21_is_big_greater(&five, &five);
     ck_assert_int_eq(result, 0);
 
 }

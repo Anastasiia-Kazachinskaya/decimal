@@ -29,13 +29,10 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst);      // DONE
 int s21_from_float_to_decimal(float src, s21_decimal* dst);  // TODO
 int s21_from_int_to_decimal(int src, s21_decimal* dst);      // DONE
 
-int s21_is_big_less(s21_big_decimal value1, s21_big_decimal value2);
 s21_big_decimal s21_decimal_to_big_internal(s21_decimal* value);
 s21_decimal s21_big_to_decimal_internal(s21_big_decimal* big_result,
                                         s21_decimal* result);
 void s21_null_big_decimal(s21_big_decimal* value);
-int s21_is_big_less(s21_big_decimal value1, s21_big_decimal value2);
-int s21_is_big_greater(s21_big_decimal value1, s21_big_decimal value2);
 int s21_divide_mantissa_by_10(s21_decimal* value);
 int s21_normalize_and_check_overflow(s21_big_decimal* value);
 void s21_set_sign_internal(s21_decimal* result, int sign);
