@@ -10,7 +10,6 @@
 
 #define MAX4BITE 0xffffffff     // исп в other.c
 #define S21_DECIMAL_LIMIT 3     // исп в other.c
-#define S21_BIG_DECIMAL_SIZE 8  // исп в arithmetic.c
 
 #define FLOAT_DIGITS 7
 

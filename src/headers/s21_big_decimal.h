@@ -5,7 +5,6 @@
 
 #include "../s21_decimal.h"
 
-#define S21_BIG_DECIMAL_SIZE 8
 #define MASK_32_BIT 0xFFFFFFFF
 
 #define ERROR 1
@@ -16,6 +15,10 @@ typedef struct {
   int sign;
   int scale;
 } s21_big_decimal;
+
+#define S21_BIG_DECIMAL_SIZE 8
+#define UNSIGNED_SIZE 32
+#define SCALE 28
 
 s21_big_decimal* s21_decimal_to_big(s21_decimal* value);
 
