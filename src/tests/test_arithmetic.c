@@ -21,7 +21,7 @@ START_TEST(s21_sub_positive_minus_zero){
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
-    status = s21_big_sub(five, zero, &big_result);
+    status = s21_big_sub(&five, &zero, &big_result);
 
     ck_assert_int_eq(big_result.bits[0], 5);
     ck_assert_int_eq(big_result.bits[1], 0);
@@ -46,7 +46,7 @@ START_TEST(s21_sub_positive_minus_lower_positive){
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
-    status = s21_big_sub(five, three, &big_result);
+    status = s21_big_sub(&five, &three, &big_result);
 
     ck_assert_int_eq(big_result.bits[0], 2);
     ck_assert_int_eq(big_result.bits[1], 0);
@@ -67,7 +67,7 @@ START_TEST(s21_sub_positive_minus_larger_positive){
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
-    status = s21_big_sub(three, five, &big_result);
+    status = s21_big_sub(&three, &five, &big_result);
 
     ck_assert_int_eq(big_result.bits[0], 2);
     ck_assert_int_eq(big_result.bits[1], 0);
@@ -90,7 +90,7 @@ START_TEST(s21_sub_modules_two_minus_five){
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
-    status = s21_big_sub(five, two, &big_result);
+    status = s21_big_sub(&five, &two, &big_result);
 
     ck_assert_int_eq(big_result.bits[0], 3);
     ck_assert_int_eq(big_result.bits[1], 0);
@@ -113,7 +113,7 @@ START_TEST(s21_sub_modules_five_minus_two){
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
-    status = s21_big_sub(five, two, &big_result);
+    status = s21_big_sub(&five, &two, &big_result);
 
     ck_assert_int_eq(big_result.bits[0], 3);
     ck_assert_int_eq(big_result.bits[1], 0);
@@ -137,7 +137,7 @@ START_TEST(s21_sub_modules_five_minus_five){
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
-    status = s21_big_sub(five, five2, &big_result);
+    status = s21_big_sub(&five, &five2, &big_result);
 
     ck_assert_int_eq(big_result.bits[0], 0);
     ck_assert_int_eq(big_result.bits[1], 0);
@@ -161,7 +161,7 @@ START_TEST(s21_sub_negative_minus_positive){
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
-    status = s21_big_add(two, five, &big_result);
+    status = s21_big_add(&two, &five, &big_result);
 
     ck_assert_int_eq(big_result.bits[0], 7);
     ck_assert_int_eq(big_result.bits[1], 0);
@@ -185,7 +185,7 @@ START_TEST(s21_sub_positive_minus_negative){
     s21_big_decimal big_result;
     s21_null_big_decimal(&big_result);
 
-    status = s21_big_add(two, five, &big_result);
+    status = s21_big_add(&two, &five, &big_result);
 
     ck_assert_int_eq(big_result.bits[0], 7);
     ck_assert_int_eq(big_result.bits[1], 0);

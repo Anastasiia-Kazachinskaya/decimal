@@ -45,7 +45,7 @@ int s21_big_perform_signed_operation(int sign_1, int sign_2,
     big_value_1->sign = 0;
     big_value_2->sign = 0;
 
-    int add_code = s21_big_add(*big_value_1, *big_value_2, res_big);
+    int add_code = s21_big_add(big_value_1, big_value_2, res_big);
     res_big->sign = sign_1;
     if (add_code != OK) {
       return CALCULATION_ERROR;
@@ -54,13 +54,13 @@ int s21_big_perform_signed_operation(int sign_1, int sign_2,
   } else {
     // Одинаковые знаки
     if (s21_is_big_greater(*big_value_1, *big_value_2)) {
-      int code = s21_big_sub(*big_value_1, *big_value_2, res_big);
+      int code = s21_big_sub(big_value_1, big_value_2, res_big);
       if (code != OK) {
         return CALCULATION_ERROR;
       }
       res_big->sign = sign_1;
     } else if (s21_is_big_less(*big_value_1, *big_value_2)) {
-      int code = s21_big_sub(*big_value_2, *big_value_1, res_big);
+      int code = s21_big_sub(big_value_2, big_value_1, res_big);
       if (code != OK) {
         return CALCULATION_ERROR;
       }
@@ -135,7 +135,7 @@ int big_normalize(s21_big_decimal* v) {
     } else if (remainder == 5) {
       round_up = (v->bits[0] & 1);
     }
-    if (round_up) big_add1(v);
+    if (round_up) big_inc(v);
   }
   return OK;
 }

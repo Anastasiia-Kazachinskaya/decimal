@@ -4,13 +4,13 @@
 #include "../../headers/s21_big_decimal.h"
 #include "../../headers/s21_utils.h"
 
-int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
+int s21_big_add(s21_big_decimal* value_1, s21_big_decimal* value_2,
                 s21_big_decimal* result) {
   uint32_t carry = 0;
 
   // Складываем по словам с учётом переноса
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
-    uint64_t sum = (uint64_t)value_1.bits[i] + value_2.bits[i] + carry;
+    uint64_t sum = (uint64_t)value_1->bits[i] + value_2->bits[i] + carry;
     result->bits[i] = (uint32_t)(sum & 0xFFFFFFFF);  // младшие 32 бита
     carry = (uint32_t)(sum >> 32);                   // старшие биты = перенос
   }
@@ -64,15 +64,15 @@ int s21_big_mul(s21_big_decimal* value_1, s21_big_decimal* value_2,
   return OK;
 }
 
-int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
+int s21_big_sub(s21_big_decimal* value_1, s21_big_decimal* value_2,
                 s21_big_decimal* result) {
   if (!result) return ERROR;
 
   uint32_t borrow = 0;
 
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
-    uint64_t a = value_1.bits[i];
-    uint64_t b = value_2.bits[i];
+    uint64_t a = value_1->bits[i];
+    uint64_t b = value_2->bits[i];
 
     // вычисляем разность
     uint64_t diff = a - b - borrow;
@@ -92,7 +92,7 @@ int s21_big_sub(s21_big_decimal value_1, s21_big_decimal value_2,
 
 // делит 2 беззнаковых big_decimal, возвращает частное в quotient, scale в
 // out_scale
-int big_div_mantissa(s21_big_decimal dividend, s21_big_decimal divisor,
+int big_div_mantissa(s21_big_decimal* dividend, s21_big_decimal* divisor,
                      s21_big_decimal* quotient, int* out_scale) {
   s21_big_decimal remainder;
   big_zero(&remainder);
@@ -103,10 +103,10 @@ int big_div_mantissa(s21_big_decimal dividend, s21_big_decimal divisor,
     big_shift_left1(&remainder);
     int word = bit_idx / 32;
     int bit_pos = bit_idx % 32;
-    int d_bit = (dividend.bits[word] >> bit_pos) & 1;
+    int d_bit = (dividend->bits[word] >> bit_pos) & 1;
     remainder.bits[0] |= d_bit;
-    if (big_gte(remainder, divisor)) {
-      big_sub(&remainder, divisor);
+    if (big_gte(&remainder, divisor)) {
+      big_sub(&remainder, *divisor);
       quotient->bits[word] |= (1u << bit_pos);
     }
   }
@@ -114,7 +114,7 @@ int big_div_mantissa(s21_big_decimal dividend, s21_big_decimal divisor,
   while (*out_scale < 28) {
     if (big_is_zero(remainder)) break;
 
-    big_mul10(&remainder);
+    big_mul_ten(&remainder);
 
     s21_big_decimal digit;
     big_zero(&digit);
@@ -127,19 +127,19 @@ int big_div_mantissa(s21_big_decimal dividend, s21_big_decimal divisor,
       int bit_pos = bit_idx % 32;
       int r_bit = (rem_copy.bits[word] >> bit_pos) & 1;
       remainder.bits[0] |= r_bit;
-      if (big_gte(remainder, divisor)) {
-        big_sub(&remainder, divisor);
+      if (big_gte(&remainder, divisor)) {
+        big_sub(&remainder, *divisor);
         digit.bits[word] |= (1u << bit_pos);
       }
     }
 
-    if (big_mul10(quotient)) return ERROR;
+    if (big_mul_ten(quotient)) return ERROR;
     big_add(quotient, digit);
     (*out_scale)++;
   }
 
   if (*out_scale == 28 && !big_is_zero(remainder)) {
-    big_bankers_round(quotient, remainder, divisor);
+    big_bankers_round(quotient, remainder, *divisor);
   }
 
   return OK;
@@ -150,12 +150,12 @@ void big_bankers_round(s21_big_decimal* quotient, s21_big_decimal remainder,
                        s21_big_decimal divisor) {
   s21_big_decimal rem2 = remainder;
   big_shift_left1(&rem2);
-  if (big_gte(rem2, divisor)) {
-    int equal = big_gte(divisor, rem2);
+  if (big_gte(&rem2, &divisor)) {
+    int equal = big_gte(&divisor, &rem2);
     if (equal) {
-      if (quotient->bits[0] & 1) big_add1(quotient);
+      if (quotient->bits[0] & 1) big_inc(quotient);
     } else {
-      big_add1(quotient);
+      big_inc(quotient);
     }
   }
 }
@@ -171,7 +171,7 @@ void big_add(s21_big_decimal* a, s21_big_decimal b) {
 }
 
 // прибавление 1, нужно для округления
-int big_add1(s21_big_decimal* v) {
+int big_inc(s21_big_decimal* v) {
   uint32_t carry = 1;  // беззнаковое 32-битное целое
   for (int i = 0; i < 8; i++) {
     uint64_t val = (uint64_t)v->bits[i] + carry;
@@ -183,7 +183,7 @@ int big_add1(s21_big_decimal* v) {
 }
 
 // умножение на 10, возращает 1, если переполнение
-int big_mul10(s21_big_decimal* v) {
+int big_mul_ten(s21_big_decimal* v) {
   uint32_t carry = 0;  // беззнаковое 32-битное целое
   for (int i = 0; i < 8; i++) {
     uint64_t val = ((uint64_t)v->bits[i] * 10) + carry;

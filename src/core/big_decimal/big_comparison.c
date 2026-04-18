@@ -34,12 +34,12 @@ int s21_is_big_greater(s21_big_decimal value1, s21_big_decimal value2) {
 }
 
 // проверяет, что a >= b
-int big_gte(s21_big_decimal a, s21_big_decimal b) {
-  for (int i = 7; i >= 0; i--) {
-    if (a.bits[i] > b.bits[i]) {
+int big_gte(const s21_big_decimal* a, const s21_big_decimal* b) {
+  for (int i = FLOAT_DIGITS; i >= 0; i--) {
+    if (a->bits[i] > b->bits[i]) {
       return 1;
     }
-    if (a.bits[i] < b.bits[i]) {
+    if (a->bits[i] < b->bits[i]) {
       return 0;
     }
   }
