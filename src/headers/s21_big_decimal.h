@@ -16,7 +16,7 @@ typedef struct {
   int scale;
 } s21_big_decimal;
 
-s21_big_decimal* s21_decimal_to_big(s21_decimal* value);  // DO
+s21_big_decimal* s21_decimal_to_big(s21_decimal* value);
 
 int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
                 s21_big_decimal* result);

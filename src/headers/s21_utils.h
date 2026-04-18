@@ -16,7 +16,6 @@
 
 int s21_get_sign(s21_decimal* value);              // DO
 int s21_get_scale(s21_decimal* value);             // TODO
-int s21_set_scale(s21_decimal* value, int scale);  // TODO
 void s21_set_sign(char sign, s21_decimal* value);  // DO
 
 int s21_get_bit(s21_decimal value, int bit_index);                  // TODO
@@ -42,11 +41,9 @@ int s21_divide_mantissa_by_10(s21_decimal* value);
 int s21_normalize_and_check_overflow(s21_big_decimal* value);
 void s21_set_sign_internal(s21_decimal* result, int sign);
 int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2);
-s21_decimal s21_get_zero();
 int s21_multiply_big_by_10(s21_big_decimal* value);
 
 int s21_decimal_check(s21_decimal value);
-void copy_decimal(s21_decimal* value_1, s21_decimal* value_2);
 int set_precision(float src);
 void apply_exponent(char* e_pos, long long* mantissa, int* exponent,
                     int* digits_after_dot, char* str);
