@@ -12,8 +12,6 @@
 #define S21_DECIMAL_LIMIT 3     // исп в other.c
 #define S21_BIG_DECIMAL_SIZE 8  // исп в arithmetic.c
 
-#define MIN_INT -2147483648
-#define MAX_INT 2147483647
 #define FLOAT_DIGITS 7
 
 int s21_get_sign(s21_decimal* value);              // DO

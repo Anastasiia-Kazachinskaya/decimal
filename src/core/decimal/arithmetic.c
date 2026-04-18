@@ -109,7 +109,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_big_decimal res_big;
   s21_null_big_decimal(&res_big);
 
-  int code = s21_big_mul(big1, big2, &res_big);
+  int code = s21_big_mul(&big1, &big2, &res_big);
   if (code != OK) {
     return result_sign ? 2 : 1;
   }

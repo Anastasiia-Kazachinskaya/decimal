@@ -23,7 +23,7 @@ int s21_big_add(s21_big_decimal value_1, s21_big_decimal value_2,
   return OK;
 }
 
-int s21_big_mul(s21_big_decimal value_1, s21_big_decimal value_2,
+int s21_big_mul(s21_big_decimal* value_1, s21_big_decimal* value_2,
                 s21_big_decimal* result) {
   if (!result) return ERROR;
 
@@ -35,7 +35,7 @@ int s21_big_mul(s21_big_decimal value_1, s21_big_decimal value_2,
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
     uint64_t carry = 0;
     for (int j = 0; j < S21_BIG_DECIMAL_SIZE; j++) {
-      uint64_t prod = (uint64_t)value_1.bits[i] * (uint64_t)value_2.bits[j] +
+      uint64_t prod = (uint64_t)value_1->bits[i] * (uint64_t)value_2->bits[j] +
                       temp[i + j] + carry;
       temp[i + j] = (uint32_t)(prod & 0xFFFFFFFFu);
       carry = prod >> 32;
