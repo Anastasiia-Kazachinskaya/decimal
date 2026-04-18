@@ -24,7 +24,8 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_null_big_decimal(&res_big);
 
   int target_scale = big1.scale;
-  int code = s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
+  int code =
+      s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
 
   if (code != OK) {
     return res_big.sign ? 2 : 1;
@@ -54,7 +55,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 
   s21_big_decimal big1 = s21_decimal_to_big_internal(&value_1);
   s21_big_decimal big2 = s21_decimal_to_big_internal(&value_2);
-  
+
   int sign1 = big1.sign;
   int sign2 = big2.sign;
 
@@ -63,7 +64,8 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_null_big_decimal(&res_big);
 
   int target_scale = big1.scale;
-  int code = s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
+  int code =
+      s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
 
   if (code != OK) {
     return res_big.sign ? 2 : 1;
@@ -130,11 +132,14 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   return OK;
 }
 
-int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   if (!result) return ERROR;
   s21_null_decimal(result);
   if (s21_is_zero(value_2)) return DIVISION_BY_ZERO;
-  if (s21_is_zero(value_1)) { s21_null_decimal(result); return OK; }
+  if (s21_is_zero(value_1)) {
+    s21_null_decimal(result);
+    return OK;
+  }
 
   s21_big_decimal big1 = decimal_to_big(value_1);
   s21_big_decimal big2 = decimal_to_big(value_2);
@@ -145,8 +150,10 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   int scale_correction = big1.scale - big2.scale;
 
   // убираем знаки и scale — работаем с чистыми мантиссами
-  big1.sign = 0; big1.scale = 0;
-  big2.sign = 0; big2.scale = 0;
+  big1.sign = 0;
+  big1.scale = 0;
+  big2.sign = 0;
+  big2.scale = 0;
 
   s21_big_decimal quotient;
   int out_scale = 0;
@@ -159,7 +166,8 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   // коррекция отрицательного scale
   if (final_scale < 0) {
     for (int i = 0; i < -final_scale; i++)
-      if (big_mul10(&quotient)) return result_sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+      if (big_mul10(&quotient))
+        return result_sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
     final_scale = 0;
   }
 
@@ -190,4 +198,3 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
   return big_to_decimal(quotient, result);
 }
-

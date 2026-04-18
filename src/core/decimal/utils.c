@@ -1,6 +1,6 @@
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 
 #include "../../headers/s21_big_decimal.h"
 #include "../../headers/s21_utils.h"
