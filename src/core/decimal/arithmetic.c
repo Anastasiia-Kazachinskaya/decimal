@@ -28,19 +28,19 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
       s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
 
   if (code != OK) {
-    return res_big.sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+    return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
   }
 
   res_big.scale = target_scale;
   int final_code = s21_handle_overflow_and_rounding(&res_big);
   if (final_code != OK) {
-    return res_big.sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+    return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
   }
 
   if (res_big.scale == 0) {
     int is_greater_than_max = check_mantissa(res_big);
     if (is_greater_than_max) {
-      return res_big.sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+      return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
     }
   }
 
@@ -70,19 +70,19 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
       s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
 
   if (code != OK) {
-    return res_big.sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+    return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
   }
 
   res_big.scale = target_scale;
   int final_code = s21_handle_overflow_and_rounding(&res_big);
   if (final_code != OK) {
-    return res_big.sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+    return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
   }
 
   if (res_big.scale == 0) {
     int is_greater_than_max = check_mantissa(res_big);
     if (is_greater_than_max) {
-      return res_big.sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+      return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
     }
   }
 
@@ -162,7 +162,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_big_decimal quotient;
   int out_scale = 0;
   int code = big_div_mantissa(&big1, &big2, &quotient, &out_scale);
-  if (code != OK) return result_sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+  if (code != OK) return result_sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
 
   // итоговый scale
   int final_scale = out_scale + scale_correction;
@@ -171,7 +171,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   if (final_scale < 0) {
     for (int i = 0; i < -final_scale; i++)
       if (big_mul_ten(&quotient))
-        return result_sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+        return result_sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
     final_scale = 0;
   }
 
@@ -198,7 +198,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   quotient.scale = final_scale;
 
   if (big_normalize(&quotient) != OK)
-    return result_sign ? NUMNER_TO_SMALL : NUMNER_TO_LARGE;
+    return result_sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
 
   return big_to_decimal(quotient, result);
 }
