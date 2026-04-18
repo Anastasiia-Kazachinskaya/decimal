@@ -526,6 +526,149 @@ START_TEST(s21_mul_result_null) {
 }
 END_TEST
 
+// div tests
+START_TEST(test_div_simple) {
+    s21_decimal a = {{10, 0, 0, 0x00000000}};
+    s21_decimal b = {{2,  0, 0, 0x00000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_uint_eq(result.bits[0], 5);
+    ck_assert_int_eq(s21_get_scale(&result), 0);
+    ck_assert_int_eq(s21_get_sign(&result), 0);
+}
+END_TEST
+
+START_TEST(test_div_by_one) {
+    s21_decimal a = {{123456, 0, 0, 0x00030000}};
+    s21_decimal b = {{1, 0, 0, 0x00000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_uint_eq(result.bits[0], 123456);
+    ck_assert_int_eq(s21_get_scale(&result), 3);
+}
+END_TEST
+
+START_TEST(test_div_one_third) {
+    s21_decimal a = {{1, 0, 0, 0x00000000}};
+    s21_decimal b = {{3, 0, 0, 0x00000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_int_eq(s21_get_scale(&result), 28);
+    ck_assert_int_eq(s21_get_sign(&result), 0);
+}
+END_TEST
+
+START_TEST(test_div_plus_minus) {
+    // 10 / -2 = -5
+    s21_decimal a = {{10, 0, 0, 0x00000000}};
+    s21_decimal b = {{2,  0, 0, (int)0x80000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_uint_eq(result.bits[0], 5);
+    ck_assert_int_eq(s21_get_sign(&result), 1);
+}
+END_TEST
+
+START_TEST(test_div_minus_minus) {
+    // -10 / -2 = 5
+    s21_decimal a = {{10, 0, 0, (int)0x80000000}};
+    s21_decimal b = {{2,  0, 0, (int)0x80000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_uint_eq(result.bits[0], 5);
+    ck_assert_int_eq(s21_get_sign(&result), 0);
+}
+END_TEST
+
+START_TEST(test_div_zero_dividend) {
+    // 0 / 5 = 0
+    s21_decimal a = {{0, 0, 0, 0x00000000}};
+    s21_decimal b = {{5, 0, 0, 0x00000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_uint_eq(result.bits[0], 0);
+}
+END_TEST
+
+START_TEST(test_div_by_zero) {
+    s21_decimal a = {{5, 0, 0, 0x00000000}};
+    s21_decimal b = {{0, 0, 0, 0x00000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), DIVISION_BY_ZERO);
+}
+END_TEST
+
+START_TEST(test_div_null_result) {
+    s21_decimal a = {{5, 0, 0, 0x00000000}};
+    s21_decimal b = {{2, 0, 0, 0x00000000}};
+    ck_assert_int_eq(s21_div(a, b, NULL), ERROR);
+}
+END_TEST
+
+START_TEST(test_div_with_scale) {
+    s21_decimal a = {{(int)0xFFFFFFFF, (int)0xFFFFFFFF, (int)0xFFFFFFFF,
+                      (int)0x801C0000}};  // scale=28, sign=1
+    s21_decimal b = {{4, 0, 0, 0x000E0000}};  // scale=14
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_int_eq(s21_get_sign(&result), 1);
+    ck_assert_int_eq(s21_get_scale(&result), 14);
+}
+END_TEST
+
+
+START_TEST(test_div_max_by_max) {
+    s21_decimal a = {{(int)0xFFFFFFFF, (int)0xFFFFFFFF, (int)0xFFFFFFFF, 0}};
+    s21_decimal b = {{(int)0xFFFFFFFF, (int)0xFFFFFFFF, (int)0xFFFFFFFF, 0}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_uint_eq(result.bits[0], 1);
+    ck_assert_uint_eq(result.bits[1], 0);
+    ck_assert_uint_eq(result.bits[2], 0);
+    ck_assert_int_eq(s21_get_scale(&result), 0);
+}
+END_TEST
+
+START_TEST(test_div_exact_quarter) {
+    s21_decimal a = {{100, 0, 0, 0x00020000}};
+    s21_decimal b = {{4,   0, 0, 0x00000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_int_eq(s21_get_scale(&result), 2);
+    ck_assert_uint_eq(result.bits[0], 25);
+}
+END_TEST
+
+START_TEST(test_div_negative_scale_correction) {
+    s21_decimal a = {{10, 0, 0, 0x00000000}};
+    s21_decimal b = {{1,  0, 0, 0x00010000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_uint_eq(result.bits[0], 100);
+    ck_assert_int_eq(s21_get_scale(&result), 0);
+}
+END_TEST
+
+START_TEST(test_div_large_scale_correction) {
+    s21_decimal a = {{1, 0, 0, 0x00140000}};
+    s21_decimal b = {{1, 0, 0, 0x00090000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_uint_eq(result.bits[0], 1);
+    ck_assert_int_eq(s21_get_scale(&result), 11);
+}
+END_TEST
+
+START_TEST(test_div_scale_over_28) {
+    s21_decimal a = {{1, 0, 0, 0x001C0000}};
+    s21_decimal b = {{3, 0, 0, 0x00000000}};
+    s21_decimal result = {0};
+    ck_assert_int_eq(s21_div(a, b, &result), OK);
+    ck_assert_int_eq(s21_get_scale(&result), 28);
+    ck_assert_int_eq(s21_get_sign(&result), 0);
+}
+END_TEST
+
 Suite *s21_arithmetic_suite(void) {
     Suite *s = suite_create("arithmetic");
     TCase *tc_core = tcase_create("Core");
@@ -562,6 +705,21 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_mul_with_scale);
     tcase_add_test(tc_core, s21_mul_large_numbers);
     tcase_add_test(tc_core, s21_mul_result_null);
+
+    tcase_add_test(tc_core, test_div_simple);
+    tcase_add_test(tc_core, test_div_by_one);
+    tcase_add_test(tc_core, test_div_one_third);
+    tcase_add_test(tc_core, test_div_plus_minus);
+    tcase_add_test(tc_core, test_div_minus_minus);
+    tcase_add_test(tc_core, test_div_zero_dividend);
+    tcase_add_test(tc_core, test_div_by_zero);
+    tcase_add_test(tc_core, test_div_null_result);
+    tcase_add_test(tc_core, test_div_with_scale);
+    tcase_add_test(tc_core, test_div_max_by_max);
+    tcase_add_test(tc_core, test_div_exact_quarter);
+    tcase_add_test(tc_core, test_div_negative_scale_correction);
+    tcase_add_test(tc_core, test_div_large_scale_correction);
+    tcase_add_test(tc_core, test_div_scale_over_28);
 
     suite_add_tcase(s, tc_core);
     return s;
