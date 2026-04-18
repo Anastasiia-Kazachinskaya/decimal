@@ -12,7 +12,7 @@ int s21_big_add(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
     const uint64_t sum = (uint64_t)value_1->bits[i] + value_2->bits[i] + carry;
     result->bits[i] = (uint32_t)(sum & MASK_32_BIT);  // младшие 32 бита
-    carry = (uint32_t)(sum >> UNSIGNED_SIZE);                    // старшие биты = перенос
+    carry = (uint32_t)(sum >> UNSIGNED_SIZE);         // старшие биты = перенос
   }
 
   // Если после обработки последнего слова остался carry — это переполнение
@@ -105,7 +105,8 @@ int big_div_mantissa(const s21_big_decimal* dividend,
   big_zero(quotient);
   *out_scale = 0;
 
-  for (int bit_idx = UNSIGNED_SIZE * S21_BIG_DECIMAL_SIZE - 1; bit_idx >= 0; bit_idx--) {
+  for (int bit_idx = UNSIGNED_SIZE * S21_BIG_DECIMAL_SIZE - 1; bit_idx >= 0;
+       bit_idx--) {
     big_shift_left1(&remainder);
 
     const int word = bit_idx / UNSIGNED_SIZE;
@@ -130,7 +131,8 @@ int big_div_mantissa(const s21_big_decimal* dividend,
     const s21_big_decimal rem_copy = remainder;
     big_zero(&remainder);
 
-    for (int bit_idx = UNSIGNED_SIZE * S21_BIG_DECIMAL_SIZE - 1; bit_idx >= 0; bit_idx--) {
+    for (int bit_idx = UNSIGNED_SIZE * S21_BIG_DECIMAL_SIZE - 1; bit_idx >= 0;
+         bit_idx--) {
       big_shift_left1(&remainder);
 
       const int word = bit_idx / UNSIGNED_SIZE;

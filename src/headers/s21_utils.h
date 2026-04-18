@@ -8,8 +8,8 @@
 #include "../s21_decimal.h"
 #include "s21_big_decimal.h"
 
-#define MAX4BITE 0xffffffff     // исп в other.c
-#define S21_DECIMAL_LIMIT 3     // исп в other.c
+#define MAX4BITE 0xffffffff  // исп в other.c
+#define S21_DECIMAL_LIMIT 3  // исп в other.c
 
 #define FLOAT_DIGITS 7
 
