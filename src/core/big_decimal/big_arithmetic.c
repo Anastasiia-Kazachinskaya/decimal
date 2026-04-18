@@ -4,15 +4,13 @@
 #include "../../headers/s21_big_decimal.h"
 #include "../../headers/s21_utils.h"
 
-#define MASK_32_BIT 0xFFFFFFFF
-
 int s21_big_add(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
                 s21_big_decimal* result) {
   uint32_t carry = 0;
 
   // Складываем по словам с учётом переноса
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
-    uint64_t sum = (uint64_t)value_1->bits[i] + value_2->bits[i] + carry;
+    const uint64_t sum = (uint64_t)value_1->bits[i] + value_2->bits[i] + carry;
     result->bits[i] = (uint32_t)(sum & MASK_32_BIT);  // младшие 32 бита
     carry = (uint32_t)(sum >> 32);                    // старшие биты = перенос
   }
@@ -36,19 +34,23 @@ int s21_big_mul(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
 
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
     uint64_t carry = 0;
+
     for (int j = 0; j < S21_BIG_DECIMAL_SIZE; j++) {
-      uint64_t prod = (uint64_t)value_1->bits[i] * (uint64_t)value_2->bits[j] +
-                      temp[i + j] + carry;
+      const uint64_t prod =
+          (uint64_t)value_1->bits[i] * (uint64_t)value_2->bits[j] +
+          temp[i + j] + carry;
       temp[i + j] = (uint32_t)(prod & MASK_32_BIT);
       carry = prod >> 32;
     }
+
     int k = i + S21_BIG_DECIMAL_SIZE;
     while (carry && k < 16) {
-      uint64_t sum = (uint64_t)temp[k] + carry;
+      const uint64_t sum = (uint64_t)temp[k] + carry;
       temp[k] = (uint32_t)(sum & MASK_32_BIT);
       carry = sum >> 32;
       k++;
     }
+
     if (carry) {
       return ERROR;
     }
@@ -57,6 +59,7 @@ int s21_big_mul(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
     result->bits[i] = temp[i];
   }
+
   for (int i = S21_BIG_DECIMAL_SIZE; i < 16; i++) {
     if (temp[i] != 0) {
       return ERROR;
@@ -73,11 +76,11 @@ int s21_big_sub(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
   uint32_t borrow = 0;
 
   for (int i = 0; i < S21_BIG_DECIMAL_SIZE; i++) {
-    uint64_t a = value_1->bits[i];
-    uint64_t b = value_2->bits[i];
+    const uint64_t a = value_1->bits[i];
+    const uint64_t b = value_2->bits[i];
 
     // вычисляем разность
-    uint64_t diff = a - b - borrow;
+    const uint64_t diff = a - b - borrow;
 
     borrow = (a < b + borrow) ? 1 : 0;
 
@@ -94,8 +97,9 @@ int s21_big_sub(const s21_big_decimal* value_1, const s21_big_decimal* value_2,
 
 // делит 2 беззнаковых big_decimal, возвращает частное в quotient, scale в
 // out_scale
-int big_div_mantissa(const s21_big_decimal* dividend, const s21_big_decimal* divisor,
-                     s21_big_decimal* quotient, int* out_scale) {
+int big_div_mantissa(const s21_big_decimal* dividend,
+                     const s21_big_decimal* divisor, s21_big_decimal* quotient,
+                     int* out_scale) {
   s21_big_decimal remainder;
   big_zero(&remainder);
   big_zero(quotient);
@@ -103,10 +107,13 @@ int big_div_mantissa(const s21_big_decimal* dividend, const s21_big_decimal* div
 
   for (int bit_idx = 255; bit_idx >= 0; bit_idx--) {
     big_shift_left1(&remainder);
-    int word = bit_idx / 32;
-    int bit_pos = bit_idx % 32;
-    int d_bit = (dividend->bits[word] >> bit_pos) & 1;
+
+    const int word = bit_idx / 32;
+    const int bit_pos = bit_idx % 32;
+    const unsigned d_bit = (dividend->bits[word] >> bit_pos) & 1;
+
     remainder.bits[0] |= d_bit;
+
     if (big_gte(&remainder, divisor)) {
       s21_big_sub(&remainder, divisor, &remainder);
       quotient->bits[word] |= (1u << bit_pos);
@@ -120,15 +127,18 @@ int big_div_mantissa(const s21_big_decimal* dividend, const s21_big_decimal* div
 
     s21_big_decimal digit;
     big_zero(&digit);
-    s21_big_decimal rem_copy = remainder;
+    const s21_big_decimal rem_copy = remainder;
     big_zero(&remainder);
 
     for (int bit_idx = 255; bit_idx >= 0; bit_idx--) {
       big_shift_left1(&remainder);
+
       int word = bit_idx / 32;
       int bit_pos = bit_idx % 32;
       int r_bit = (rem_copy.bits[word] >> bit_pos) & 1;
+
       remainder.bits[0] |= r_bit;
+
       if (big_gte(&remainder, divisor)) {
         s21_big_sub(&remainder, divisor, &remainder);
         digit.bits[word] |= (1u << bit_pos);
@@ -148,12 +158,14 @@ int big_div_mantissa(const s21_big_decimal* dividend, const s21_big_decimal* div
 }
 
 // банковское округление
-void big_bankers_round(s21_big_decimal* quotient, s21_big_decimal remainder,
-                       s21_big_decimal divisor) {
+void big_bankers_round(s21_big_decimal* quotient,
+                       const s21_big_decimal remainder,
+                       const s21_big_decimal divisor) {
   s21_big_decimal rem2 = remainder;
   big_shift_left1(&rem2);
   if (big_gte(&rem2, &divisor)) {
     int equal = big_gte(&divisor, &rem2);
+
     if (equal) {
       if (quotient->bits[0] & 1) big_inc(quotient);
     } else {
@@ -166,7 +178,7 @@ void big_bankers_round(s21_big_decimal* quotient, s21_big_decimal remainder,
 int big_inc(s21_big_decimal* v) {
   uint32_t carry = 1;  // беззнаковое 32-битное целое
   for (int i = 0; i < 8; i++) {
-    uint64_t val = (uint64_t)v->bits[i] + carry;
+    const uint64_t val = (uint64_t)v->bits[i] + carry;
     v->bits[i] = (uint32_t)(val & MASK_32_BIT);
     carry = (uint32_t)(val >> 32);
     if (carry == 0) break;
@@ -178,7 +190,7 @@ int big_inc(s21_big_decimal* v) {
 int big_mul_ten(s21_big_decimal* v) {
   uint32_t carry = 0;  // беззнаковое 32-битное целое
   for (int i = 0; i < 8; i++) {
-    uint64_t val = ((uint64_t)v->bits[i] * 10) + carry;
+    const uint64_t val = ((uint64_t)v->bits[i] * 10) + carry;
     v->bits[i] = (uint32_t)(val & MASK_32_BIT);
     carry = (uint32_t)(val >> 32);
   }
