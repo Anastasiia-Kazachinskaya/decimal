@@ -178,3 +178,26 @@ s21_decimal s21_big_to_decimal_internal(s21_big_decimal* big_result,
 
   return *result;
 }
+
+// конвертация из биг_децимал в децимал
+int big_to_decimal(s21_big_decimal v, s21_decimal *result) {
+  for (int i = 3; i < 8; i++)
+    if (v.bits[i] != 0) return ERROR;
+  result->bits[0] = v.bits[0];
+  result->bits[1] = v.bits[1];
+  result->bits[2] = v.bits[2];
+  result->bits[3] = ((uint32_t)v.sign << 31) | ((uint32_t)v.scale << 16);
+  return OK;
+}
+
+// конвертация из децимал в биг_децимал
+s21_big_decimal decimal_to_big(s21_decimal v) {
+  s21_big_decimal result;
+  big_zero(&result);
+  result.bits[0] = (uint32_t)v.bits[0];
+  result.bits[1] = (uint32_t)v.bits[1];
+  result.bits[2] = (uint32_t)v.bits[2];
+  result.sign  = (v.bits[3] >> 31) & 1;
+  result.scale = (v.bits[3] >> 16) & 0xFF;
+  return result;
+}

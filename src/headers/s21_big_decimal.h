@@ -48,4 +48,17 @@ int s21_big_mul(s21_big_decimal value_1, s21_big_decimal value_2,
 int s21_is_big_greater(s21_big_decimal value1, s21_big_decimal value2);
 int s21_is_big_less(s21_big_decimal value1, s21_big_decimal value2);
 
+int big_div_mantissa(s21_big_decimal dividend, s21_big_decimal divisor,
+                     s21_big_decimal *quotient, int *out_scale);
+void big_bankers_round(s21_big_decimal *quotient,
+                       s21_big_decimal remainder,
+                       s21_big_decimal divisor);
+void big_add(s21_big_decimal *a, s21_big_decimal b);
+int big_add1(s21_big_decimal *v);
+int big_mul10(s21_big_decimal *v);
+void big_sub(s21_big_decimal *a, s21_big_decimal b);
+
+int big_gte(s21_big_decimal a, s21_big_decimal b);
+
+
 #endif

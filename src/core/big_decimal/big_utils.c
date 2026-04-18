@@ -153,3 +153,58 @@ int s21_handle_overflow_and_rounding(s21_big_decimal* res_big) {
   }
   return OK;
 }
+
+// проверка влезет ли мантисса в 96 бит, если нет - то делит на 10, пока не влезет
+int big_normalize(s21_big_decimal *v) {
+  // пока не влезает в 96 бит
+  while (v->bits[3] != 0 || v->bits[4] != 0 || v->bits[5] != 0
+     || v->bits[6] != 0 || v->bits[7] != 0) {
+    if (v->scale == 0) return ERROR;
+
+    // делим мантиссу на 10, остаток в remainder
+    uint64_t remainder = 0;
+    for (int i = 7; i >= 0; i--) {
+      uint64_t cur = (remainder << 32) | v->bits[i];
+      v->bits[i] = (uint32_t)(cur / 10);
+      remainder = cur % 10;
+    }
+
+    v->scale--;
+
+    // банковское округление по цифре remainder
+    int round_up = 0;
+    if (remainder > 5) {
+      round_up = 1;
+    } else if (remainder == 5) {
+      round_up = (v->bits[0] & 1);
+    }
+    if (round_up) big_add1(v);
+     }
+  return OK;
+}
+
+// сдвигает на 1 бит
+void big_shift_left1(s21_big_decimal *v) {
+  uint32_t carry = 0; // беззнаковое 32-битное целое
+  for (int i = 0; i < 8; i++) {
+    uint64_t val = ((uint64_t)v->bits[i] << 1) | carry;
+    v->bits[i] = (uint32_t)(val & 0xFFFFFFFF);
+    carry = (uint32_t)(val >> 32);
+  }
+}
+
+// проверит, что все биты == 0
+// если число нулевое, то вернет 1
+ int big_is_zero(s21_big_decimal v) {
+  for (int i = 0; i < 8; i++)
+    if (v.bits[i] != 0) return 0;
+  return 1;
+}
+
+// helpers
+// обнуляет все 8 битов, а также знак и scale
+void big_zero(s21_big_decimal *v) {
+  for (int i = 0; i < 8; i++) v->bits[i] = 0;
+  v->sign = 0;
+  v->scale = 0;
+}
