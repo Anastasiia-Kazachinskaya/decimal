@@ -1,6 +1,6 @@
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 
 #include "../../headers/s21_big_decimal.h"
 #include "../../headers/s21_utils.h"
@@ -43,12 +43,6 @@ int s21_get_scale(s21_decimal* value) {
   return scale;
 }
 
-int s21_set_scale(s21_decimal* value, int scale) {
-  if (!value || scale < 0 || scale > 28) return 1;
-  value->bits[3] = (value->bits[3] & ~(0xFF << 16)) | ((scale & 0xFF) << 16);
-  return 0;
-}
-
 void s21_null_decimal(s21_decimal* value) {
   if (value) {
     memset(value, 0, sizeof(s21_decimal));
@@ -84,15 +78,6 @@ int s21_get_sign(s21_decimal* value) {
   return sign;
 }
 
-s21_decimal s21_get_zero() {
-  s21_decimal zero;
-  char* ptr = (char*)&zero;
-  for (size_t i = 0; i < sizeof(s21_decimal); i++) {
-    ptr[i] = 0;
-  }
-  return zero;
-}
-
 void s21_set_sign(char val, s21_decimal* value) { value->bits[3] |= val << 31; }
 
 int s21_decimal_check(s21_decimal value) {
@@ -111,12 +96,6 @@ int s21_decimal_check(s21_decimal value) {
   }
 
   return result;
-}
-
-void copy_decimal(s21_decimal* value_1, s21_decimal* value_2) {
-  if (value_1 && value_2) {
-    for (int i = 0; i < 4; ++i) value_2->bits[i] = value_1->bits[i];
-  }
 }
 
 long long s21_str_to_ll(const char* str) {

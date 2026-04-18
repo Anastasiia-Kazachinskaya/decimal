@@ -136,7 +136,6 @@ int s21_truncate(s21_decimal value, s21_decimal* result) {
 }
 
 int s21_divide_mantissa_by_10(s21_decimal* value) {
-  
   if (!value) return CALCULATION_ERROR;
 
   uint32_t remainder = 0;
@@ -146,7 +145,6 @@ int s21_divide_mantissa_by_10(s21_decimal* value) {
     value->bits[i] = (uint32_t)(temp / 10);
     remainder = (uint32_t)(temp % 10);
   }
-
 
   return remainder ? 1 : 0;
 }

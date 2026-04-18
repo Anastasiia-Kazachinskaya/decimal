@@ -26,7 +26,6 @@ else
     OPEN_CMD = xdg-open
 endif
 
-# Добавляем флаги для Check в CFLAGS, если они есть
 ifneq ($(CHECK_CFLAGS),)
     CFLAGS += $(CHECK_CFLAGS)
 endif
@@ -39,29 +38,16 @@ all: $(LIB)
 $(LIB): $(OBJECTS) $(HEADERS)
 	ar rcs $(LIB) $(OBJECTS)
 
-# ИСПРАВЛЕНО: Порядок линковки правильный - объектные файлы и библиотека ДО флагов линковки
 test: $(TEST_OBJ) $(LIB)
 	$(CC) $(CFLAGS) -o $(TEST_EXE) $(TEST_OBJ) $(LIB) $(CHECK_LIBS)
 	@./$(TEST_EXE)
-
-# gcov_report: $(DECIMAL_SOURCES) $(TEST_SRC)
-# 	$(CC) $(CFLAGS) --coverage -o $(TEST_EXE) $(DECIMAL_SOURCES) $(TEST_SRC) $(CHECK_LIBS)
-# 	./$(TEST_EXE)
-# 	@mkdir -p $(REPORT_DIR)
-# 	@gcovr --html-details $(REPORT_DIR)/$(REPORT)
-# 	@rm -rf *.gcov *.gcno *.gcda
 
 gcov_report: $(DECIMAL_SOURCES) $(TEST_SRC)
 	$(CC) $(CFLAGS) --coverage -o $(TEST_EXE) $(DECIMAL_SOURCES) $(TEST_SRC) $(CHECK_LIBS)
 	./$(TEST_EXE)
 	mkdir -p $(REPORT_DIR)
-	gcovr --html-details $(REPORT_DIR)/$(REPORT) \
-		--filter 'core/decimal/arithmetic.c' \
-		--filter 'core/decimal/comparison.c' \
-		--filter 'core/decimal/converters.c' \
-		--filter 'core/decimal/other.c'
+	gcovr --html-details $(REPORT_DIR)/$(REPORT)
 	rm -rf *.gcov *.gcno *.gcda
-
 
 clean:
 	rm -rf $(OBJECTS) $(LIB) $(TEST_OBJ) $(TEST_EXE) *.gcov *.gcno *.gcda
@@ -75,9 +61,6 @@ clang_check:
 style:
 	clang-format -i $(DECIMAL_SOURCES) $(HEADERS)
 
-
-
-# Docker тесты (запуск из src/)
 docker_test:
 	@echo "Cleaning src/ before docker tests..."
 	$(MAKE) clean

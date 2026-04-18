@@ -3,42 +3,8 @@
 #include "../../headers/s21_big_decimal.h"
 #include "../../headers/s21_utils.h"
 
-int get_scale(s21_big_decimal* value) {
-  int p = 0;
-  while (value->bits[p] == 0 && p < 8 * 32) {
-    p++;
-  }
-  return 8 * 32 - p;
-}
-
-s21_big_decimal* s21_big_zero() { return calloc(1, sizeof(s21_big_decimal)); }
-
-int big_get_bit(s21_big_decimal* value, int bit_index) {
-  if (bit_index < 0 || bit_index >= 8 * 32) {
-    return 0;
-  }
-  int word_index = bit_index / 32;
-  int bit_in_word = bit_index % 32;
-
-  return (value->bits[word_index] >> bit_in_word) & 1;
-}
-
-int big_set_bit(s21_big_decimal* value, int bit_index, char bit) {
-  if (!value || bit_index < 0 || bit_index >= 8 * 32) {
-    return 0;
-  }
-  int word_index = bit_index / 32;
-  int bit_in_word = bit_index % 32;
-  if (bit) {
-    value->bits[word_index] |= (1 << bit_in_word);
-  } else {
-    value->bits[word_index] &= ~(1 << bit_in_word);
-  }
-  return 0;
-}
-
-
-/* Деление мантиссы на 10 с округлением к ближайшему целому (banker: при .5 — к чётному). */
+/* Деление мантиссы на 10 с округлением к ближайшему целому (banker: при .5 — к
+ * чётному). */
 static int s21_big_div10_bankers(s21_big_decimal* value) {
   uint64_t remainder = 0;
   for (int i = 7; i >= 0; i--) {
@@ -70,16 +36,10 @@ static int s21_big_div10_bankers(s21_big_decimal* value) {
   return OK;
 }
 
-
-
-int s21_big_perform_signed_operation(
-  int sign_1,
-  int sign_2,
-  s21_big_decimal* big_value_1,
-  s21_big_decimal* big_value_2,
-  s21_big_decimal* res_big) {
-  
-  
+int s21_big_perform_signed_operation(int sign_1, int sign_2,
+                                     s21_big_decimal* big_value_1,
+                                     s21_big_decimal* big_value_2,
+                                     s21_big_decimal* res_big) {
   if (sign_1 != sign_2) {
     // Разные знаки: складываем модули (для s21_add после перекодировки знаков)
     big_value_1->sign = 0;
@@ -113,18 +73,15 @@ int s21_big_perform_signed_operation(
   return OK;
 }
 
-
-
 int check_overflow(s21_big_decimal value) {
-    int overflow = 0;
-    for (int i = 3; i < 8 && !overflow; i++) {
-      if (value.bits[i] != 0) {
-        overflow = 1;
-      }
+  int overflow = 0;
+  for (int i = 3; i < 8 && !overflow; i++) {
+    if (value.bits[i] != 0) {
+      overflow = 1;
     }
-    return overflow;
   }
-
+  return overflow;
+}
 
 int check_mantissa(s21_big_decimal res_big) {
   int status = 0;
@@ -136,7 +93,6 @@ int check_mantissa(s21_big_decimal res_big) {
   }
   return status;
 }
-
 
 int s21_handle_overflow_and_rounding(s21_big_decimal* res_big) {
   if (!res_big) {
@@ -154,11 +110,12 @@ int s21_handle_overflow_and_rounding(s21_big_decimal* res_big) {
   return OK;
 }
 
-// проверка влезет ли мантисса в 96 бит, если нет - то делит на 10, пока не влезет
-int big_normalize(s21_big_decimal *v) {
+// проверка влезет ли мантисса в 96 бит, если нет - то делит на 10, пока не
+// влезет
+int big_normalize(s21_big_decimal* v) {
   // пока не влезает в 96 бит
-  while (v->bits[3] != 0 || v->bits[4] != 0 || v->bits[5] != 0
-     || v->bits[6] != 0 || v->bits[7] != 0) {
+  while (v->bits[3] != 0 || v->bits[4] != 0 || v->bits[5] != 0 ||
+         v->bits[6] != 0 || v->bits[7] != 0) {
     if (v->scale == 0) return ERROR;
 
     // делим мантиссу на 10, остаток в remainder
@@ -179,13 +136,13 @@ int big_normalize(s21_big_decimal *v) {
       round_up = (v->bits[0] & 1);
     }
     if (round_up) big_add1(v);
-     }
+  }
   return OK;
 }
 
 // сдвигает на 1 бит
-void big_shift_left1(s21_big_decimal *v) {
-  uint32_t carry = 0; // беззнаковое 32-битное целое
+void big_shift_left1(s21_big_decimal* v) {
+  uint32_t carry = 0;  // беззнаковое 32-битное целое
   for (int i = 0; i < 8; i++) {
     uint64_t val = ((uint64_t)v->bits[i] << 1) | carry;
     v->bits[i] = (uint32_t)(val & 0xFFFFFFFF);
@@ -195,7 +152,7 @@ void big_shift_left1(s21_big_decimal *v) {
 
 // проверит, что все биты == 0
 // если число нулевое, то вернет 1
- int big_is_zero(s21_big_decimal v) {
+int big_is_zero(s21_big_decimal v) {
   for (int i = 0; i < 8; i++)
     if (v.bits[i] != 0) return 0;
   return 1;
@@ -203,7 +160,7 @@ void big_shift_left1(s21_big_decimal *v) {
 
 // helpers
 // обнуляет все 8 битов, а также знак и scale
-void big_zero(s21_big_decimal *v) {
+void big_zero(s21_big_decimal* v) {
   for (int i = 0; i < 8; i++) v->bits[i] = 0;
   v->sign = 0;
   v->scale = 0;
