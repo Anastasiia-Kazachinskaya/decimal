@@ -185,7 +185,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
     }
     final_scale--;
 
-    unsigned round_up = 0;
+    int round_up = 0;
     if (rem > 5) {
       round_up = 1;
     } else if (rem == 5) {

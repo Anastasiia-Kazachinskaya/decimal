@@ -46,7 +46,14 @@ gcov_report: $(DECIMAL_SOURCES) $(TEST_SRC)
 	$(CC) $(CFLAGS) --coverage -o $(TEST_EXE) $(DECIMAL_SOURCES) $(TEST_SRC) $(CHECK_LIBS)
 	./$(TEST_EXE)
 	mkdir -p $(REPORT_DIR)
-	gcovr --html-details $(REPORT_DIR)/$(REPORT)
+	gcovr --html-details $(REPORT_DIR)/$(REPORT) \
+		--exclude 'tests/test_arithmetic.c' \
+		--exclude 'tests/test_comparison.c' \
+		--exclude 'tests/test_complex.c' \
+		--exclude 'tests/test_converters.c' \
+		--exclude 'tests/test_other.c' \
+		--exclude 'tests/test_s21_decimal_all.c' \
+		--exclude 'tests/test_utils.c'
 	rm -rf *.gcov *.gcno *.gcda
 
 clean:

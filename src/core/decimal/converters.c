@@ -10,8 +10,7 @@ int s21_from_decimal_to_float(s21_decimal src, float* dst) {
       double result = 0.0;
       result = (unsigned)src.bits[0];
       if (src.bits[1] != 0) result += (unsigned)src.bits[1] * RANDOM_FLOAT_1;
-      if (src.bits[2] != 0)
-        result += (unsigned)src.bits[2] * RANDOM_FLOAT_2;
+      if (src.bits[2] != 0) result += (unsigned)src.bits[2] * RANDOM_FLOAT_2;
       const int scale = s21_get_scale(&src);
       if (scale != 0 && result != 0.0)
         for (int i = 0; i < scale; ++i) result /= 10.0L;
