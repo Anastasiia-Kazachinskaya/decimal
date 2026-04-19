@@ -122,7 +122,7 @@ int big_normalize(s21_big_decimal* v) {
     // делим мантиссу на 10, остаток в remainder
     uint64_t remainder = 0;
     for (int i = 7; i >= 0; i--) {
-      const uint64_t cur = (remainder << S21_BIG_DECIMAL_SIZE) | v->bits[i];
+      const uint64_t cur = (remainder << UNSIGNED_SIZE) | v->bits[i];
       v->bits[i] = (uint32_t)(cur / 10);
       remainder = cur % 10;
     }
