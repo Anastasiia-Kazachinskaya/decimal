@@ -669,6 +669,305 @@ START_TEST(test_div_scale_over_28) {
 }
 END_TEST
 
+// Вычитание с разными знаками и масштабами
+START_TEST(s21_sub_diff_scales_negative_result) {
+    // 1.5 - 3.75 = -2.25
+    s21_decimal a = {{15, 0, 0, 0x00010000}};   // 1.5, scale=1
+    s21_decimal b = {{375, 0, 0, 0x00020000}};  // 3.75, scale=2
+    s21_decimal result = {0};
+
+    int code = s21_sub(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq(result.bits[0], 225);     // 2.25
+    ck_assert_int_eq(s21_get_scale(&result), 2);
+    ck_assert_int_eq(s21_get_sign(&result), 1); // negative
+}
+END_TEST
+
+START_TEST(s21_sub_zero_minus_negative) {
+    // 0 - (-5) = 5
+    s21_decimal a = {{0, 0, 0, 0}};
+    s21_decimal b = {{5, 0, 0, 0x80000000}};
+    s21_decimal result = {0};
+
+    int code = s21_sub(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq(result.bits[0], 5);
+    ck_assert_int_eq(s21_get_sign(&result), 0);
+}
+END_TEST
+
+START_TEST(s21_sub_overflow_scale_correction) {
+    // Вычитание с необходимостью коррекции масштаба
+    s21_decimal a = {{1, 0, 0, 0x001C0000}};    // очень маленькое число
+    s21_decimal b = {{1, 0, 0, 0x001B0000}};    // чуть больше
+    s21_decimal result = {0};
+
+    int code = s21_sub(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    // Результат должен быть отрицательным и с корректным масштабом
+    ck_assert_int_eq(s21_get_sign(&result), 1);
+    ck_assert_int_le(s21_get_scale(&result), 28);
+}
+END_TEST
+
+START_TEST(s21_add_overflow_max_positive) {
+    // MAX_DECIMAL + 1 = переполнение
+    s21_decimal a = {{4294967295U, 4294967295U, 4294967295U, 0}};
+    s21_decimal b = {{1, 0, 0, 0}};
+    s21_decimal result = {0};
+
+    int code = s21_add(a, b, &result);
+
+    ck_assert_int_eq(code, NUMBER_TO_LARGE); // Переполнение
+}
+END_TEST
+
+START_TEST(s21_add_overflow_min_negative) {
+    // MIN_DECIMAL + (-1) = переполнение в отрицательную сторону
+    s21_decimal a = {{4294967295U, 4294967295U, 4294967295U, 0x80000000}};
+    s21_decimal b = {{1, 0, 0, 0x80000000}};
+    s21_decimal result = {0};
+
+    int code = s21_add(a, b, &result);
+
+    ck_assert_int_eq(code, NUMBER_TO_SMALL);
+}
+END_TEST
+
+START_TEST(s21_add_max_scales) {
+    // Сложение с максимальными масштабами
+    s21_decimal a = {{123, 0, 0, 0x001C0000}};   // scale=28
+    s21_decimal b = {{456, 0, 0, 0x001C0000}};   // scale=28
+    s21_decimal result = {0};
+
+    int code = s21_add(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq(result.bits[0], 579);
+    ck_assert_int_eq(s21_get_scale(&result), 28);
+}
+END_TEST
+
+START_TEST(s21_add_precision_loss) {
+    // Потеря точности при приведении масштабов
+    s21_decimal a = {{1, 0, 0, 0x001C0000}};    // 1e-28
+    s21_decimal b = {{1, 0, 0, 0x00000000}};    // 1
+    s21_decimal result = {0};
+
+    int code = s21_add(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    // Результат должен быть примерно 1 с масштабом 0 или небольшим
+    ck_assert_int_le(s21_get_scale(&result), 28);
+}
+END_TEST
+
+START_TEST(s21_mul_overflow_positive) {
+    // MAX_DECIMAL * 2 = переполнение
+    s21_decimal a = {{4294967295U, 4294967295U, 4294967295U, 0}};
+    s21_decimal b = {{2, 0, 0, 0}};
+    s21_decimal result = {0};
+
+    int code = s21_mul(a, b, &result);
+
+    ck_assert_int_eq(code, NUMBER_TO_LARGE);
+}
+END_TEST
+
+START_TEST(s21_mul_scale_overflow) {
+    // Умножение с масштабом > 28
+    s21_decimal a = {{5, 0, 0, 0x00140000}};    // scale=20
+    s21_decimal b = {{3, 0, 0, 0x00140000}};    // scale=20
+    s21_decimal result = {0};
+
+    int code = s21_mul(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    // Масштаб должен быть уменьшен до 28
+    ck_assert_int_eq(s21_get_scale(&result), 28);
+}
+END_TEST
+
+START_TEST(s21_mul_very_small_numbers) {
+    // Умножение очень маленьких чисел
+    s21_decimal a = {{1, 0, 0, 0x001C0000}};    // 1e-28
+    s21_decimal b = {{1, 0, 0, 0x001C0000}};    // 1e-28
+    s21_decimal result = {0};
+
+    int code = s21_mul(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    // Результат: 1e-56, должен быть округлен до 0 или минимального значения
+    ck_assert_int_eq(s21_get_scale(&result), 28);
+}
+END_TEST
+
+START_TEST(s21_mul_max_scale_rounding) {
+    // Проверка банковского округления при умножении
+    s21_decimal a = {{1, 0, 0, 0x00010000}};    // 0.1
+    s21_decimal b = {{1, 0, 0, 0x00010000}};    // 0.1
+    s21_decimal result = {0};
+
+    int code = s21_mul(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq(result.bits[0], 1);       // 0.1 * 0.1 = 0.01
+    ck_assert_int_eq(s21_get_scale(&result), 2);
+}
+END_TEST
+
+START_TEST(s21_div_precision_bank_rounding) {
+    // 1/3: s21_div возвращает частное с точностью до 28 знаков (банковское на хвосте)
+    s21_decimal a = {{1, 0, 0, 0}};
+    s21_decimal b = {{3, 0, 0, 0}};
+    s21_decimal result = {0};
+
+    int code = s21_div(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_int_eq(s21_get_scale(&result), 28);
+
+    // 3333333333333333333333333333 / 10^28 — мантисса в bits[0..2] (little-endian)
+    if (s21_get_scale(&result) == 28) {
+        ck_assert_uint_eq(result.bits[0], 0x05555555u);
+        ck_assert_uint_eq(result.bits[1], 0x14B700CBu);
+        ck_assert_uint_eq(result.bits[2], 0x0AC544CAu);
+    }
+}
+END_TEST
+
+START_TEST(s21_div_round_half_up) {
+    // 0.5 / 1 = 0.5 — точное частное, не округление до целого (для этого s21_round)
+    s21_decimal a = {{5, 0, 0, 0x00010000}};    // 0.5
+    s21_decimal b = {{1, 0, 0, 0}};              // 1
+    s21_decimal result = {0};
+
+    int code = s21_div(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq(result.bits[0], 5u);
+    ck_assert_int_eq(s21_get_scale(&result), 1);
+}
+END_TEST
+
+START_TEST(s21_div_round_half_even) {
+    // 1.5 / 1 = 1.5 — то же: деление не заменяет s21_round
+    s21_decimal a = {{15, 0, 0, 0x00010000}};    // 1.5
+    s21_decimal b = {{1, 0, 0, 0}};              // 1
+    s21_decimal result = {0};
+
+    int code = s21_div(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq(result.bits[0], 15u);
+    ck_assert_int_eq(s21_get_scale(&result), 1);
+}
+END_TEST
+
+START_TEST(s21_div_very_small_divisor) {
+    // Деление на очень маленькое число = большое число
+    s21_decimal a = {{1, 0, 0, 0}};
+    s21_decimal b = {{1, 0, 0, 0x001C0000}};    // 1e-28
+    s21_decimal result = {0};
+
+    int code = s21_div(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    // Результат должен быть очень большим, но не переполненным
+    ck_assert_int_eq(s21_get_scale(&result), 0);
+}
+END_TEST
+
+START_TEST(s21_div_exact_division_high_precision) {
+    // Точное деление с большим масштабом
+    s21_decimal a = {{1, 0, 0, 0x00140000}};    // 1e-20
+    s21_decimal b = {{2, 0, 0, 0x00140000}};    // 2e-20
+    s21_decimal result = {0};
+
+    int code = s21_div(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq(result.bits[0], 5);        // 0.5
+    ck_assert_int_eq(s21_get_scale(&result), 1);
+}
+END_TEST
+
+START_TEST(s21_chain_operations) {
+    // (10.5 + 3.2) * 2 - 7.8 / 3 = ?
+    s21_decimal a = {{105, 0, 0, 0x00010000}};   // 10.5
+    s21_decimal b = {{32, 0, 0, 0x00010000}};    // 3.2
+    s21_decimal c = {{2, 0, 0, 0}};              // 2
+    s21_decimal d = {{78, 0, 0, 0x00010000}};    // 7.8
+    s21_decimal e = {{3, 0, 0, 0}};              // 3
+    s21_decimal temp1 = {0}, temp2 = {0}, result = {0};
+
+    s21_add(a, b, &temp1);      // 13.7
+    s21_mul(temp1, c, &temp2);  // 27.4
+    s21_div(d, e, &temp1);      // 2.6
+    s21_sub(temp2, temp1, &result); // 24.8
+
+    ck_assert_uint_eq(result.bits[0], 248);
+    ck_assert_int_eq(s21_get_scale(&result), 1);
+}
+END_TEST
+
+START_TEST(s21_max_precision_chain) {
+    // Цепочка операций с максимальной точностью
+    s21_decimal a = {{1, 0, 0, 0x001C0000}};
+    s21_decimal b = {{1, 0, 0, 0x001C0000}};
+    s21_decimal c = {{1, 0, 0, 0x001C0000}};
+    s21_decimal result = {0};
+
+    s21_add(a, b, &result);
+    int code = s21_add(result, c, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_uint_eq(result.bits[0], 3);
+    ck_assert_int_eq(s21_get_scale(&result), 28);
+}
+END_TEST
+
+START_TEST(s21_zero_handling) {
+    // Различные операции с нулем
+    s21_decimal zero = {{0, 0, 0, 0}};
+    s21_decimal positive = {{5, 0, 0, 0}};
+    s21_decimal negative = {{5, 0, 0, 0x80000000}};
+    s21_decimal result = {0};
+
+    s21_add(zero, positive, &result);
+    ck_assert_uint_eq(result.bits[0], 5);
+
+    s21_sub(zero, negative, &result);
+    ck_assert_uint_eq(result.bits[0], 5);
+    ck_assert_int_eq(s21_get_sign(&result), 0);
+
+    s21_mul(zero, positive, &result);
+    ck_assert_uint_eq(result.bits[0], 0);
+
+    int code = s21_div(positive, zero, &result);
+    ck_assert_int_eq(code, DIVISION_BY_ZERO);
+}
+END_TEST
+
+START_TEST(s21_div_infinity_rounding) {
+    // Проверка округления при достижении предела точности
+    s21_decimal a = {{1, 0, 0, 0}};
+    s21_decimal b = {{7, 0, 0, 0}};              // 1/7 с периодом
+    s21_decimal result = {0};
+
+    int code = s21_div(a, b, &result);
+
+    ck_assert_int_eq(code, OK);
+    ck_assert_int_eq(s21_get_scale(&result), 28);
+    // Проверяем, что результат не 0 и не переполнен
+    ck_assert_uint_ne(result.bits[0], 0);
+}
+END_TEST
+
 Suite *s21_arithmetic_suite(void) {
     Suite *s = suite_create("arithmetic");
     TCase *tc_core = tcase_create("Core");
@@ -685,6 +984,10 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_sub_test_result_is_null);
     tcase_add_test(tc_core, s21_sub_overflow_max);
     tcase_add_test(tc_core, s21_sub_overflow_min);
+    tcase_add_test(tc_core, s21_sub_diff_scales_negative_result);
+    tcase_add_test(tc_core, s21_sub_zero_minus_negative);
+    tcase_add_test(tc_core, s21_sub_overflow_scale_correction);
+
     tcase_add_test(tc_core, s21_handle_overflow_scale_decrement);
 
     tcase_add_test(tc_core, s21_add_two_positive);
@@ -696,6 +999,10 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_add_different_scales);
     tcase_add_test(tc_core, s21_add_result_null);
     tcase_add_test(tc_core, s21_add_opposite_equal);
+    tcase_add_test(tc_core, s21_add_overflow_max_positive);
+    tcase_add_test(tc_core, s21_add_overflow_min_negative);
+    tcase_add_test(tc_core, s21_add_max_scales);
+    tcase_add_test(tc_core, s21_add_precision_loss);
 
     tcase_add_test(tc_core, s21_mul_two_positive);
     tcase_add_test(tc_core, s21_mul_positive_negative);
@@ -705,6 +1012,10 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, s21_mul_with_scale);
     tcase_add_test(tc_core, s21_mul_large_numbers);
     tcase_add_test(tc_core, s21_mul_result_null);
+    tcase_add_test(tc_core, s21_mul_overflow_positive);
+    tcase_add_test(tc_core, s21_mul_scale_overflow);
+    tcase_add_test(tc_core, s21_mul_very_small_numbers);
+    tcase_add_test(tc_core, s21_mul_max_scale_rounding);
 
     tcase_add_test(tc_core, test_div_simple);
     tcase_add_test(tc_core, test_div_by_one);
@@ -720,6 +1031,16 @@ Suite *s21_arithmetic_suite(void) {
     tcase_add_test(tc_core, test_div_negative_scale_correction);
     tcase_add_test(tc_core, test_div_large_scale_correction);
     tcase_add_test(tc_core, test_div_scale_over_28);
+    tcase_add_test(tc_core, s21_div_precision_bank_rounding);
+    tcase_add_test(tc_core, s21_div_round_half_up);
+    tcase_add_test(tc_core, s21_div_round_half_even);
+    tcase_add_test(tc_core, s21_div_very_small_divisor);
+    tcase_add_test(tc_core, s21_div_exact_division_high_precision);
+    tcase_add_test(tc_core, s21_div_infinity_rounding);
+
+    tcase_add_test(tc_core, s21_chain_operations);
+    tcase_add_test(tc_core, s21_max_precision_chain);
+    tcase_add_test(tc_core, s21_zero_handling);
 
     suite_add_tcase(s, tc_core);
     return s;

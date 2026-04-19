@@ -306,6 +306,216 @@ START_TEST(complex_negate_zero) {
 }
 END_TEST
 
+START_TEST(test_is_equal_complex_scales) {
+    // 1.5 (scale=1) vs 150 (scale=2) -> 1.5 vs 1.5
+    s21_decimal a = {{15, 0, 0, 0x00010000}};
+    s21_decimal b = {{150, 0, 0, 0x00020000}};
+    ck_assert_int_eq(s21_is_equal(a, b), 1);
+
+    // 1.5 vs 1.50
+    s21_decimal c = {{15, 0, 0, 0x00010000}};
+    s21_decimal d = {{150, 0, 0, 0x00020000}};
+    ck_assert_int_eq(s21_is_equal(c, d), 1);
+}
+END_TEST
+
+START_TEST(test_is_equal_max_scales) {
+    // Очень маленькие числа с максимальным масштабом
+    s21_decimal a = {{1, 0, 0, 0x001C0000}};  // 1e-28
+    s21_decimal b = {{1, 0, 0, 0x001C0000}};
+    ck_assert_int_eq(s21_is_equal(a, b), 1);
+
+    // Разные числа с одинаковым масштабом
+    s21_decimal c = {{1, 0, 0, 0x001C0000}};
+    s21_decimal d = {{2, 0, 0, 0x001C0000}};
+    ck_assert_int_eq(s21_is_equal(c, d), 0);
+}
+END_TEST
+
+START_TEST(test_is_equal_boundary_values) {
+    // MAX_DECIMAL vs MAX_DECIMAL
+    s21_decimal max1 = {{4294967295U, 4294967295U, 4294967295U, 0}};
+    s21_decimal max2 = {{4294967295U, 4294967295U, 4294967295U, 0}};
+    ck_assert_int_eq(s21_is_equal(max1, max2), 1);
+
+    // MIN_DECIMAL (отрицательный) vs MAX_DECIMAL
+    s21_decimal min = {{4294967295U, 4294967295U, 4294967295U, 0x80000000}};
+    ck_assert_int_eq(s21_is_equal(max1, min), 0);
+}
+END_TEST
+
+// Тесты для s21_is_less
+START_TEST(test_is_less_different_scales) {
+    // 0.5 (scale=1) vs 0.05 (scale=2) -> 0.5 > 0.05
+    s21_decimal a = {{5, 0, 0, 0x00010000}};   // 0.5
+    s21_decimal b = {{5, 0, 0, 0x00020000}};   // 0.05
+    ck_assert_int_eq(s21_is_less(a, b), 0);
+    ck_assert_int_eq(s21_is_less(b, a), 1);
+}
+END_TEST
+
+START_TEST(test_is_less_negative_scales) {
+    // -0.5 vs -0.05 -> -0.5 < -0.05
+    s21_decimal a = {{5, 0, 0, 0x80010000}};   // -0.5
+    s21_decimal b = {{5, 0, 0, 0x80020000}};   // -0.05
+    ck_assert_int_eq(s21_is_less(a, b), 1);
+    ck_assert_int_eq(s21_is_less(b, a), 0);
+}
+END_TEST
+
+START_TEST(test_is_less_boundary) {
+    // MAX_DECIMAL vs MAX_DECIMAL - 1
+    s21_decimal max = {{4294967295U, 4294967295U, 4294967295U, 0}};
+    s21_decimal almost_max = {{4294967294U, 4294967295U, 4294967295U, 0}};
+    ck_assert_int_eq(s21_is_less(almost_max, max), 1);
+    ck_assert_int_eq(s21_is_less(max, almost_max), 0);
+}
+END_TEST
+
+START_TEST(test_is_less_zero_cases) {
+    s21_decimal zero = {{0, 0, 0, 0}};
+    s21_decimal neg_zero = {{0, 0, 0, 0x80000000}};
+    s21_decimal positive = {{5, 0, 0, 0}};
+    s21_decimal negative = {{5, 0, 0, 0x80000000}};
+
+    ck_assert_int_eq(s21_is_less(zero, positive), 1);
+    ck_assert_int_eq(s21_is_less(positive, zero), 0);
+    ck_assert_int_eq(s21_is_less(negative, zero), 1);
+    ck_assert_int_eq(s21_is_less(zero, negative), 0);
+    ck_assert_int_eq(s21_is_less(zero, neg_zero), 0);  // 0 == -0
+    ck_assert_int_eq(s21_is_less(neg_zero, zero), 0);
+}
+END_TEST
+
+// Тесты для s21_is_greater
+START_TEST(test_is_greater_different_scales) {
+    // 0.05 vs 0.5 -> 0.05 < 0.5
+    s21_decimal a = {{5, 0, 0, 0x00020000}};   // 0.05
+    s21_decimal b = {{5, 0, 0, 0x00010000}};   // 0.5
+    ck_assert_int_eq(s21_is_greater(a, b), 0);
+    ck_assert_int_eq(s21_is_greater(b, a), 1);
+}
+END_TEST
+
+START_TEST(test_is_greater_overflow) {
+    // Тест с очень большими числами
+    s21_decimal big1 = {{4294967295U, 4294967295U, 4294967295U, 0}};
+    s21_decimal big2 = {{4294967295U, 4294967295U, 4294967294U, 0}};
+    ck_assert_int_eq(s21_is_greater(big1, big2), 1);
+    ck_assert_int_eq(s21_is_greater(big2, big1), 0);
+}
+END_TEST
+
+// Тесты для s21_is_less_or_equal
+START_TEST(test_is_less_or_equal_boundary) {
+    s21_decimal max = {{4294967295U, 4294967295U, 4294967295U, 0}};
+    s21_decimal almost_max = {{4294967294U, 4294967295U, 4294967295U, 0}};
+
+    ck_assert_int_eq(s21_is_less_or_equal(almost_max, max), 1);
+    ck_assert_int_eq(s21_is_less_or_equal(max, max), 1);
+    ck_assert_int_eq(s21_is_less_or_equal(max, almost_max), 0);
+}
+END_TEST
+
+START_TEST(test_is_less_or_equal_with_scale) {
+    // 1.999 vs 2.0 (разные масштабы)
+    s21_decimal a = {{1999, 0, 0, 0x00030000}};  // 1.999
+    s21_decimal b = {{20, 0, 0, 0x00010000}};    // 2.0
+    ck_assert_int_eq(s21_is_less_or_equal(a, b), 1);
+    ck_assert_int_eq(s21_is_less_or_equal(b, a), 0);
+}
+END_TEST
+
+// Тесты для s21_is_greater_or_equal
+START_TEST(test_is_greater_or_equal_negative) {
+    s21_decimal a = {{5, 0, 0, 0x80000000}};   // -5
+    s21_decimal b = {{10, 0, 0, 0x80000000}};  // -10
+    ck_assert_int_eq(s21_is_greater_or_equal(a, b), 1);  // -5 > -10
+    ck_assert_int_eq(s21_is_greater_or_equal(b, a), 0);
+    ck_assert_int_eq(s21_is_greater_or_equal(a, a), 1);
+}
+END_TEST
+
+START_TEST(test_is_greater_or_equal_precision) {
+    // 1.9999999999999999999999999999 vs 2.0 (почти равны)
+    s21_decimal a = {{1999999999U, 1999999999U, 1999999999U, 0x001C0000}};
+    s21_decimal b = {{20, 0, 0, 0x00010000}};  // 2.0
+    ck_assert_int_eq(s21_is_greater_or_equal(b, a), 0);
+}
+END_TEST
+
+// Тесты для s21_is_not_equal
+START_TEST(test_is_not_equal_zero_variants) {
+    s21_decimal zero1 = {{0, 0, 0, 0}};
+    s21_decimal zero2 = {{0, 0, 0, 0x80000000}};
+    s21_decimal zero3 = {{0, 0, 0, 0x001C0000}};  // 0 с масштабом
+
+    ck_assert_int_eq(s21_is_not_equal(zero1, zero2), 0);  // 0 == -0
+    ck_assert_int_eq(s21_is_not_equal(zero1, zero3), 0);  // 0 == 0.000...
+}
+END_TEST
+
+START_TEST(test_is_not_equal_close_values) {
+    // Очень близкие значения, но не равные
+    s21_decimal a = {{1000000000U, 0, 0, 0x00090000}};  // 1.000000000
+    s21_decimal b = {{999999999U, 0, 0, 0x00090000}};   // 0.999999999
+    ck_assert_int_eq(s21_is_not_equal(a, b), 1);
+}
+END_TEST
+
+// Комбинированные тесты для всех функций
+START_TEST(test_all_comparisons_comprehensive) {
+    s21_decimal a = {{15, 0, 0, 0x00010000}};   // 1.5
+    s21_decimal b = {{150, 0, 0, 0x00020000}};  // 1.50
+    s21_decimal c = {{16, 0, 0, 0x00010000}};   // 1.6
+    s21_decimal d = {{14, 0, 0, 0x00010000}};   // 1.4
+
+    // a и b равны
+    ck_assert_int_eq(s21_is_equal(a, b), 1);
+    ck_assert_int_eq(s21_is_less(a, b), 0);
+    ck_assert_int_eq(s21_is_greater(a, b), 0);
+    ck_assert_int_eq(s21_is_less_or_equal(a, b), 1);
+    ck_assert_int_eq(s21_is_greater_or_equal(a, b), 1);
+    ck_assert_int_eq(s21_is_not_equal(a, b), 0);
+
+    // a < c
+    ck_assert_int_eq(s21_is_less(a, c), 1);
+    ck_assert_int_eq(s21_is_greater(a, c), 0);
+
+    // a > d
+    ck_assert_int_eq(s21_is_less(a, d), 0);
+    ck_assert_int_eq(s21_is_greater(a, d), 1);
+}
+END_TEST
+
+// Стресс-тесты с максимальными значениями
+START_TEST(test_comparison_stress_max_values) {
+    s21_decimal max = {{4294967295U, 4294967295U, 4294967295U, 0}};
+    s21_decimal min = {{4294967295U, 4294967295U, 4294967295U, 0x80000000}};
+    s21_decimal one = {{1, 0, 0, 0}};
+    s21_decimal neg_one = {{1, 0, 0, 0x80000000}};
+
+    ck_assert_int_eq(s21_is_greater(max, one), 1);
+    ck_assert_int_eq(s21_is_less(min, neg_one), 1);
+    ck_assert_int_eq(s21_is_greater(one, min), 1);
+    ck_assert_int_eq(s21_is_less(neg_one, max), 1);
+    ck_assert_int_eq(s21_is_equal(max, min), 0);
+}
+END_TEST
+
+// Тесты с очень маленькими числами
+START_TEST(test_comparison_very_small_numbers) {
+    s21_decimal small1 = {{1, 0, 0, 0x001C0000}};  // 1e-28
+    s21_decimal small2 = {{2, 0, 0, 0x001C0000}};  // 2e-28
+    s21_decimal zero = {{0, 0, 0, 0}};
+
+    ck_assert_int_eq(s21_is_less(small1, small2), 1);
+    ck_assert_int_eq(s21_is_greater(small1, zero), 1);
+    ck_assert_int_eq(s21_is_equal(small1, zero), 0);
+}
+END_TEST
+
+
 Suite *s21_complex_suite(void) {
     Suite *s = suite_create("complex");
     TCase *tc_core = tcase_create("Core");
@@ -330,6 +540,25 @@ Suite *s21_complex_suite(void) {
     tcase_add_test(tc_core, complex_truncate_after_sub);
     tcase_add_test(tc_core, complex_add_large_ints);
     tcase_add_test(tc_core, complex_negate_zero);
+
+    tcase_add_test(tc_core, test_is_equal_complex_scales);
+    tcase_add_test(tc_core, test_is_equal_max_scales);
+    tcase_add_test(tc_core, test_is_equal_boundary_values);
+    tcase_add_test(tc_core, test_is_less_different_scales);
+    tcase_add_test(tc_core, test_is_less_negative_scales);
+    tcase_add_test(tc_core, test_is_less_boundary);
+    tcase_add_test(tc_core, test_is_less_zero_cases);
+    tcase_add_test(tc_core, test_is_greater_different_scales);
+    tcase_add_test(tc_core, test_is_greater_overflow);
+    tcase_add_test(tc_core, test_is_less_or_equal_boundary);
+    tcase_add_test(tc_core, test_is_less_or_equal_with_scale);
+    tcase_add_test(tc_core, test_is_greater_or_equal_negative);
+    tcase_add_test(tc_core, test_is_greater_or_equal_precision);
+    tcase_add_test(tc_core, test_is_not_equal_zero_variants);
+    tcase_add_test(tc_core, test_is_not_equal_close_values);
+    tcase_add_test(tc_core, test_all_comparisons_comprehensive);
+    tcase_add_test(tc_core, test_comparison_stress_max_values);
+    tcase_add_test(tc_core, test_comparison_very_small_numbers);
 
     suite_add_tcase(s, tc_core);
     return s;
