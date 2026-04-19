@@ -122,7 +122,7 @@ int big_div_mantissa(const s21_big_decimal* dividend,
   }
 
   while (*out_scale < SCALE) {
-    if (big_is_zero(remainder)) break;
+    if (big_is_zero(&remainder)) break;
 
     big_mul_ten(&remainder);
 
@@ -152,7 +152,7 @@ int big_div_mantissa(const s21_big_decimal* dividend,
     (*out_scale)++;
   }
 
-  if (*out_scale == SCALE && !big_is_zero(remainder)) {
+  if (*out_scale == SCALE && !big_is_zero(&remainder)) {
     big_bankers_round(quotient, remainder, *divisor);
   }
 

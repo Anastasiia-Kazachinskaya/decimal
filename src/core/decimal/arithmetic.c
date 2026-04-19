@@ -38,7 +38,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   }
 
   if (res_big.scale == 0) {
-    int is_greater_than_max = check_mantissa(res_big);
+    int is_greater_than_max = check_mantissa(&res_big);
     if (is_greater_than_max) {
       return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
     }
@@ -80,7 +80,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   }
 
   if (res_big.scale == 0) {
-    int is_greater_than_max = check_mantissa(res_big);
+    int is_greater_than_max = check_mantissa(&res_big);
     if (is_greater_than_max) {
       return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
     }
@@ -123,7 +123,7 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 
   int final_code = s21_handle_overflow_and_rounding(&res_big);
   if (final_code == OK && res_big.scale == 0) {
-    int is_greater_than_max = check_mantissa(res_big);
+    int is_greater_than_max = check_mantissa(&res_big);
     if (is_greater_than_max) {
       final_code = res_big.sign ? 2 : 1;
     }

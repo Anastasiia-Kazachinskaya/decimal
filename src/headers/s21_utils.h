@@ -29,15 +29,8 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst);      // DONE
 int s21_from_float_to_decimal(float src, s21_decimal* dst);  // TODO
 int s21_from_int_to_decimal(int src, s21_decimal* dst);      // DONE
 
-s21_big_decimal s21_decimal_to_big_internal(s21_decimal* value);
-s21_decimal s21_big_to_decimal_internal(s21_big_decimal* big_result,
-                                        s21_decimal* result);
-void s21_null_big_decimal(s21_big_decimal* value);
 int s21_divide_mantissa_by_10(s21_decimal* value);
-int s21_normalize_and_check_overflow(s21_big_decimal* value);
 void s21_set_sign_internal(s21_decimal* result, int sign);
-int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2);
-int s21_multiply_big_by_10(s21_big_decimal* value);
 
 int s21_decimal_check(s21_decimal value);
 int set_precision(float src);
@@ -49,20 +42,5 @@ int float_sign(float* src);
 int float_or_dec_error(float src, s21_decimal* dst);
 int s21_str_to_int(const char* str);
 long long s21_str_to_ll(const char* str);
-int s21_big_perform_signed_operation(int sign_1, int sign_2,
-                                     s21_big_decimal* big_value_1,
-                                     s21_big_decimal* big_value_2,
-                                     s21_big_decimal* res_big);
-
-int check_overflow(s21_big_decimal value);
-int check_mantissa(s21_big_decimal res_big);
-int s21_handle_overflow_and_rounding(s21_big_decimal* res_big);
-
-int big_normalize(s21_big_decimal* v);
-int big_to_decimal(s21_big_decimal v, s21_decimal* result);
-s21_big_decimal decimal_to_big(s21_decimal v);
-void big_shift_left1(s21_big_decimal* v);
-int big_is_zero(s21_big_decimal v);
-void big_zero(s21_big_decimal* v);
 
 #endif

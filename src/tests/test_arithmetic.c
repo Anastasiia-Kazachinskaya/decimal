@@ -289,7 +289,7 @@ START_TEST(s21_handle_overflow_scale_decrement) {
     test_big.scale = 15;
     test_big.bits[3] = 1;
 
-    ck_assert_int_eq(check_overflow(test_big), 1);
+    ck_assert_int_eq(check_overflow(&test_big), 1);
 
     int code = s21_handle_overflow_and_rounding(&test_big);
 
