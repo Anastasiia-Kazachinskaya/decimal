@@ -6,20 +6,20 @@
 #define CALCULATION_ERROR 2
 
 #define CONVERTATION_ERROR 1
-#define NUMNER_TO_LARGE 1
-#define NUMNER_TO_SMALL 2
+#define NUMBER_TO_LARGE 1
+#define NUMBER_TO_SMALL 2
 #define DIVISION_BY_ZERO 3
 
 #define TRUE 1
 #define FALSE 0
 
-#define MIN_INT -2147483648
+#define MIN_INT (-2147483648)
 #define MAX_INT 2147483647
 
 #define S21_BIG_DECIMAL_DATA_BITS 3
 
 typedef struct {
-  int bits[4];
+  unsigned bits[4];
 } s21_decimal;
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result);

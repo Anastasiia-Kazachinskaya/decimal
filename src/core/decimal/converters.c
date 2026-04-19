@@ -9,10 +9,9 @@ int s21_from_decimal_to_float(s21_decimal src, float* dst) {
       *dst = 0.0f;
       double result = 0.0;
       result = (unsigned)src.bits[0];
-      if (src.bits[1] != 0) result += (unsigned)src.bits[1] * 4294967296.0;
-      if (src.bits[2] != 0)
-        result += (unsigned)src.bits[2] * 18446744073709551616.0;
-      int scale = s21_get_scale(&src);
+      if (src.bits[1] != 0) result += (unsigned)src.bits[1] * RANDOM_FLOAT_1;
+      if (src.bits[2] != 0) result += (unsigned)src.bits[2] * RANDOM_FLOAT_2;
+      const int scale = s21_get_scale(&src);
       if (scale != 0 && result != 0.0)
         for (int i = 0; i < scale; ++i) result /= 10.0L;
       if (s21_get_sign(&src) == 1) result = result == 0.0 ? -0.0 : -result;
@@ -30,13 +29,13 @@ int s21_from_decimal_to_int(s21_decimal src, int* dst) {
   *dst = 0;
   s21_decimal result;
   s21_truncate(src, &result);
-  int sign = s21_get_sign(&result);
+  const int sign = s21_get_sign(&result);
   if (result.bits[1] == 0 && result.bits[2] == 0) {
     unsigned mantissa = result.bits[0];
-    unsigned max_allowed = sign ? 2147483648U : 2147483647U;
+    unsigned max_allowed = sign ? RANDOM_LONG_1 : RANDOM_LONG_2;
     if (mantissa <= max_allowed) {
       if (sign) {
-        *dst = mantissa == 2147483648U ? MIN_INT : -(int)mantissa;
+        *dst = mantissa == RANDOM_LONG_1 ? MIN_INT : -(int)mantissa;
       } else {
         *dst = (int)mantissa;
       }
@@ -50,9 +49,9 @@ int s21_from_float_to_decimal(float src, s21_decimal* dst) {
   int res = CONVERTATION_ERROR;
   if (float_or_dec_error(src, dst)) return res;
 
-  int sign = float_sign(&src);
+  const int sign = float_sign(&src);
   char str[64];
-  int precision = set_precision(src);
+  const int precision = set_precision(src);
   snprintf(str, sizeof(str), "%.*e", precision - 1, src);
   long long mantissa = 0;
   int exponent = 0;
@@ -64,7 +63,7 @@ int s21_from_float_to_decimal(float src, s21_decimal* dst) {
   }
   int scale = digits_after_dot - exponent;
 
-  if (scale > 28) {
+  if (scale > SCALE) {
     if (scale_lower(&scale, &mantissa)) res = OK;
   }
 
@@ -76,8 +75,8 @@ int s21_from_float_to_decimal(float src, s21_decimal* dst) {
   if (scale < 0) {
     if (scale_upper(&scale, &mantissa, dst)) res = OK;
   } else {
-    dst->bits[0] = (unsigned int)(mantissa & 0xFFFFFFFF);
-    dst->bits[1] = (unsigned int)((mantissa >> 32) & 0xFFFFFFFF);
+    dst->bits[0] = (unsigned int)(mantissa & MASK_32_BIT);
+    dst->bits[1] = (unsigned int)((mantissa >> UNSIGNED_SIZE) & MASK_32_BIT);
     dst->bits[2] = 0;
     res = OK;
   }

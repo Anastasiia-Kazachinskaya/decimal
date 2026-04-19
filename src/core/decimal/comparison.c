@@ -7,8 +7,8 @@ static int s21_compare(s21_decimal value_1, s21_decimal value_2) {
     return 0;
   }
 
-  int sign_1 = s21_get_sign(&value_1);
-  int sign_2 = s21_get_sign(&value_2);
+  const int sign_1 = s21_get_sign(&value_1);
+  const int sign_2 = s21_get_sign(&value_2);
 
   if (sign_1 != sign_2) {
     return (sign_1 == 0) ? 1 : -1;
@@ -31,9 +31,9 @@ static int s21_compare(s21_decimal value_1, s21_decimal value_2) {
 
   int result = 0;
 
-  if (s21_is_big_greater(big_1, big_2)) {
+  if (s21_is_big_greater(&big_1, &big_2)) {
     result = 1;
-  } else if (s21_is_big_less(big_1, big_2)) {
+  } else if (s21_is_big_less(&big_1, &big_2)) {
     result = -1;
   } else {
     result = 0;

@@ -173,11 +173,6 @@ int s21_normalize_big_pair(s21_big_decimal* value_1, s21_big_decimal* value_2) {
   int target_scale =
       (value_1->scale > value_2->scale) ? value_1->scale : value_2->scale;
 
-  // if (target_scale > 14) {  // не поднимать до 28; ограничение по требованиям
-  // задачи
-  //   target_scale = 15;
-  // }
-
   if (s21_scale_normalize_big_to(value_1, target_scale) != OK) {
     status = CALCULATION_ERROR;
   }
@@ -338,7 +333,7 @@ static int s21_compute_fractional_big(s21_decimal original,
   } else {
     // fractional = original - truncated
     s21_null_big_decimal(fractional);
-    s21_big_sub(big_orig, big_truncated, fractional);
+    s21_big_sub(&big_orig, &big_truncated, fractional);
 
     fractional->scale = big_orig.scale;
     fractional->sign = 0;  // дробная часть всегда положительная
@@ -352,7 +347,7 @@ static int s21_apply_rounding(s21_decimal* result, s21_big_decimal* fractional,
   int status = OK;
 
   // Округляем вверх, если дробная часть >= 0,5
-  if (s21_is_big_greater(*fractional, *half) ||
+  if (s21_is_big_greater(fractional, half) ||
       s21_is_big_equal(*fractional, *half)) {
     if (s21_inc_decimal(result) != OK) {
       status = CALCULATION_ERROR;
