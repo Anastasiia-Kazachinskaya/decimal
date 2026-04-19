@@ -23,8 +23,8 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_big_decimal res_big;
   s21_null_big_decimal(&res_big);
 
-  int target_scale = big1.scale;
-  int code =
+  const int target_scale = big1.scale;
+  const int code =
       s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
 
   if (code != OK) {
@@ -32,13 +32,13 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   }
 
   res_big.scale = target_scale;
-  int final_code = s21_handle_overflow_and_rounding(&res_big);
+  const int final_code = s21_handle_overflow_and_rounding(&res_big);
   if (final_code != OK) {
     return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
   }
 
   if (res_big.scale == 0) {
-    int is_greater_than_max = check_mantissa(&res_big);
+    const int is_greater_than_max = check_mantissa(&res_big);
     if (is_greater_than_max) {
       return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
     }
@@ -58,15 +58,15 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_big_decimal big1 = s21_decimal_to_big_internal(&value_1);
   s21_big_decimal big2 = s21_decimal_to_big_internal(&value_2);
 
-  int sign1 = big1.sign;
-  int sign2 = big2.sign;
+  const int sign1 = big1.sign;
+  const int sign2 = big2.sign;
 
   s21_normalize_big_pair(&big1, &big2);
   s21_big_decimal res_big;
   s21_null_big_decimal(&res_big);
 
-  int target_scale = big1.scale;
-  int code =
+  const int target_scale = big1.scale;
+  const int code =
       s21_big_perform_signed_operation(sign1, sign2, &big1, &big2, &res_big);
 
   if (code != OK) {
@@ -74,13 +74,13 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   }
 
   res_big.scale = target_scale;
-  int final_code = s21_handle_overflow_and_rounding(&res_big);
+  const int final_code = s21_handle_overflow_and_rounding(&res_big);
   if (final_code != OK) {
     return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
   }
 
   if (res_big.scale == 0) {
-    int is_greater_than_max = check_mantissa(&res_big);
+    const int is_greater_than_max = check_mantissa(&res_big);
     if (is_greater_than_max) {
       return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
     }
@@ -104,8 +104,8 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_big_decimal big1 = s21_decimal_to_big_internal(&value_1);
   s21_big_decimal big2 = s21_decimal_to_big_internal(&value_2);
 
-  int result_sign = big1.sign ^ big2.sign;
-  int result_scale = big1.scale + big2.scale;
+  const int result_sign = big1.sign ^ big2.sign;
+  const int result_scale = big1.scale + big2.scale;
 
   big1.sign = 0;
   big2.sign = 0;
@@ -113,9 +113,9 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_big_decimal res_big;
   s21_null_big_decimal(&res_big);
 
-  int code = s21_big_mul(&big1, &big2, &res_big);
+  const int code = s21_big_mul(&big1, &big2, &res_big);
   if (code != OK) {
-    return result_sign ? 2 : 1;
+    return result_sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
   }
 
   res_big.sign = result_sign;
@@ -123,13 +123,13 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 
   int final_code = s21_handle_overflow_and_rounding(&res_big);
   if (final_code == OK && res_big.scale == 0) {
-    int is_greater_than_max = check_mantissa(&res_big);
+    const int is_greater_than_max = check_mantissa(&res_big);
     if (is_greater_than_max) {
-      final_code = res_big.sign ? 2 : 1;
+      final_code = res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
     }
   }
   if (final_code != OK) {
-    return res_big.sign ? 2 : 1;
+    return res_big.sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
   }
 
   s21_big_to_decimal_internal(&res_big, result);
@@ -149,9 +149,9 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   s21_big_decimal big2 = decimal_to_big(value_2);
 
   // знак результата
-  int result_sign = big1.sign ^ big2.sign;
+  const int result_sign = big1.sign ^ big2.sign;
 
-  int scale_correction = big1.scale - big2.scale;
+  const int scale_correction = big1.scale - big2.scale;
 
   // убираем знаки и scale — работаем с чистыми мантиссами
   big1.sign = 0;
@@ -161,7 +161,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
 
   s21_big_decimal quotient;
   int out_scale = 0;
-  int code = big_div_mantissa(&big1, &big2, &quotient, &out_scale);
+  const int code = big_div_mantissa(&big1, &big2, &quotient, &out_scale);
   if (code != OK) return result_sign ? NUMBER_TO_SMALL : NUMBER_TO_LARGE;
 
   // итоговый scale
@@ -176,16 +176,16 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal* result) {
   }
 
   // коррекция scale > 28
-  while (final_scale > 28) {
+  while (final_scale > SCALE) {
     uint64_t rem = 0;
     for (int w = 7; w >= 0; w--) {
-      uint64_t cur = (rem << 32) | quotient.bits[w];
+      const uint64_t cur = (rem << UNSIGNED_SIZE) | quotient.bits[w];
       quotient.bits[w] = (uint32_t)(cur / 10);
       rem = cur % 10;
     }
     final_scale--;
 
-    int round_up = 0;
+    unsigned round_up = 0;
     if (rem > 5) {
       round_up = 1;
     } else if (rem == 5) {

@@ -24,11 +24,6 @@ int s21_is_zero(s21_decimal value);                                 // DONE
 void s21_null_decimal(s21_decimal* value);                           // TODO
 int s21_normalize_pair(s21_decimal* value_1, s21_decimal* value_2);  // TODO
 
-int s21_from_decimal_to_float(s21_decimal src, float* dst);  // TODO
-int s21_from_decimal_to_int(s21_decimal src, int* dst);      // DONE
-int s21_from_float_to_decimal(float src, s21_decimal* dst);  // TODO
-int s21_from_int_to_decimal(int src, s21_decimal* dst);      // DONE
-
 int s21_divide_mantissa_by_10(s21_decimal* value);
 void s21_set_sign_internal(s21_decimal* result, int sign);
 

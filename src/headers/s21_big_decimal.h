@@ -17,8 +17,14 @@ typedef struct {
 } s21_big_decimal;
 
 #define S21_BIG_DECIMAL_SIZE 8
-#define UNSIGNED_SIZE 32
-#define SCALE 28
+#define UNSIGNED_SIZE (sizeof(unsigned) * 8)
+#define SCALE (int)((S21_BIG_DECIMAL_SIZE - 1) * sizeof(unsigned))
+
+#define RANDOM_FLOAT_1 4294967296.0
+#define RANDOM_FLOAT_2 18446744073709551616.0
+
+#define RANDOM_LONG_1 2147483648U
+#define RANDOM_LONG_2 2147483647U
 
 s21_big_decimal* s21_decimal_to_big(s21_decimal* value);
 
