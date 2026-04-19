@@ -63,10 +63,10 @@ clean:
 rebuild: clean all
 
 clang_check:
-	clang-format -n $(DECIMAL_SOURCES) $(HEADERS)
+	clang-format -n $(DECIMAL_SOURCES) $(HEADERS) $(TEST_SRC)
 
 style:
-	clang-format -i $(DECIMAL_SOURCES) $(HEADERS)
+	clang-format -i $(DECIMAL_SOURCES) $(HEADERS) $(TEST_SRC)
 
 docker_test:
 	@echo "Cleaning src/ before docker tests..."
